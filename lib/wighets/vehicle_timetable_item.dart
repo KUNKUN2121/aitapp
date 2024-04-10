@@ -57,7 +57,7 @@ class TimeTableCard extends HookWidget {
           const SizedBox(
             height: 5,
           ),
-          todayDaiya != null
+          todayDaiya != null && todayDaiya != '-'
               ? Expanded(
                   child: ListView(
                     children: [

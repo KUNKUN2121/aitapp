@@ -1,5 +1,6 @@
 import 'package:aitapp/const.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class TimeTableDetailScreen extends StatelessWidget {
   const TimeTableDetailScreen({
@@ -13,7 +14,7 @@ class TimeTableDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final now = DateTime.now().toUtc().add(const Duration(hours: 9));
-    final todayDaiya = dayDaiya['${now.year}-${now.month}-${now.day}'];
+    final todayDaiya = dayDaiya[DateFormat('yyyy-MM-dd').format(now)];
     int? initialValue;
     switch (todayDaiya) {
       case 'A':
