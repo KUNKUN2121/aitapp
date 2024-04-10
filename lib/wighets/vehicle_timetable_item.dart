@@ -21,7 +21,7 @@ class TimeTableCard extends HookWidget {
     final now =
         useMemoized(() => DateTime.now().toUtc().add(const Duration(hours: 9)));
     final todayDaiya = useMemoized(
-      () => dayDaiya[DateFormat('yyyy-M-d').format(now)],
+      () => dayDaiya[DateFormat('yyyy-MM-dd').format(now)],
     );
     return Expanded(
       child: Column(

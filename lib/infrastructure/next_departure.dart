@@ -1,4 +1,5 @@
 import 'package:aitapp/const.dart';
+import 'package:intl/intl.dart';
 
 class NextDeparture {
   NextDeparture({
@@ -12,8 +13,8 @@ class NextDeparture {
   DateTime? searchNextDeparture() {
     final now = DateTime.now().toUtc().add(const Duration(hours: 9));
     var counter = 0;
-    final todayDaiya = dayDaiya['${now.year}-${now.month}-${now.day}'];
-    if (todayDaiya == null) {
+    var todayDaiya = dayDaiya[DateFormat('yyyy-MM-dd').format(now)];
+    if (todayDaiya == null || todayDaiya == '-') {
       return null;
     }
 
