@@ -13,7 +13,7 @@ class NextDeparture {
   DateTime? searchNextDeparture() {
     final now = DateTime.now().toUtc().add(const Duration(hours: 9));
     var counter = 0;
-    var todayDaiya = dayDaiya[DateFormat('yyyy-MM-dd').format(now)];
+    final todayDaiya = dayDaiya[DateFormat('yyyy-MM-dd').format(now)];
     if (todayDaiya == null || todayDaiya == '-') {
       return null;
     }
