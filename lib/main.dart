@@ -16,19 +16,11 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:system_proxy/system_proxy.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // システムのproxy設定を取得する.
-  final proxy = await SystemProxy.getProxySettings();
-  debugPrint('=== proxy: $proxy');
-  // HttpOverridesの派生クラスをHttpOverrides.globalに指定する.
-  HttpOverrides.global = ProxiedHttpOverrides(
-    proxy?['host'],
-    proxy?['port'],
-  );
+
   final directory = await getApplicationDocumentsDirectory();
   final plist = directory.listSync();
   for (final p in plist) {
@@ -84,22 +76,6 @@ class App extends ConsumerWidget {
       // アプリのlocaleを日本語に変更する
       locale: const Locale('ja', 'JP'),
     );
-  }
-}
-
-class ProxiedHttpOverrides extends HttpOverrides {
-  ProxiedHttpOverrides(this._host, this._port);
-  final String? _port;
-  final String? _host;
-
-  @override
-  HttpClient createHttpClient(SecurityContext? context) {
-    // host情報が設定されていればhostとportを指定、そうでなければ DIRECT を設定.
-    return super.createHttpClient(context)
-      // set proxy
-      ..findProxy = (uri) {
-        return _port != null ? 'PROXY $_host:$_port;' : 'DIRECT';
-      };
   }
 }
 
