@@ -103,8 +103,21 @@ class ClassGridContainer extends StatelessWidget {
   final Class? clas;
 
   String alphanumericToHalfLength(String input) {
-    return input.replaceAllMapped(RegExp(r'[^\x00-\x7F]'), (match) {
-      return String.fromCharCode(match.group(0)!.codeUnitAt(0) - 0xfee0);
+    return input.replaceAllMapped(RegExp(r'[^\u0020-\u007E\uFF61-\uFF9F]+'),
+        (match) {
+      return match
+          .group(0)!
+          .codeUnits
+          .map((codeUnit) {
+            if (codeUnit >= 0xFF01 && codeUnit <= 0xFF5E) {
+              // 全角英数字の範囲
+              return codeUnit - 0xFEE0;
+            } else {
+              return codeUnit;
+            }
+          })
+          .map(String.fromCharCode)
+          .join();
     });
   }
 
