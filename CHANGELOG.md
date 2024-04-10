@@ -1,5 +1,10 @@
 # Changelog
 
+## [v1.4.1](https://github.com/piman528/aitapp/compare/v1.4.0...v1.4.1) - 2024-04-10
+- 2024年度のバス運行日程を追加 by @KUNKUN2121 in https://github.com/piman528/aitapp/pull/44
+- 時間割が正しく表示されない問題を修正 by @piman528 in https://github.com/piman528/aitapp/pull/46
+- package update by @piman528 in https://github.com/piman528/aitapp/pull/47
+
 ## [v1.3.1](https://github.com/piman528/aitapp/compare/v1.3.0...v1.3.1) - 2024-03-27
 - メッセージが重要かどうか確認できる機能を追加 by @piman528 in https://github.com/piman528/aitapp/pull/22
 - Bump syncfusion_flutter_pdfviewer from 24.2.3 to 24.2.4 by @dependabot in https://github.com/piman528/aitapp/pull/21
