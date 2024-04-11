@@ -34,7 +34,7 @@ Map<DayOfWeek, Map<int, Class>> parseClassTimeTable(String body) {
         case 0: //授業科目
           subject = text.replaceAll('[八]', '');
         case 1: // 教員
-          teacher = text;
+          teacher = text.replaceAll(RegExp(r'　他$'), '');
         case 2: // 教室
           classRoom = text.replaceAll('八草', '').trim();
       }
