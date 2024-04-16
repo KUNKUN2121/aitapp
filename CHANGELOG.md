@@ -1,5 +1,11 @@
 # Changelog
 
+## [v1.5.1](https://github.com/piman528/aitapp/compare/v1.5.0...v1.5.1) - 2024-04-16
+- 授業からシラバスを参照する際に意図しない動作を修正 by @piman528 in https://github.com/piman528/aitapp/pull/49
+- Gradleのバージョンアップ by @piman528 in https://github.com/piman528/aitapp/pull/55
+- javaを17に変更 by @piman528 in https://github.com/piman528/aitapp/pull/56
+- パッケージのバージョンアップ by @piman528 in https://github.com/piman528/aitapp/pull/57
+
 ## [v1.4.1](https://github.com/piman528/aitapp/compare/v1.4.0...v1.4.1) - 2024-04-10
 - 2024年度のバス運行日程を追加 by @KUNKUN2121 in https://github.com/piman528/aitapp/pull/44
 - 時間割が正しく表示されない問題を修正 by @piman528 in https://github.com/piman528/aitapp/pull/46
