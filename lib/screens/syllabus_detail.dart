@@ -67,6 +67,13 @@ class SyllabusDetail extends StatelessWidget {
                     [classSyllabusDetail.teachersMessage],
                   ),
                 },
+                _buildSection('教科書', [classSyllabusDetail.textBook]),
+                if (classSyllabusDetail.referenceBook.isNotEmpty) ...{
+                  _buildSection(
+                    '参考書',
+                    [classSyllabusDetail.referenceBook],
+                  ),
+                },
                 const SizedBox(
                   height: 10,
                 ),
