@@ -45,6 +45,8 @@ class ClassSyllabusDetail {
     this.features,
     this.records,
     this.teachersMessage,
+    this.textBook,
+    this.referenceBook,
   );
   final int unitsNumber;
   // 区分
@@ -72,4 +74,8 @@ class ClassSyllabusDetail {
   final String records;
   //教員メッセージ
   final String teachersMessage;
+  // 教科書
+  final String textBook;
+  // 参考書
+  final String referenceBook;
 }

@@ -196,6 +196,7 @@ ClassSyllabusDetail parseSyllabusDetail(String body) {
             .split('\n')) {
           if (text != '' && text != ' ') {
             texts.add(text);
+            // print(text);
             if (text == '計画') {
               index = 1;
             }
@@ -207,13 +208,13 @@ ClassSyllabusDetail parseSyllabusDetail(String body) {
           final text = content.text!.trim();
           if (text != '') {
             texts.add(text);
+            // print(text);
           }
         }
         index = 0;
       }
     }
   }
-  // print(texts);
   final unitsNumber = texts[texts.indexOf('単位数') + 1];
   final classification = texts[texts.indexOf('単位区分') + 1] == '選択'
       ? Classification.choice
@@ -225,6 +226,9 @@ ClassSyllabusDetail parseSyllabusDetail(String body) {
   for (var i = texts.indexOf('担当教員') + 1;
       i < texts.indexOf('研究室・オフィスアワー');
       i = i + 2) {
+    if (texts[i].trim().isEmpty) {
+      i++;
+    }
     teacher.add(texts[i]);
     teacherRuby.add(texts[i + 1]);
   }
@@ -239,6 +243,10 @@ ClassSyllabusDetail parseSyllabusDetail(String body) {
   for (var i = texts.indexOf('計画') + 1; i < texts.indexOf('教科書'); i++) {
     plan.add(texts[i]);
   }
+  final referenceBook = texts[texts.indexOf('参考書') + 1] != '学習到達目標'
+      ? texts[texts.indexOf('参考書') + 1]
+      : '';
+  final textBook = texts[texts.indexOf('教科書') + 1];
   final learningGoal = texts[texts.indexOf('学習到達目標') + 1];
   final feature = texts[texts.indexOf('方法と特徴') + 1];
   final record = texts[texts.indexOf('成績評価の方法') + 1];
@@ -261,6 +269,8 @@ ClassSyllabusDetail parseSyllabusDetail(String body) {
     feature,
     record,
     teachersMessage,
+    textBook,
+    referenceBook,
   );
 }
 
