@@ -225,6 +225,9 @@ ClassSyllabusDetail parseSyllabusDetail(String body) {
   for (var i = texts.indexOf('担当教員') + 1;
       i < texts.indexOf('研究室・オフィスアワー');
       i = i + 2) {
+    if (texts[i].trim().isEmpty) {
+      i++;
+    }
     teacher.add(texts[i]);
     teacherRuby.add(texts[i + 1]);
   }
