@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:aitapp/models/get_notice.dart';
 import 'package:aitapp/models/notice_detail.dart';
 import 'package:aitapp/provider/id_password_provider.dart';
+import 'package:aitapp/wighets/attachment.dart';
 import 'package:async/async.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -123,37 +124,26 @@ class NoticeDetailScreen extends HookConsumerWidget {
                         }
                       : null,
                 ),
+                const SizedBox(
+                  height: 20,
+                ),
                 if (notice.value!.url.isNotEmpty) ...{
-                  const SizedBox(
-                    height: 10,
-                  ),
-                  const Text(
-                    '参考URL',
-                    style: TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
                   for (final url in notice.value!.url) ...{
-                    TextButton(
-                      child: Text(url),
-                      onPressed: () {
+                    Attachment(
+                      isUrl: true,
+                      attachName: url.replaceAll(RegExp('https?://'), ''),
+                      onTap: () {
                         launchUrl(Uri.parse(url));
                       },
                     ),
                   },
                 },
                 if (notice.value!.files.isNotEmpty) ...{
-                  const Text(
-                    '添付ファイル',
-                    style: TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
                   for (final entries in notice.value!.files.entries) ...{
-                    TextButton(
-                      onPressed: isDonwloading.value
+                    Attachment(
+                      isUrl: false,
+                      attachName: entries.key,
+                      onTap: isDonwloading.value
                           ? null
                           : () async {
                               isDonwloading.value = true;
@@ -170,7 +160,6 @@ class NoticeDetailScreen extends HookConsumerWidget {
                               }
                               isDonwloading.value = false;
                             },
-                      child: Text(entries.key),
                     ),
                   },
                 },
