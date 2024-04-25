@@ -39,10 +39,22 @@ class TabScreen extends HookConsumerWidget {
       ),
       drawer: const MainDrawer(),
       body: currentPages[currentPageIndex.value],
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: currentPageIndex.value,
-        destinations: destinations,
-        onDestinationSelected: (index) {
+      bottomNavigationBar: BottomNavigationBar(
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.article),
+            label: 'お知らせ',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.event),
+            label: '時間割',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.directions_bus),
+            label: '時刻表',
+          ),
+        ],
+        onTap: (index) {
           if (currentPageIndex.value == index) {
             ref.read(tabButtonProvider.notifier).state =
                 !ref.read(tabButtonProvider);
@@ -50,6 +62,9 @@ class TabScreen extends HookConsumerWidget {
             currentPageIndex.value = index;
           }
         },
+        currentIndex: currentPageIndex.value,
+        selectedFontSize: 10,
+        unselectedFontSize: 10,
       ),
     );
   }
