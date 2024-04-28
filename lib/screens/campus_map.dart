@@ -59,30 +59,32 @@ class CampusMap extends HookWidget {
     );
 
     void animateResetInitialize() {
-      controllerReset.reset();
-      animationReset = Matrix4Tween(
-        begin: transformationController.value,
-        end: Matrix4(
-          2.69,
-          0,
-          0,
-          0,
-          0,
-          2.69,
-          0,
-          0,
-          0,
-          0,
-          2.69,
-          0,
-          -250,
-          -750,
-          0,
-          1,
-        ),
-      ).animate(controllerReset);
-      animationReset!.addListener(onAnimateReset);
-      controllerReset.forward();
+      if (!controllerReset.isAnimating) {
+        controllerReset.reset();
+        animationReset = Matrix4Tween(
+          begin: transformationController.value,
+          end: Matrix4(
+            2.69,
+            0,
+            0,
+            0,
+            0,
+            2.69,
+            0,
+            0,
+            0,
+            0,
+            2.69,
+            0,
+            -250,
+            -750,
+            0,
+            1,
+          ),
+        ).animate(controllerReset);
+        animationReset!.addListener(onAnimateReset);
+        controllerReset.forward();
+      }
     }
 
     return Scaffold(

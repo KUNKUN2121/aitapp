@@ -11,6 +11,7 @@ class SVGMap extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
+    final pointerDownPosition = useRef<Offset?>(null);
     void traverseTree(XmlNode node, List<XmlNode> result) {
       if (node.children.isNotEmpty) {
         for (final child in node.children) {
@@ -53,10 +54,11 @@ class SVGMap extends HookWidget {
                     fillColor: fillColor != 'none' && fillColor != null
                         ? HexColor.from(fillColor)
                         : const Color.fromARGB(0, 0, 0, 0),
-                    strokeWidth: double.parse(strokeWidth!),
+                    strokeWidth: double.parse(strokeWidth ?? '0.0'),
                     isSelectable:
                         node.parentElement!.parentElement!.getAttribute('id') ==
                             'selectable',
+                    id: int.parse(node.getAttribute('data-name') ?? '0'),
                   ),
                 );
               }
@@ -69,10 +71,28 @@ class SVGMap extends HookWidget {
       [],
     );
     return Listener(
-      onPointerDown: (e) => notifier.value = e.localPosition,
-      child: CustomPaint(
-        painter: SVGMapRender(notifier, shapes.value),
-        child: const SizedBox.expand(),
+      onPointerDown: (e) {
+        pointerDownPosition.value = e.position;
+      },
+      onPointerUp: (e) {
+        if (e.position == pointerDownPosition.value) {
+          for (final shape in shapes.value!) {
+            final path = shape.transformedPath;
+            final selected =
+                path!.contains(e.localPosition) && shape.isSelectable;
+            if (selected) {
+              notifier.value = e.localPosition;
+            }
+          }
+        }
+
+        pointerDownPosition.value = null;
+      },
+      child: RepaintBoundary(
+        child: CustomPaint(
+          painter: SVGMapRender(notifier, shapes.value),
+          child: const SizedBox.expand(),
+        ),
       ),
     );
   }
@@ -104,7 +124,7 @@ class SVGMapRender extends CustomPainter {
 
     canvas
       ..clipRect(Offset.zero & size)
-      ..drawColor(const Color.fromARGB(255, 197, 197, 197), BlendMode.src);
+      ..drawColor(const Color.fromARGB(255, 243, 243, 243), BlendMode.src);
     MapShape? selectedMapShape;
     if (_shapes != null) {
       for (final shape in _shapes!) {
@@ -128,8 +148,9 @@ class SVGMapRender extends CustomPainter {
     if (selectedMapShape != null) {
       _paint
         ..color = selectedMapShape.strokeColor
-        ..strokeWidth = selectedMapShape.strokeWidth / 1
+        ..strokeWidth = 0.5
         ..style = PaintingStyle.stroke;
+      print(selectedMapShape.id);
       canvas.drawPath(selectedMapShape.transformedPath!, _paint);
       _paint.maskFilter = null;
     }

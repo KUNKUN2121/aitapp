@@ -1,5 +1,6 @@
 import 'package:aitapp/models/contact.dart';
 import 'package:aitapp/models/web_access.dart';
+import 'package:aitapp/wighets/building_info.dart';
 import 'package:flutter/material.dart';
 
 const Map<DayOfWeek, String> dayOfWeekToString = {
@@ -819,5 +820,248 @@ const List<WebAccessPage> webAccessPages = [
     icon: Icons.bar_chart,
     url:
         '$origin/portalv2/smartphone/smartPhonePerformanceInfor/nextPage/performance/',
+  ),
+];
+
+const List<BuildingInfo> buildings = [
+  BuildingInfo(
+    id: 1,
+    name: 'アーチェリー場',
+    classrooms: {'1F': []},
+  ),
+  BuildingInfo(
+    id: 2,
+    name: '14号館',
+    classrooms: {'1F': []},
+  ),
+  BuildingInfo(
+    id: 3,
+    name: '4号館別館',
+    classrooms: {'1F': []},
+  ),
+  BuildingInfo(
+    id: 4,
+    name: '情報教育センター',
+    classrooms: {'1F': []},
+  ),
+  BuildingInfo(
+    id: 5,
+    name: '11号館',
+    classrooms: {'1F': []},
+  ),
+  BuildingInfo(
+    id: 6,
+    name: '12号館',
+    classrooms: {'1F': []},
+  ),
+  BuildingInfo(
+    id: 7,
+    name: '8号館',
+    classrooms: {'1F': []},
+  ),
+  BuildingInfo(
+    id: 8,
+    name: '9号館',
+    classrooms: {'1F': []},
+  ),
+  BuildingInfo(
+    id: 9,
+    name: '計算センター',
+    classrooms: {'1F': []},
+  ),
+  BuildingInfo(
+    id: 10,
+    name: '4号館',
+    classrooms: {'1F': []},
+  ),
+  BuildingInfo(
+    id: 11,
+    name: '5号館講義実験棟',
+    classrooms: {'1F': []},
+  ),
+  BuildingInfo(
+    id: 12,
+    name: '図書館',
+    classrooms: {'1F': []},
+  ),
+  BuildingInfo(
+    id: 13,
+    name: '土木・建築実験棟',
+    classrooms: {'1F': []},
+  ),
+  BuildingInfo(
+    id: 14,
+    name: 'セントラルテラス',
+    classrooms: {'1F': []},
+  ),
+  BuildingInfo(
+    id: 15,
+    name: 'AITプラザ',
+    classrooms: {'1F': []},
+  ),
+  BuildingInfo(
+    id: 16,
+    name: '2号館',
+    classrooms: {'1F': []},
+  ),
+  BuildingInfo(
+    id: 17,
+    name: '10号館',
+    classrooms: {'1F': []},
+  ),
+  BuildingInfo(
+    id: 18,
+    name: '10号館大講義室',
+    classrooms: {'1F': []},
+  ),
+  BuildingInfo(
+    id: 19,
+    name: '愛和会館',
+    classrooms: {'1F': []},
+  ),
+  BuildingInfo(
+    id: 20,
+    name: '1号館',
+    classrooms: {'1F': []},
+  ),
+  BuildingInfo(
+    id: 21,
+    name: '6号館',
+    classrooms: {'1F': []},
+  ),
+  BuildingInfo(
+    id: 22,
+    name: '鉀徳館',
+    classrooms: {'1F': []},
+  ),
+  BuildingInfo(
+    id: 23,
+    name: '第5クラブハウス',
+    classrooms: {'1F': []},
+  ),
+  BuildingInfo(
+    id: 24,
+    name: '総合運動場管理棟',
+    classrooms: {'1F': []},
+  ),
+  BuildingInfo(
+    id: 25,
+    name: '地域防災研究センター',
+    classrooms: {'1F': []},
+  ),
+  BuildingInfo(
+    id: 26,
+    name: 'バイオ環境科学実験棟',
+    classrooms: {'1F': []},
+  ),
+  BuildingInfo(
+    id: 27,
+    name: '13号館',
+    classrooms: {'1F': []},
+  ),
+  BuildingInfo(
+    id: 28,
+    name: '1号館別館',
+    classrooms: {'1F': []},
+  ),
+  BuildingInfo(
+    id: 29,
+    name: '振動実験棟',
+    classrooms: {'1F': []},
+  ),
+  BuildingInfo(
+    id: 30,
+    name: '第4クラブハウス',
+    classrooms: {'1F': []},
+  ),
+  BuildingInfo(
+    id: 31,
+    name: '小体育館',
+    classrooms: {'1F': []},
+  ),
+  BuildingInfo(
+    id: 32,
+    name: '3号館別館',
+    classrooms: {'1F': []},
+  ),
+  BuildingInfo(
+    id: 33,
+    name: '第二本部棟',
+    classrooms: {'1F': []},
+  ),
+  BuildingInfo(
+    id: 34,
+    name: '総合技術研究所',
+    classrooms: {'1F': []},
+  ),
+  BuildingInfo(
+    id: 35,
+    name: '3号館',
+    classrooms: {'1F': []},
+  ),
+  BuildingInfo(
+    id: 36,
+    name: '第一本部棟',
+    classrooms: {'1F': []},
+  ),
+  BuildingInfo(
+    id: 37,
+    name: '本部棟',
+    classrooms: {'1F': []},
+  ),
+  BuildingInfo(
+    id: 38,
+    name: '7号館',
+    classrooms: {'1F': []},
+  ),
+  BuildingInfo(
+    id: 39,
+    name: 'テニスコート',
+    classrooms: {'1F': []},
+  ),
+  BuildingInfo(
+    id: 40,
+    name: 'セントラル広場',
+    classrooms: {'1F': []},
+  ),
+  BuildingInfo(
+    id: 41,
+    name: 'セントラル広場',
+    classrooms: {'1F': []},
+  ),
+  BuildingInfo(
+    id: 42,
+    name: '球技場',
+    classrooms: {'1F': []},
+  ),
+  BuildingInfo(
+    id: 43,
+    name: '陸上競技場',
+    classrooms: {'1F': []},
+  ),
+  BuildingInfo(
+    id: 44,
+    name: 'サッカー場',
+    classrooms: {'1F': []},
+  ),
+  BuildingInfo(
+    id: 45,
+    name: '野球場',
+    classrooms: {'1F': []},
+  ),
+  BuildingInfo(
+    id: 46,
+    name: '第2駐車場',
+    classrooms: {'1F': []},
+  ),
+  BuildingInfo(
+    id: 47,
+    name: '第1駐車場',
+    classrooms: {'1F': []},
+  ),
+  BuildingInfo(
+    id: 48,
+    name: '第1駐車場',
+    classrooms: {'1F': []},
   ),
 ];

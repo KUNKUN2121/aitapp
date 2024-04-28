@@ -7,6 +7,7 @@ class MapShape {
     required this.strokeColor,
     required this.strokeWidth,
     required this.isSelectable,
+    required this.id,
     this.fillColor,
   }) : _path = parseSvgPathData(strPath);
 
@@ -20,4 +21,5 @@ class MapShape {
   final Color? fillColor;
   final double strokeWidth;
   final bool isSelectable;
+  final int id;
 }
