@@ -55,7 +55,7 @@ class SVGMap extends HookWidget {
                         : const Color.fromARGB(0, 0, 0, 0),
                     strokeWidth: double.parse(strokeWidth!),
                     isSelectable:
-                        node.parentElement!.getAttribute('data-name') ==
+                        node.parentElement!.parentElement!.getAttribute('id') ==
                             'selectable',
                   ),
                 );
@@ -104,7 +104,7 @@ class SVGMapRender extends CustomPainter {
 
     canvas
       ..clipRect(Offset.zero & size)
-      ..drawColor(const Color.fromARGB(255, 255, 255, 255), BlendMode.src);
+      ..drawColor(const Color.fromARGB(255, 197, 197, 197), BlendMode.src);
     MapShape? selectedMapShape;
     if (_shapes != null) {
       for (final shape in _shapes!) {
@@ -127,9 +127,9 @@ class SVGMapRender extends CustomPainter {
     }
     if (selectedMapShape != null) {
       _paint
-        ..color = Colors.black
-        ..maskFilter = const MaskFilter.blur(BlurStyle.outer, 12)
-        ..style = PaintingStyle.fill;
+        ..color = selectedMapShape.strokeColor
+        ..strokeWidth = selectedMapShape.strokeWidth / 1
+        ..style = PaintingStyle.stroke;
       canvas.drawPath(selectedMapShape.transformedPath!, _paint);
       _paint.maskFilter = null;
     }
@@ -141,7 +141,21 @@ class SVGMapRender extends CustomPainter {
 
 extension HexColor on Color {
   static Color from(String hexString) {
-    final fixHexString = 'FF${hexString.replaceAll('#', '')}';
-    return Color(int.parse(fixHexString, radix: 16));
+    final buffer = StringBuffer();
+    if (hexString.length == 6 || hexString.length == 7) {
+      buffer
+        ..write('FF')
+        ..write(hexString.replaceAll('#', ''));
+    } else if (hexString.length == 4 || hexString.length == 5) {
+      buffer.write('FF');
+      for (var i = hexString.length == 4 ? 1 : 2; i < hexString.length; i++) {
+        buffer
+          ..write(hexString[i])
+          ..write(hexString[i]);
+      }
+    } else {
+      throw ArgumentError('Invalid hexString: $hexString');
+    }
+    return Color(int.parse(buffer.toString(), radix: 16));
   }
 }
