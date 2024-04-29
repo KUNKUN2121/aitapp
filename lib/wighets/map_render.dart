@@ -1,16 +1,19 @@
 import 'dart:convert';
 
+import 'package:aitapp/const.dart';
 import 'package:aitapp/models/map_shape.dart';
+import 'package:aitapp/provider/building_probvider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:xml/xml.dart';
 
-class SVGMap extends HookWidget {
+class SVGMap extends HookConsumerWidget {
   const SVGMap({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final pointerDownPosition = useRef<Offset?>(null);
     void traverseTree(XmlNode node, List<XmlNode> result) {
       if (node.children.isNotEmpty) {
@@ -59,6 +62,7 @@ class SVGMap extends HookWidget {
                         node.parentElement!.parentElement!.getAttribute('id') ==
                             'selectable',
                     id: int.parse(node.getAttribute('data-name') ?? '0'),
+                    isSelect: false,
                   ),
                 );
               }
@@ -81,7 +85,13 @@ class SVGMap extends HookWidget {
             final selected =
                 path!.contains(e.localPosition) && shape.isSelectable;
             if (selected) {
+              shape.isSelect = true;
+
               notifier.value = e.localPosition;
+              ref.read(buildingProvider.notifier).state =
+                  buildings[shape.id - 1];
+            } else {
+              shape.isSelect = false;
             }
           }
         }
@@ -90,7 +100,7 @@ class SVGMap extends HookWidget {
       },
       child: RepaintBoundary(
         child: CustomPaint(
-          painter: SVGMapRender(notifier, shapes.value),
+          painter: SVGMapRender(shapes.value),
           child: const SizedBox.expand(),
         ),
       ),
@@ -99,10 +109,8 @@ class SVGMap extends HookWidget {
 }
 
 class SVGMapRender extends CustomPainter {
-  SVGMapRender(this._notifier, this._shapes) : super(repaint: _notifier);
+  SVGMapRender(this._shapes);
   final List<MapShape>? _shapes;
-
-  final ValueNotifier<Offset> _notifier;
   final Paint _paint = Paint();
   Size _size = Size.zero;
 
@@ -125,34 +133,29 @@ class SVGMapRender extends CustomPainter {
     canvas
       ..clipRect(Offset.zero & size)
       ..drawColor(const Color.fromARGB(255, 243, 243, 243), BlendMode.src);
-    MapShape? selectedMapShape;
     if (_shapes != null) {
       for (final shape in _shapes!) {
         final path = shape.transformedPath;
-        final selected = path!.contains(_notifier.value) && shape.isSelectable;
         if (shape.fillColor != null) {
           _paint
             ..color = shape.fillColor!
             ..style = PaintingStyle.fill;
-          canvas.drawPath(path, _paint);
-          selectedMapShape ??= selected ? shape : null;
+          canvas.drawPath(path!, _paint);
         }
-
-        _paint
-          ..color = shape.strokeColor
-          ..strokeWidth = shape.strokeWidth / 10
-          ..style = PaintingStyle.stroke;
-        canvas.drawPath(path, _paint);
+        if (shape.isSelect) {
+          _paint
+            ..color = shape.strokeColor
+            ..strokeWidth = 0.5
+            ..style = PaintingStyle.stroke
+            ..maskFilter = null;
+        } else {
+          _paint
+            ..color = shape.strokeColor
+            ..strokeWidth = shape.strokeWidth / 10
+            ..style = PaintingStyle.stroke;
+        }
+        canvas.drawPath(path!, _paint);
       }
-    }
-    if (selectedMapShape != null) {
-      _paint
-        ..color = selectedMapShape.strokeColor
-        ..strokeWidth = 0.5
-        ..style = PaintingStyle.stroke;
-      print(selectedMapShape.id);
-      canvas.drawPath(selectedMapShape.transformedPath!, _paint);
-      _paint.maskFilter = null;
     }
   }
 

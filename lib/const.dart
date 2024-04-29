@@ -827,137 +827,201 @@ const List<BuildingInfo> buildings = [
   BuildingInfo(
     id: 1,
     name: 'アーチェリー場',
-    classrooms: {'1F': []},
   ),
   BuildingInfo(
     id: 2,
     name: '14号館',
-    classrooms: {'1F': []},
+    classrooms: {
+      '2F': ['201', '202'],
+      '3F': ['301', '302'],
+    },
   ),
   BuildingInfo(
     id: 3,
     name: '4号館別館',
-    classrooms: {'1F': []},
+    classrooms: {
+      '1F': ['情報科学科事務室', '情報科学部事務室'],
+    },
   ),
   BuildingInfo(
     id: 4,
     name: '情報教育センター',
-    classrooms: {'1F': []},
+    classrooms: {
+      '2F': ['情報実習室A'],
+      '3F': ['情報実習室B'],
+    },
   ),
   BuildingInfo(
     id: 5,
     name: '11号館',
-    classrooms: {'1F': []},
+    classrooms: {
+      '1F': [
+        '11-101',
+        '11-201',
+        '11-301',
+        '11-401',
+      ],
+    },
   ),
   BuildingInfo(
     id: 6,
     name: '12号館',
-    classrooms: {'1F': []},
+    classrooms: {
+      'B1F': ['みらい工房'],
+      '1F': ['工学研究科', '工学部事務室'],
+      '2F': ['12-201', '12-202'],
+      '3F': ['12-303'],
+    },
   ),
   BuildingInfo(
     id: 7,
     name: '8号館',
-    classrooms: {'1F': []},
+    classrooms: {
+      '1F': ['8-102', '8-104'],
+      '2F': ['8-201', '8-203', '8-205'],
+      '3F': ['8-303', '8-304'],
+    },
   ),
   BuildingInfo(
     id: 8,
     name: '9号館',
-    classrooms: {'1F': []},
+    classrooms: {
+      '2F': ['G3201', 'G3202', 'G3203'],
+      '3F': ['G3301', 'G3302', 'G3303'],
+      '4F': ['G3401', 'G3402', 'G3403'],
+      '5F': ['G3501', 'G3502', 'G3503', 'G3504'],
+    },
   ),
   BuildingInfo(
     id: 9,
     name: '計算センター',
-    classrooms: {'1F': []},
+    classrooms: {
+      '1F': ['事務室', 'セー講義室'],
+      '3F': ['マイコン室1', 'マイコン室2', 'セー実習室1'],
+      '4F': ['セー実習室2'],
+    },
   ),
   BuildingInfo(
     id: 10,
     name: '4号館',
-    classrooms: {'1F': []},
+    classrooms: {
+      '1F': ['売店'],
+      '4F': ['K401', 'K404'],
+    },
   ),
   BuildingInfo(
     id: 11,
     name: '5号館講義実験棟',
-    classrooms: {'1F': []},
+    classrooms: {
+      '1F': ['機器実験室', '計測実験室'],
+      '2F': ['ER221', 'ER222'],
+      '3F': ['ER321', 'ER322', 'ER323', 'ER324'],
+    },
   ),
   BuildingInfo(
     id: 12,
     name: '図書館',
-    classrooms: {'1F': []},
   ),
   BuildingInfo(
     id: 13,
     name: '土木・建築実験棟',
-    classrooms: {'1F': []},
   ),
   BuildingInfo(
     id: 14,
     name: 'セントラルテラス',
-    classrooms: {'1F': []},
   ),
   BuildingInfo(
     id: 15,
     name: 'AITプラザ',
-    classrooms: {'1F': []},
+    classrooms: {
+      '1F': ['スガキヤ', 'すき家'],
+      '2F': ['セブンイレブン', '紀伊國屋書店', 'Com・Com'],
+    },
   ),
   BuildingInfo(
     id: 16,
     name: '2号館',
-    classrooms: {'1F': []},
+    classrooms: {
+      'B2F': ['Gギャラリー'],
+      'B1F': ['B101'],
+      '2F': ['電気学科事務室', '建築学科事務室'],
+    },
   ),
   BuildingInfo(
     id: 17,
     name: '10号館',
-    classrooms: {'1F': []},
+    classrooms: {
+      '1F': ['基礎教育センター事務室', '学習支援センター'],
+      '2F': ['G2208', 'G2209'],
+      '3F': ['G2309', 'G2310', 'G2311'],
+      '4F': ['G2307', 'G2308', 'G2309'],
+      '5F': ['G2305', 'G2306', 'G2307'],
+    },
   ),
   BuildingInfo(
     id: 18,
     name: '10号館大講義室',
-    classrooms: {'1F': []},
+    classrooms: {
+      '1F': ['G2110'],
+      '2F': ['G2210'],
+    },
   ),
   BuildingInfo(
     id: 19,
     name: '愛和会館',
-    classrooms: {'1F': []},
+    classrooms: {
+      '1F': ['愛和食堂', '理容室', 'ゆうちょ銀行', '三菱UFJ銀行'],
+    },
   ),
   BuildingInfo(
     id: 20,
     name: '1号館',
-    classrooms: {'1F': []},
+    classrooms: {
+      '1F': ['アメリカフェ'],
+      '2F': ['キャリアセンター', 'メディアセンター'],
+      '3F': ['1-301', '1-303'],
+      '4F': ['1-401'],
+      '5F': ['1-501', '1-502'],
+      '6F': ['1-601', '1-602'],
+      '7F': ['1-701', '1-702'],
+    },
   ),
   BuildingInfo(
     id: 21,
     name: '6号館',
-    classrooms: {'1F': []},
+    classrooms: {
+      '1F': ['機械学科事務室'],
+    },
   ),
   BuildingInfo(
     id: 22,
     name: '鉀徳館',
-    classrooms: {'1F': []},
   ),
   BuildingInfo(
     id: 23,
     name: '第5クラブハウス',
-    classrooms: {'1F': []},
   ),
   BuildingInfo(
     id: 24,
     name: '総合運動場管理棟',
-    classrooms: {'1F': []},
   ),
   BuildingInfo(
     id: 25,
     name: '地域防災研究センター',
-    classrooms: {'1F': []},
   ),
   BuildingInfo(
     id: 26,
     name: 'バイオ環境科学実験棟',
-    classrooms: {'1F': []},
   ),
   BuildingInfo(
     id: 27,
     name: '13号館',
-    classrooms: {'1F': []},
+    classrooms: {
+      '1F': ['13-101'],
+      '2F': ['13-201'],
+      '3F': ['13-301'],
+      '4F': ['13-401'],
+    },
   ),
   BuildingInfo(
     id: 28,
@@ -967,101 +1031,113 @@ const List<BuildingInfo> buildings = [
   BuildingInfo(
     id: 29,
     name: '振動実験棟',
-    classrooms: {'1F': []},
   ),
   BuildingInfo(
     id: 30,
     name: '第4クラブハウス',
-    classrooms: {'1F': []},
   ),
   BuildingInfo(
     id: 31,
     name: '小体育館',
-    classrooms: {'1F': []},
   ),
   BuildingInfo(
     id: 32,
     name: '3号館別館',
-    classrooms: {'1F': []},
+    classrooms: {
+      '1F': ['C2101'],
+    },
   ),
   BuildingInfo(
     id: 33,
-    name: '第二本部棟',
-    classrooms: {'1F': []},
+    name: '第2本部棟',
+    classrooms: {
+      '2F': [
+        '学生サービスグループ',
+        '教務グループ',
+        '国際交流グループ',
+        'クラブ活動支援グループ',
+      ],
+      '3F': ['保健室'],
+      '4F': ['学生相談室'],
+    },
   ),
   BuildingInfo(
     id: 34,
     name: '総合技術研究所',
-    classrooms: {'1F': []},
   ),
   BuildingInfo(
     id: 35,
     name: '3号館',
-    classrooms: {'1F': []},
+    classrooms: {
+      '1F': ['応用科学科事務室'],
+      '2F': ['C1215'],
+      '3F': ['C1315'],
+      '4F': ['C1401', 'C1411'],
+    },
   ),
   BuildingInfo(
     id: 36,
-    name: '第一本部棟',
-    classrooms: {'1F': []},
+    name: '第1本部棟',
   ),
   BuildingInfo(
     id: 37,
     name: '本部棟',
-    classrooms: {'1F': []},
+    classrooms: {
+      '2F': ['経理会計課'],
+    },
   ),
   BuildingInfo(
     id: 38,
     name: '7号館',
-    classrooms: {'1F': []},
+    classrooms: {
+      '2F': [
+        '土木工学科事務室',
+        '7-201',
+        '7-202',
+        '7-203',
+        '7-205',
+        '7-206',
+      ],
+    },
   ),
   BuildingInfo(
     id: 39,
     name: 'テニスコート',
-    classrooms: {'1F': []},
   ),
   BuildingInfo(
     id: 40,
     name: 'セントラル広場',
-    classrooms: {'1F': []},
   ),
   BuildingInfo(
     id: 41,
     name: 'セントラル広場',
-    classrooms: {'1F': []},
   ),
   BuildingInfo(
     id: 42,
     name: '球技場',
-    classrooms: {'1F': []},
   ),
   BuildingInfo(
     id: 43,
     name: '陸上競技場',
-    classrooms: {'1F': []},
   ),
   BuildingInfo(
     id: 44,
     name: 'サッカー場',
-    classrooms: {'1F': []},
   ),
   BuildingInfo(
     id: 45,
     name: '野球場',
-    classrooms: {'1F': []},
   ),
   BuildingInfo(
     id: 46,
     name: '第2駐車場',
-    classrooms: {'1F': []},
   ),
   BuildingInfo(
     id: 47,
     name: '第1駐車場',
-    classrooms: {'1F': []},
   ),
   BuildingInfo(
     id: 48,
     name: '第1駐車場',
-    classrooms: {'1F': []},
   ),
 ];

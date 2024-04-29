@@ -1,34 +1,38 @@
+import 'package:aitapp/provider/building_probvider.dart';
 import 'package:aitapp/wighets/map_render.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-class CampusMap extends HookWidget {
+class CampusMap extends HookConsumerWidget {
   const CampusMap({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final selectBuilding = ref.watch(buildingProvider);
+    final initialMatrix = useMemoized(
+      () => Matrix4(
+        2.69,
+        0,
+        0,
+        0,
+        0,
+        2.69,
+        0,
+        0,
+        0,
+        0,
+        2.69,
+        0,
+        -250,
+        -750,
+        0,
+        1,
+      ),
+    );
     final controller = useMemoized(DraggableScrollableController.new);
     final transformationController = useMemoized(
-      () => TransformationController(
-        Matrix4(
-          2.69,
-          0,
-          0,
-          0,
-          0,
-          2.69,
-          0,
-          0,
-          0,
-          0,
-          2.69,
-          0,
-          -250,
-          -750,
-          0,
-          1,
-        ),
-      ),
+      () => TransformationController(initialMatrix),
     );
     final pixel = useState<double>(200);
     final controllerReset = useAnimationController(
@@ -51,6 +55,7 @@ class CampusMap extends HookWidget {
           pixel.value = controller.pixels + 10;
         });
         WidgetsBinding.instance.addPostFrameCallback((_) {
+          ref.watch(buildingProvider.notifier).state = null;
           pixel.value = controller.pixels + 10;
         });
         return null;
@@ -63,24 +68,7 @@ class CampusMap extends HookWidget {
         controllerReset.reset();
         animationReset = Matrix4Tween(
           begin: transformationController.value,
-          end: Matrix4(
-            2.69,
-            0,
-            0,
-            0,
-            0,
-            2.69,
-            0,
-            0,
-            0,
-            0,
-            2.69,
-            0,
-            -250,
-            -750,
-            0,
-            1,
-          ),
+          end: initialMatrix,
         ).animate(controllerReset);
         animationReset!.addListener(onAnimateReset);
         controllerReset.forward();
@@ -112,8 +100,8 @@ class CampusMap extends HookWidget {
           ),
           DraggableScrollableSheet(
             controller: controller,
-            initialChildSize: 0.3,
-            minChildSize: 0.1,
+            initialChildSize: 0.4,
+            minChildSize: 0.15,
             maxChildSize: 0.50,
             builder: (context, scrollController) {
               return DecoratedBox(
@@ -143,19 +131,77 @@ class CampusMap extends HookWidget {
                       ),
                     ),
                     SliverList.list(
-                      children: const [
-                        SizedBox(height: 12),
+                      children: [
+                        const SizedBox(height: 12),
                         Center(
                           child: Text(
-                            'Pull up to expand',
-                            style: TextStyle(
+                            selectBuilding?.name ?? '建物を選択',
+                            style: const TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                         ),
-                        SizedBox(height: 32),
-                        // 追加のコンテンツを配置
+                        const SizedBox(height: 32),
+                        if (selectBuilding != null &&
+                            selectBuilding.classrooms != null) ...{
+                          for (final floor
+                              in selectBuilding.classrooms!.keys) ...{
+                            // ignore: prefer_const_constructors
+                            Divider(
+                              height: 1,
+                            ),
+                            Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 20),
+                              child: Row(
+                                children: [
+                                  Text(
+                                    floor,
+                                    textAlign: TextAlign.center,
+                                    style:
+                                        Theme.of(context).textTheme.titleLarge,
+                                  ),
+                                  const SizedBox(
+                                    width: 10,
+                                  ),
+                                  Expanded(
+                                    child: GridView.count(
+                                      padding: const EdgeInsets.all(8),
+                                      shrinkWrap: true,
+                                      physics:
+                                          const NeverScrollableScrollPhysics(),
+                                      crossAxisCount: 4,
+                                      children: [
+                                        for (final classroom in selectBuilding
+                                            .classrooms![floor]!) ...{
+                                          Container(
+                                            height: 50,
+                                            alignment: Alignment.center,
+                                            padding: const EdgeInsets.all(5),
+                                            margin: const EdgeInsets.all(2),
+                                            decoration: BoxDecoration(
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .primaryContainer,
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
+                                            ),
+                                            child: Text(
+                                              classroom,
+                                              style:
+                                                  const TextStyle(fontSize: 12),
+                                            ),
+                                          ),
+                                        },
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          },
+                        },
                       ],
                     ),
                   ],

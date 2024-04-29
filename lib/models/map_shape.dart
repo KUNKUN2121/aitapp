@@ -9,6 +9,7 @@ class MapShape {
     required this.isSelectable,
     required this.id,
     this.fillColor,
+    required this.isSelect,
   }) : _path = parseSvgPathData(strPath);
 
   /// transforms a [_path] into [transformedPath] using given [matrix]
@@ -22,4 +23,5 @@ class MapShape {
   final double strokeWidth;
   final bool isSelectable;
   final int id;
+  bool isSelect;
 }
