@@ -74,28 +74,27 @@ class SVGMap extends HookConsumerWidget {
       },
       [],
     );
-    return Listener(
-      onPointerDown: (e) {
-        pointerDownPosition.value = e.position;
+    return GestureDetector(
+      onTapDown: (details) {
+        pointerDownPosition.value = details.localPosition;
       },
-      onPointerUp: (e) {
-        if (e.position == pointerDownPosition.value) {
+      onTapUp: (details) {
+        if (details.localPosition == pointerDownPosition.value) {
           for (final shape in shapes.value!) {
             final path = shape.transformedPath;
             final selected =
-                path!.contains(e.localPosition) && shape.isSelectable;
+                path!.contains(details.localPosition) && shape.isSelectable;
             if (selected) {
               shape.isSelect = true;
-
-              notifier.value = e.localPosition;
+              notifier.value = details.localPosition;
               ref.read(buildingProvider.notifier).state =
                   buildings[shape.id - 1];
+              ref.read(shapeProvider.notifier).state = shape;
             } else {
               shape.isSelect = false;
             }
           }
         }
-
         pointerDownPosition.value = null;
       },
       child: RepaintBoundary(

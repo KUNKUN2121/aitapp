@@ -10,25 +10,10 @@ class CampusMap extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final selectBuilding = ref.watch(buildingProvider);
+    final selectShape = ref.watch(shapeProvider);
+
     final initialMatrix = useMemoized(
-      () => Matrix4(
-        2.69,
-        0,
-        0,
-        0,
-        0,
-        2.69,
-        0,
-        0,
-        0,
-        0,
-        2.69,
-        0,
-        -250,
-        -750,
-        0,
-        1,
-      ),
+      () => Matrix4.translationValues(-250, -750, 0).scaled(2.6),
     );
     final controller = useMemoized(DraggableScrollableController.new);
     final transformationController = useMemoized(
@@ -56,6 +41,7 @@ class CampusMap extends HookConsumerWidget {
         });
         WidgetsBinding.instance.addPostFrameCallback((_) {
           ref.watch(buildingProvider.notifier).state = null;
+          ref.watch(shapeProvider.notifier).state = null;
           pixel.value = controller.pixels + 10;
         });
         return null;
@@ -63,16 +49,26 @@ class CampusMap extends HookConsumerWidget {
       [],
     );
 
-    void animateResetInitialize() {
+    void animateResetInitialize(Matrix4 destination) {
       if (!controllerReset.isAnimating) {
         controllerReset.reset();
         animationReset = Matrix4Tween(
           begin: transformationController.value,
-          end: initialMatrix,
-        ).animate(controllerReset);
+          end: destination,
+        ).chain(CurveTween(curve: Curves.decelerate)).animate(controllerReset);
         animationReset!.addListener(onAnimateReset);
         controllerReset.forward();
       }
+    }
+
+    if (selectShape != null) {
+      final bounds = selectShape.transformedPath!.getBounds();
+      final centerX = bounds.left + bounds.width / 2;
+      final centerY = bounds.top + bounds.height / 2;
+      animateResetInitialize(
+        Matrix4.translationValues(-centerX * 7.0 + 200, -centerY * 7.0 + 250, 0)
+            .scaled(7.0),
+      );
     }
 
     return Scaffold(
@@ -94,7 +90,9 @@ class CampusMap extends HookConsumerWidget {
             bottom: pixel.value,
             right: 16,
             child: FloatingActionButton(
-              onPressed: animateResetInitialize,
+              onPressed: () {
+                animateResetInitialize(initialMatrix);
+              },
               child: const Icon(Icons.home),
             ),
           ),
