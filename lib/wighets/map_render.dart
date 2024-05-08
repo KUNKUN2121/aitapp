@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:aitapp/const.dart';
 import 'package:aitapp/models/map_shape.dart';
 import 'package:aitapp/provider/building_probvider.dart';
 import 'package:flutter/material.dart';
@@ -14,6 +13,7 @@ class SVGMap extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final selectShape = ref.watch(shapeProvider);
     final pointerDownPosition = useRef<Offset?>(null);
     void traverseTree(XmlNode node, List<XmlNode> result) {
       if (node.children.isNotEmpty) {
@@ -27,7 +27,6 @@ class SVGMap extends HookConsumerWidget {
       }
     }
 
-    final notifier = useState(Offset.zero);
     final shapes = useState<List<MapShape>?>(null);
     useEffect(
       () {
@@ -62,7 +61,6 @@ class SVGMap extends HookConsumerWidget {
                         node.parentElement!.parentElement!.getAttribute('id') ==
                             'selectable',
                     id: int.parse(node.getAttribute('data-name') ?? '0'),
-                    isSelect: false,
                   ),
                 );
               }
@@ -85,13 +83,7 @@ class SVGMap extends HookConsumerWidget {
             final selected =
                 path!.contains(details.localPosition) && shape.isSelectable;
             if (selected) {
-              shape.isSelect = true;
-              notifier.value = details.localPosition;
-              ref.read(buildingProvider.notifier).state =
-                  buildings[shape.id - 1];
               ref.read(shapeProvider.notifier).state = shape;
-            } else {
-              shape.isSelect = false;
             }
           }
         }
@@ -99,7 +91,10 @@ class SVGMap extends HookConsumerWidget {
       },
       child: RepaintBoundary(
         child: CustomPaint(
-          painter: SVGMapRender(shapes.value),
+          painter: SVGMapRender(
+            selectShape,
+            shapes.value,
+          ),
           child: const SizedBox.expand(),
         ),
       ),
@@ -108,10 +103,11 @@ class SVGMap extends HookConsumerWidget {
 }
 
 class SVGMapRender extends CustomPainter {
-  SVGMapRender(this._shapes);
+  SVGMapRender(this.selectShape, this._shapes);
   final List<MapShape>? _shapes;
   final Paint _paint = Paint();
   Size _size = Size.zero;
+  final MapShape? selectShape;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -141,7 +137,7 @@ class SVGMapRender extends CustomPainter {
             ..style = PaintingStyle.fill;
           canvas.drawPath(path!, _paint);
         }
-        if (shape.isSelect) {
+        if (shape == selectShape) {
           _paint
             ..color = shape.strokeColor
             ..strokeWidth = 0.5

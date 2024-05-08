@@ -1,4 +1,5 @@
 import 'package:aitapp/provider/building_probvider.dart';
+import 'package:aitapp/wighets/building_info_sheet.dart';
 import 'package:aitapp/wighets/map_render.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -9,13 +10,12 @@ class CampusMap extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final selectBuilding = ref.watch(buildingProvider);
+    final controller = useMemoized(DraggableScrollableController.new);
     final selectShape = ref.watch(shapeProvider);
 
     final initialMatrix = useMemoized(
       () => Matrix4.translationValues(-250, -750, 0).scaled(2.6),
     );
-    final controller = useMemoized(DraggableScrollableController.new);
     final transformationController = useMemoized(
       () => TransformationController(initialMatrix),
     );
@@ -40,7 +40,6 @@ class CampusMap extends HookConsumerWidget {
           pixel.value = controller.pixels + 10;
         });
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          ref.watch(buildingProvider.notifier).state = null;
           ref.watch(shapeProvider.notifier).state = null;
           pixel.value = controller.pixels + 10;
         });
@@ -65,9 +64,13 @@ class CampusMap extends HookConsumerWidget {
       final bounds = selectShape.transformedPath!.getBounds();
       final centerX = bounds.left + bounds.width / 2;
       final centerY = bounds.top + bounds.height / 2;
+      final scale = (100 / bounds.width + 100 / bounds.height) / 2;
       animateResetInitialize(
-        Matrix4.translationValues(-centerX * 7.0 + 200, -centerY * 7.0 + 250, 0)
-            .scaled(7.0),
+        Matrix4.translationValues(
+          -centerX * scale + 200,
+          -centerY * scale + 250,
+          0,
+        ).scaled(scale),
       );
     }
 
@@ -91,122 +94,13 @@ class CampusMap extends HookConsumerWidget {
             right: 16,
             child: FloatingActionButton(
               onPressed: () {
+                ref.read(shapeProvider.notifier).state = null;
                 animateResetInitialize(initialMatrix);
               },
               child: const Icon(Icons.home),
             ),
           ),
-          DraggableScrollableSheet(
-            controller: controller,
-            initialChildSize: 0.4,
-            minChildSize: 0.15,
-            maxChildSize: 0.50,
-            builder: (context, scrollController) {
-              return DecoratedBox(
-                decoration: BoxDecoration(
-                  color: Theme.of(context).canvasColor,
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(25),
-                    topRight: Radius.circular(25),
-                  ),
-                ),
-                child: CustomScrollView(
-                  controller: scrollController,
-                  slivers: [
-                    SliverToBoxAdapter(
-                      child: Center(
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).hintColor,
-                            borderRadius: const BorderRadius.all(
-                              Radius.circular(10),
-                            ),
-                          ),
-                          height: 4,
-                          width: 40,
-                          margin: const EdgeInsets.symmetric(vertical: 10),
-                        ),
-                      ),
-                    ),
-                    SliverList.list(
-                      children: [
-                        const SizedBox(height: 12),
-                        Center(
-                          child: Text(
-                            selectBuilding?.name ?? '建物を選択',
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 32),
-                        if (selectBuilding != null &&
-                            selectBuilding.classrooms != null) ...{
-                          for (final floor
-                              in selectBuilding.classrooms!.keys) ...{
-                            // ignore: prefer_const_constructors
-                            Divider(
-                              height: 1,
-                            ),
-                            Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 20),
-                              child: Row(
-                                children: [
-                                  Text(
-                                    floor,
-                                    textAlign: TextAlign.center,
-                                    style:
-                                        Theme.of(context).textTheme.titleLarge,
-                                  ),
-                                  const SizedBox(
-                                    width: 10,
-                                  ),
-                                  Expanded(
-                                    child: GridView.count(
-                                      padding: const EdgeInsets.all(8),
-                                      shrinkWrap: true,
-                                      physics:
-                                          const NeverScrollableScrollPhysics(),
-                                      crossAxisCount: 4,
-                                      children: [
-                                        for (final classroom in selectBuilding
-                                            .classrooms![floor]!) ...{
-                                          Container(
-                                            height: 50,
-                                            alignment: Alignment.center,
-                                            padding: const EdgeInsets.all(5),
-                                            margin: const EdgeInsets.all(2),
-                                            decoration: BoxDecoration(
-                                              color: Theme.of(context)
-                                                  .colorScheme
-                                                  .primaryContainer,
-                                              borderRadius:
-                                                  BorderRadius.circular(8),
-                                            ),
-                                            child: Text(
-                                              classroom,
-                                              style:
-                                                  const TextStyle(fontSize: 12),
-                                            ),
-                                          ),
-                                        },
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          },
-                        },
-                      ],
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
+          BuildingInfoSheet(controller: controller),
         ],
       ),
     );
