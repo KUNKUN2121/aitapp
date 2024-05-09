@@ -5,6 +5,7 @@ import 'package:aitapp/provider/id_password_provider.dart';
 import 'package:aitapp/provider/last_login_time_provider.dart';
 import 'package:aitapp/provider/link_tap_provider.dart';
 import 'package:aitapp/provider/shared_preference_provider.dart';
+import 'package:aitapp/screens/campus_map.dart';
 import 'package:aitapp/screens/contacts.dart';
 import 'package:aitapp/screens/course_registration.dart';
 import 'package:aitapp/screens/links.dart';
@@ -107,10 +108,7 @@ class MainDrawer extends ConsumerWidget {
                 onTap: () {
                   Navigator.of(context).push(
                     MaterialPageRoute<void>(
-                      builder: (ctx) => const OpenAssetPdf(
-                        title: '学内マップ',
-                        path: 'assets/pdfs/guide-campus-yakusa.pdf',
-                      ),
+                      builder: (ctx) => const CampusMap(),
                     ),
                   );
                 },
