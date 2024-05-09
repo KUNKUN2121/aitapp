@@ -1,21 +1,28 @@
+import 'package:aitapp/models/building_info.dart';
+import 'package:aitapp/provider/building_probvider.dart';
 import 'package:flutter/material.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-class BuildingItem extends StatelessWidget {
+class BuildingItem extends ConsumerWidget {
   const BuildingItem({super.key, required this.building});
-  final String building;
+  final BuildingInfo building;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         InkWell(
-          onTap: () {},
+          onTap: () {
+            if (building.mapShape != null) {
+              ref.read(shapeProvider.notifier).state = building;
+            }
+          },
           child: Container(
             height: 50,
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
             width: double.infinity,
-            child: Text(building),
+            child: Text(building.name),
           ),
         ),
         const Divider(),

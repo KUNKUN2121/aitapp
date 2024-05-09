@@ -1,6 +1,6 @@
 import 'package:aitapp/provider/building_probvider.dart';
 import 'package:aitapp/wighets/building_info_sheet.dart';
-import 'package:aitapp/wighets/map_render.dart';
+import 'package:aitapp/wighets/svg_map.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -61,7 +61,7 @@ class CampusMap extends HookConsumerWidget {
     }
 
     if (selectShape != null) {
-      final bounds = selectShape.transformedPath!.getBounds();
+      final bounds = selectShape.mapShape!.transformedPath!.getBounds();
       final centerX = bounds.left + bounds.width / 2;
       final centerY = bounds.top + bounds.height / 2;
       final scale = (100 / bounds.width + 100 / bounds.height) / 2;

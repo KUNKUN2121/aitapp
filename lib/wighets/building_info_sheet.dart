@@ -14,9 +14,7 @@ class BuildingInfoSheet extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final textEditingController = useTextEditingController();
     late final List<Widget> content;
-    final selectShape = ref.watch(shapeProvider);
-    final selectBuilding =
-        selectShape != null ? buildings[selectShape.id - 1] : null;
+    final selectBuilding = ref.watch(shapeProvider);
     final typeWord = useState('');
     final result = buildings
         .where(
@@ -116,7 +114,7 @@ class BuildingInfoSheet extends HookConsumerWidget {
           controller: textEditingController,
         ),
         for (final building in result) ...{
-          BuildingItem(building: building.name),
+          BuildingItem(building: building),
         },
       ];
     }

@@ -823,7 +823,7 @@ const List<WebAccessPage> webAccessPages = [
   ),
 ];
 
-const List<BuildingInfo> buildings = [
+final List<BuildingInfo> buildings = [
   BuildingInfo(
     id: 1,
     name: 'アーチェリー場',
