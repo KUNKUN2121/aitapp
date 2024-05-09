@@ -1,6 +1,6 @@
+import 'package:aitapp/models/building_info.dart';
 import 'package:aitapp/models/contact.dart';
 import 'package:aitapp/models/web_access.dart';
-import 'package:aitapp/wighets/building_info.dart';
 import 'package:flutter/material.dart';
 
 const Map<DayOfWeek, String> dayOfWeekToString = {

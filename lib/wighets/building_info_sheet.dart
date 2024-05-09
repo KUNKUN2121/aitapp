@@ -1,17 +1,125 @@
 import 'package:aitapp/const.dart';
 import 'package:aitapp/provider/building_probvider.dart';
+import 'package:aitapp/wighets/building_item.dart';
+import 'package:aitapp/wighets/search_bar.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-class BuildingInfoSheet extends ConsumerWidget {
+class BuildingInfoSheet extends HookConsumerWidget {
   const BuildingInfoSheet({super.key, required this.controller});
   final DraggableScrollableController controller;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final textEditingController = useTextEditingController();
+    late final List<Widget> content;
     final selectShape = ref.watch(shapeProvider);
     final selectBuilding =
         selectShape != null ? buildings[selectShape.id - 1] : null;
+    final typeWord = useState('');
+    final result = buildings
+        .where(
+          (building) =>
+              building.name.toLowerCase().contains(
+                    typeWord.value.toLowerCase(),
+                  ) ||
+              building.name.toLowerCase().contains(
+                    typeWord.value.toLowerCase(),
+                  ),
+        )
+        .toList();
+    useEffect(
+      () {
+        textEditingController.addListener(() {
+          typeWord.value = textEditingController.text;
+        });
+        return null;
+      },
+      [],
+    );
+    if (selectBuilding != null) {
+      content = [
+        const SizedBox(height: 12),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Text(
+            selectBuilding.name,
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+        const SizedBox(height: 32),
+        if (selectBuilding.classrooms != null) ...{
+          for (final floor in selectBuilding.classrooms!.keys) ...{
+            // ignore: prefer_const_constructors
+            Divider(
+              height: 1,
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 20,
+              ),
+              child: Row(
+                children: [
+                  Text(
+                    floor,
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                  const SizedBox(
+                    width: 10,
+                  ),
+                  Expanded(
+                    child: GridView.count(
+                      padding: const EdgeInsets.all(8),
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      crossAxisCount: 4,
+                      children: [
+                        for (final classroom
+                            in selectBuilding.classrooms![floor]!) ...{
+                          Container(
+                            height: 50,
+                            alignment: Alignment.center,
+                            padding: const EdgeInsets.all(5),
+                            margin: const EdgeInsets.all(2),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .primaryContainer,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              classroom,
+                              style: const TextStyle(
+                                fontSize: 12,
+                              ),
+                            ),
+                          ),
+                        },
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          },
+        },
+      ];
+    } else {
+      content = [
+        SearchBarWidget(
+          hintText: '教室名,建物名を入力',
+          controller: textEditingController,
+        ),
+        for (final building in result) ...{
+          BuildingItem(building: building.name),
+        },
+      ];
+    }
 
     return DraggableScrollableSheet(
       controller: controller,
@@ -45,78 +153,7 @@ class BuildingInfoSheet extends ConsumerWidget {
               Expanded(
                 child: ListView(
                   controller: scrollController,
-                  children: [
-                    const SizedBox(height: 12),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: Text(
-                        selectBuilding?.name ?? '建物を選択',
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 32),
-                    if (selectBuilding != null &&
-                        selectBuilding.classrooms != null) ...{
-                      for (final floor in selectBuilding.classrooms!.keys) ...{
-                        // ignore: prefer_const_constructors
-                        Divider(
-                          height: 1,
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 20,
-                          ),
-                          child: Row(
-                            children: [
-                              Text(
-                                floor,
-                                textAlign: TextAlign.center,
-                                style: Theme.of(context).textTheme.titleLarge,
-                              ),
-                              const SizedBox(
-                                width: 10,
-                              ),
-                              Expanded(
-                                child: GridView.count(
-                                  padding: const EdgeInsets.all(8),
-                                  shrinkWrap: true,
-                                  physics: const NeverScrollableScrollPhysics(),
-                                  crossAxisCount: 4,
-                                  children: [
-                                    for (final classroom in selectBuilding
-                                        .classrooms![floor]!) ...{
-                                      Container(
-                                        height: 50,
-                                        alignment: Alignment.center,
-                                        padding: const EdgeInsets.all(5),
-                                        margin: const EdgeInsets.all(2),
-                                        decoration: BoxDecoration(
-                                          color: Theme.of(context)
-                                              .colorScheme
-                                              .primaryContainer,
-                                          borderRadius:
-                                              BorderRadius.circular(8),
-                                        ),
-                                        child: Text(
-                                          classroom,
-                                          style: const TextStyle(
-                                            fontSize: 12,
-                                          ),
-                                        ),
-                                      ),
-                                    },
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      },
-                    },
-                  ],
+                  children: content,
                 ),
               ),
             ],

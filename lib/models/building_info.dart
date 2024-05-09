@@ -4,7 +4,6 @@ class BuildingInfo {
     required this.name,
     this.classrooms,
   });
-
   final int id;
   final String name;
   final Map<String, List<String>>? classrooms;
