@@ -1,12 +1,13 @@
 import 'dart:convert';
 
-import 'package:aitapp/const.dart';
-import 'package:aitapp/infrastructure/convert_css_color.dart';
-import 'package:aitapp/models/map_shape.dart';
+import 'package:aitapp/application/config/const.dart';
+import 'package:aitapp/domain/types/map_shape.dart';
+import 'package:aitapp/utils/convert_css_color.dart';
 import 'package:flutter/services.dart';
 import 'package:xml/xml.dart';
 
 class SVGLoader {
+  final hexColor = ConvertHexColor();
   Future<List<MapShape>> loadSVGMap() async {
     final data = await rootBundle.load('assets/images/map.svg');
     final document = XmlDocument.parse(utf8.decode(data.buffer.asUint8List()));
@@ -24,10 +25,10 @@ class SVGLoader {
         final mapShape = MapShape(
           strPath: data,
           strokeColor: strokeColor != null
-              ? HexColor.from(strokeColor)
+              ? hexColor.from(strokeColor)
               : const Color.fromARGB(0, 0, 0, 0),
           fillColor: fillColor != 'none' && fillColor != null
-              ? HexColor.from(fillColor)
+              ? hexColor.from(fillColor)
               : const Color.fromARGB(0, 0, 0, 0),
           strokeWidth: double.parse(strokeWidth ?? '0.0'),
           isSelectable: node.parentElement!.parentElement!.getAttribute('id') ==
