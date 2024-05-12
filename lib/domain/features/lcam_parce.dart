@@ -4,39 +4,30 @@ import 'package:aitapp/domain/types/class_notice_detail.dart';
 import 'package:aitapp/domain/types/day_of_week.dart';
 import 'package:aitapp/domain/types/univ_notice.dart';
 import 'package:aitapp/domain/types/univ_notice_detail.dart';
+import 'package:universal_html/html.dart';
 import 'package:universal_html/parsing.dart';
 
 class LcamParse {
   List<ClassNotice> classNotice(String body) {
     final classNoticeList = <ClassNotice>[];
-    final topStorytitle = parseHtmlDocument(body).querySelectorAll(
+    final rows = parseHtmlDocument(body).querySelectorAll(
       '#smartPhoneClassContactList > form:nth-child(4) > div.listItem',
     );
-
-    if (topStorytitle.isEmpty) {
+    if (rows.isEmpty) {
       throw Exception('[parseClassNotice]データの取得に失敗しました');
     }
 
-    for (final div in topStorytitle) {
-      final texts = <String>[];
-      final contents =
-          div.querySelector('> table > tbody > tr > td:nth-child(1)');
-      for (final text
-          in contents!.text!.replaceAll('	', '').trim().split('\n')) {
-        if (text != '') {
-          texts.add(text);
-        }
-      }
+    for (final row in rows) {
+      //1通知ごと
+      final texts = _extractText(row);
+
       var c = 0;
       var sender = '';
       var title = '';
-      var subject = '';
       var makeupClassAt = '';
       var isImportant = false;
       for (final text in texts) {
         switch (c) {
-          case 2: // 授業科目
-            subject = text;
           case 6: // タイトル
             if (text == '重要') {
               isImportant = true;
@@ -54,13 +45,25 @@ class LcamParse {
         ClassNotice(
           sender: sender,
           title: title,
-          subject: subject,
+          subject: texts[2],
           makeupClassAt: makeupClassAt,
           isInportant: isImportant,
         ),
       );
     }
     return classNoticeList;
+  }
+
+  List<String> _extractText(Element row) {
+    final texts = <String>[];
+    final contents =
+        row.querySelector('> table > tbody > tr > td:nth-child(1)');
+    for (final text in contents!.text!.replaceAll('	', '').trim().split('\n')) {
+      if (text != '') {
+        texts.add(text);
+      }
+    }
+    return texts;
   }
 
   ClassNoticeDetail classNoticeDetail(String body) {
@@ -127,23 +130,19 @@ class LcamParse {
           mainContent = 2;
       }
     }
-    final subject = texts[texts.indexOf('授業科目') + 1];
-    final sender = texts[texts.indexOf('授業科目') + 3];
     final titleindex = texts.indexOf('タイトル') + 1;
     final title =
         texts[titleindex] != '重要' ? texts[titleindex] : texts[titleindex + 1];
-    final content = texts[texts.indexOf('内容') + 1];
-    final sendAt = texts[texts.indexOf('連絡日時') + 1];
     final url = <String>[];
     for (var i = texts.indexOf('参考URL') + 1; i < texts.indexOf('連絡日時'); i++) {
       url.add(texts[i]);
     }
     return ClassNoticeDetail(
-      sender: sender,
+      sender: texts[texts.indexOf('授業科目') + 3],
       title: title,
-      sendAt: sendAt,
-      content: content,
-      subject: subject,
+      sendAt: texts[texts.indexOf('連絡日時') + 1],
+      content: texts[texts.indexOf('内容') + 1],
+      subject: texts[texts.indexOf('授業科目') + 1],
       url: url,
       files: fileMap,
     );
@@ -224,29 +223,19 @@ class LcamParse {
 
   List<UnivNotice> univNotice(String body) {
     final univNoticeList = <UnivNotice>[]; //return
-    final topStorytitle = parseHtmlDocument(body).querySelectorAll(
+    final rows = parseHtmlDocument(body).querySelectorAll(
       '#smartPhoneCommonContactList > form:nth-child(4) > div.listItem',
     ); //記事のリスト
-    if (topStorytitle.isEmpty) {
+    if (rows.isEmpty) {
       throw Exception('[parseUnivNotice]データの取得に失敗しました');
     }
 
-    for (final parentDiv in topStorytitle) {
-      final texts = <String>[];
-      final td = parentDiv.querySelector(
-        'table > tbody > tr > td',
-      );
-      for (final text in td!.text!.replaceAll('	', '').trim().split('\n')) {
-        if (text != '') {
-          texts.add(text);
-        }
-      }
+    for (final row in rows) {
+      final texts = _extractText(row);
       var c = 0;
       var sender = '';
       var title = '';
       var sendAt = '';
-      // var subject = '';
-      // var makeupClassAt = '';
       var isImportant = false;
       for (final text in texts) {
         switch (c) {

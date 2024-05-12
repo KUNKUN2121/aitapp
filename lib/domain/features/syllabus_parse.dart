@@ -111,14 +111,7 @@ class SyllabusParse {
     }
   }
 
-  ClassSyllabusDetail detail(String body) {
-    final rows = parseHtmlDocument(body).querySelectorAll(
-      'body > table:nth-child(16) > tbody > tr > td > table > tbody > tr',
-    );
-    if (rows.isEmpty) {
-      throw Exception('[parseSyllabus]データの取得に失敗しました');
-    }
-
+  List<String> _extractDetailText(ElementList<Element> rows) {
     final texts = <String>[];
     for (final tr in rows) {
       final tds = tr.querySelectorAll('td');
@@ -150,12 +143,73 @@ class SyllabusParse {
         }
       }
     }
-    final unitsNumber = texts[texts.indexOf('単位数') + 1];
-    final classification = texts[texts.indexOf('単位区分') + 1] == '選択'
-        ? Classification.choice
-        : texts[texts.indexOf('単位区分') + 1] == '必修'
-            ? Classification.required
-            : Classification.requiredElective;
+    return texts;
+  }
+
+  List<String> _extractExpain(
+    Map<String, int> explainsIndex,
+    List<String> texts,
+    String text,
+  ) {
+    var i = explainsIndex[text]! + 1;
+    final result = <String>[];
+    while (explainsIndex[texts[i]] == null && texts.length > i) {
+      result.add(texts[i]);
+      i++;
+    }
+    if (result.isEmpty) {
+      result.add('不明');
+    }
+
+    return result;
+  }
+
+  Map<String, int> _makeIndex(List<String> texts) {
+    final explains = [
+      '科目名',
+      '担当教員',
+      '研究室・オフィスアワー',
+      'メールアドレス',
+      '対象学年',
+      'クラスコード',
+      '講義室（キャンパス）',
+      '開講学期',
+      '曜日・時限',
+      '単位区分',
+      '科目種別',
+      '単位数',
+      '準備事項',
+      '備考',
+      '概要',
+      'ディプロマ・ポリシー',
+      '実施形態',
+      '計画',
+      '教科書',
+      '参考書',
+      '学習到達目標',
+      '方法と特徴',
+      '成績評価の方法',
+      '教員からのメッセージ',
+      'アクティブ・ラーニング科目',
+      '実務経験に基づく教育内容',
+      '添付ファイル(5MBまで）',
+    ];
+    final explainsIndex = explains
+        .asMap()
+        .map((key, value) => MapEntry(value, texts.indexOf(value)));
+    return explainsIndex;
+  }
+
+  ClassSyllabusDetail detail(String body) {
+    final rows = parseHtmlDocument(body).querySelectorAll(
+      'body > table:nth-child(16) > tbody > tr > td > table > tbody > tr',
+    );
+    if (rows.isEmpty) {
+      throw Exception('[parseSyllabus]データの取得に失敗しました');
+    }
+    final texts = _extractDetailText(rows);
+    final explainsIndex = _makeIndex(texts);
+
     final teacher = <String>[];
     final teacherRuby = <String>[];
     for (var i = texts.indexOf('担当教員') + 1;
@@ -167,45 +221,23 @@ class SyllabusParse {
       teacher.add(texts[i]);
       teacherRuby.add(texts[i + 1]);
     }
-    final subject = texts[texts.indexOf('科目名') + 3];
-    final classPeriod = texts[texts.indexOf('曜日・時限') + 1];
-    final classRoom = texts[texts.indexOf('講義室（キャンパス）') + 1] != '開講学期'
-        ? texts[texts.indexOf('講義室（キャンパス）') + 1]
-        : '';
-    final semester = texts[texts.indexOf('開講学期') + 1];
-    final content = texts[texts.indexOf('概要') + 1];
-    final plan = <String>[];
-    for (var i = texts.indexOf('計画') + 1; i < texts.indexOf('教科書'); i++) {
-      plan.add(texts[i]);
-    }
-    final referenceBook = texts[texts.indexOf('参考書') + 1] != '学習到達目標'
-        ? texts[texts.indexOf('参考書') + 1]
-        : '';
-    final textBook = texts[texts.indexOf('教科書') + 1];
-    final learningGoal = texts[texts.indexOf('学習到達目標') + 1];
-    final feature = texts[texts.indexOf('方法と特徴') + 1];
-    final record = texts[texts.indexOf('成績評価の方法') + 1];
-    final teachersMessage =
-        texts[texts.indexOf('教員からのメッセージ') + 1] != '添付ファイル(5MBまで）'
-            ? texts[texts.indexOf('教員からのメッセージ') + 1]
-            : '';
     return ClassSyllabusDetail(
-      int.parse(unitsNumber),
-      classification,
+      int.tryParse(_extractExpain(explainsIndex, texts, '単位数')[0]) ?? 0,
+      _parseClassification(_extractExpain(explainsIndex, texts, '単位区分')[0]),
       teacher,
       teacherRuby,
-      semester,
-      [content],
-      subject,
-      classPeriod,
-      classRoom,
-      plan,
-      learningGoal,
-      feature,
-      record,
-      teachersMessage,
-      textBook,
-      referenceBook,
+      _extractExpain(explainsIndex, texts, '開講学期')[0],
+      _extractExpain(explainsIndex, texts, '概要'),
+      _extractExpain(explainsIndex, texts, '科目名')[2],
+      _extractExpain(explainsIndex, texts, '曜日・時限')[0],
+      _extractExpain(explainsIndex, texts, '講義室（キャンパス）')[0],
+      _extractExpain(explainsIndex, texts, '計画'),
+      _extractExpain(explainsIndex, texts, '学習到達目標')[0],
+      _extractExpain(explainsIndex, texts, '方法と特徴')[0],
+      _extractExpain(explainsIndex, texts, '成績評価の方法')[0],
+      _extractExpain(explainsIndex, texts, '教員からのメッセージ')[0],
+      _extractExpain(explainsIndex, texts, '教科書')[0],
+      _extractExpain(explainsIndex, texts, '参考書')[0],
     );
   }
 
