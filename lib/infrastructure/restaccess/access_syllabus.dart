@@ -17,11 +17,9 @@ Future<Response> getSyllabusSession() async {
 }
 
 Future<String> getSyllabusListBody({
-  String? campus,
-  String? semester,
+  int? campus,
+  int? semester,
   int? week,
-  String? altWeek,
-  String? altPeriod,
   int? hour,
   required String year,
   required String jSessionId,
@@ -42,10 +40,10 @@ Future<String> getSyllabusListBody({
     'syllabusTitleID': year,
     'indexID': folder ?? '',
     'subFolderFlag': 'on',
-    'syllabusCampus': campus ?? '',
-    'syllabusSemester': semester ?? '',
-    'syllabusWeek': altWeek ?? '${week ?? ''}',
-    'syllabusHour': altPeriod ?? '${hour ?? ''}',
+    'syllabusCampus': '${campus ?? ''}',
+    'syllabusSemester': '${semester ?? ''}',
+    'syllabusWeek': '${week ?? ''}',
+    'syllabusHour': '${hour ?? ''}',
     'kamokuName': '',
     'editorName': '',
     'freeWord': searchWord ?? '',

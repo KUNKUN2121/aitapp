@@ -1,6 +1,8 @@
 import 'package:aitapp/domain/features/syllabus_parse.dart';
+import 'package:aitapp/domain/types/campus.dart';
 import 'package:aitapp/domain/types/class_syllabus.dart';
 import 'package:aitapp/domain/types/day_of_week.dart';
+import 'package:aitapp/domain/types/semester.dart';
 import 'package:aitapp/domain/types/syllabus_filter.dart';
 import 'package:aitapp/infrastructure/restaccess/access_syllabus.dart';
 
@@ -25,23 +27,19 @@ class GetSyllabus {
     DayOfWeek? dayOfWeek,
     int? classPeriod,
     String? searchWord,
-    String? altWeek,
-    String? altPeriod,
-    String? campus,
-    String? semester,
+    Campus? campus,
+    Semester? semester,
     String? folder,
     required String year,
   }) async {
     final body = await getSyllabusListBody(
-      campus: campus,
-      semester: semester,
+      campus: campus?.num,
+      semester: semester?.num,
       week: dayOfWeek?.num,
       hour: classPeriod,
       year: year,
       jSessionId: jSessionId,
       searchWord: searchWord,
-      altWeek: altWeek,
-      altPeriod: altPeriod,
       folder: folder,
     );
     return parse.searchList(body);

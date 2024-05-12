@@ -1,6 +1,10 @@
 import 'package:aitapp/application/state/filter_provider.dart';
 import 'package:aitapp/domain/features/get_syllabus.dart';
+import 'package:aitapp/domain/types/campus.dart';
+import 'package:aitapp/domain/types/day_of_week.dart';
 import 'package:aitapp/domain/types/select_filter.dart';
+import 'package:aitapp/domain/types/semester.dart';
+import 'package:aitapp/utils/to_string_or_null.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -22,11 +26,17 @@ class FilterDrawer extends HookConsumerWidget {
     final filters = ref.watch(syllabusFiltersProvider);
 
     final selectYear = useState<String>(selectfilters!.year);
-    final selectCampus = useState<String?>(selectfilters.campus);
+    final selectCampus =
+        useState<String?>(selectfilters.campus?.num.toStringOrNull());
     final selectFaculty = useState<String?>(selectfilters.folder);
-    final selectSemester = useState<String?>(selectfilters.semester);
-    final selectWeek = useState<String?>(selectfilters.week);
-    final selectHour = useState<String?>(selectfilters.hour);
+    final selectSemester =
+        useState<String?>(selectfilters.semester?.num.toStringOrNull());
+    final selectWeek = useState<String?>(
+      selectfilters.week?.num.toStringOrNull(),
+    );
+    final selectHour = useState<String?>(
+      selectfilters.hour.toStringOrNull(),
+    );
 
     useEffect(
       () {
@@ -34,10 +44,24 @@ class FilterDrawer extends HookConsumerWidget {
           final submitfilter = SelectFilters(
             year: selectYear.value,
             folder: selectFaculty.value,
-            campus: selectCampus.value,
-            semester: selectSemester.value,
-            week: selectWeek.value,
-            hour: selectHour.value,
+            campus: selectCampus.value != null
+                ? Campus.values.firstWhere(
+                    (element) => element.num.toString() == selectCampus.value,
+                  )
+                : null,
+            semester: selectSemester.value != null
+                ? Semester.values.firstWhere(
+                    (element) {
+                      return element.num.toString() == selectSemester.value;
+                    },
+                  )
+                : null,
+            week: selectWeek.value != null
+                ? DayOfWeek.values.firstWhere(
+                    (element) => element.num.toString() == selectWeek.value,
+                  )
+                : null,
+            hour: int.tryParse(selectHour.value ?? ''),
           );
           if (submitfilter != selectfilters) {
             setFilters(selectFilters: submitfilter);
@@ -46,14 +70,46 @@ class FilterDrawer extends HookConsumerWidget {
       },
       [],
     );
-    Future<void> changeYear(String year) async {
-      selectCampus.value = null;
+
+    void filterClear() {
       selectFaculty.value = null;
+      selectCampus.value = null;
       selectSemester.value = null;
       selectWeek.value = null;
       selectHour.value = null;
+    }
+
+    Future<void> changeYear(String year) async {
+      filterClear();
       ref.read(syllabusFiltersProvider.notifier).state =
           await getSyllabus.getRefreshFilters(year: year);
+    }
+
+    Widget filterListTile(
+      ValueNotifier<String?> select,
+      String title,
+      Iterable<MapEntry<String, String>> entries,
+    ) {
+      return ListTile(
+        title: Text(title),
+        trailing: DropdownButton(
+          value: select.value,
+          items: [
+            for (final entry in entries) ...{
+              DropdownMenuItem(
+                value: entry.value,
+                child: Text(entry.key),
+              ),
+            },
+          ],
+          onChanged: (item) {
+            select.value = item;
+            if (select == selectYear) {
+              changeYear(selectYear.value);
+            }
+          },
+        ),
+      );
     }
 
     return Drawer(
@@ -66,13 +122,7 @@ class FilterDrawer extends HookConsumerWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   TextButton(
-                    onPressed: () {
-                      selectFaculty.value = null;
-                      selectCampus.value = null;
-                      selectSemester.value = null;
-                      selectWeek.value = null;
-                      selectHour.value = null;
-                    },
+                    onPressed: filterClear,
                     child: const Text('クリア'),
                   ),
                   Text(
@@ -82,108 +132,35 @@ class FilterDrawer extends HookConsumerWidget {
                 ],
               ),
               const Divider(),
-              ListTile(
-                title: const Text('年度'),
-                trailing: DropdownButton(
-                  value: selectYear.value,
-                  items: [
-                    for (final entry in filters!.year.entries) ...{
-                      DropdownMenuItem(
-                        value: entry.value,
-                        child: Text(entry.key),
-                      ),
-                    },
-                  ],
-                  onChanged: (item) {
-                    selectYear.value = item!;
-                    changeYear(selectYear.value);
-                  },
-                ),
+              filterListTile(
+                selectYear,
+                '年度',
+                filters!.year.entries,
               ),
-              ListTile(
-                title: const Text('学部'),
-                trailing: DropdownButton(
-                  value: selectFaculty.value,
-                  items: [
-                    for (final entry in filters.folder.entries) ...{
-                      DropdownMenuItem(
-                        value: entry.value,
-                        child: Text(entry.key),
-                      ),
-                    },
-                  ],
-                  onChanged: (item) {
-                    selectFaculty.value = item;
-                  },
-                ),
+              filterListTile(
+                selectFaculty,
+                '学部',
+                filters.folder.entries,
               ),
-              ListTile(
-                title: const Text('キャンパス'),
-                trailing: DropdownButton(
-                  value: selectCampus.value,
-                  items: [
-                    for (final entry in filters.campus.entries) ...{
-                      DropdownMenuItem(
-                        value: entry.value,
-                        child: Text(entry.key),
-                      ),
-                    },
-                  ],
-                  onChanged: (item) {
-                    selectCampus.value = item;
-                  },
-                ),
+              filterListTile(
+                selectCampus,
+                'キャンパス',
+                filters.campus.entries,
               ),
-              ListTile(
-                title: const Text('開講学期'),
-                trailing: DropdownButton(
-                  value: selectSemester.value,
-                  items: [
-                    for (final entry in filters.semester.entries) ...{
-                      DropdownMenuItem(
-                        value: entry.value,
-                        child: Text(entry.key),
-                      ),
-                    },
-                  ],
-                  onChanged: (item) {
-                    selectSemester.value = item;
-                  },
-                ),
+              filterListTile(
+                selectSemester,
+                '開講学期',
+                filters.semester.entries,
               ),
-              ListTile(
-                title: const Text('曜日'),
-                trailing: DropdownButton(
-                  value: selectWeek.value,
-                  items: [
-                    for (final entry in filters.week.entries) ...{
-                      DropdownMenuItem(
-                        value: entry.value,
-                        child: Text(entry.key),
-                      ),
-                    },
-                  ],
-                  onChanged: (item) {
-                    selectWeek.value = item;
-                  },
-                ),
+              filterListTile(
+                selectWeek,
+                '曜日',
+                filters.week.entries.toList(),
               ),
-              ListTile(
-                title: const Text('時限'),
-                trailing: DropdownButton(
-                  value: selectHour.value,
-                  items: [
-                    for (final entry in filters.hour.entries) ...{
-                      DropdownMenuItem(
-                        value: entry.value,
-                        child: Text(entry.key),
-                      ),
-                    },
-                  ],
-                  onChanged: (item) {
-                    selectHour.value = item;
-                  },
-                ),
+              filterListTile(
+                selectHour,
+                '時限',
+                filters.hour.entries,
               ),
             ],
           ),

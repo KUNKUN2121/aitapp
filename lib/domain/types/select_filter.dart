@@ -1,3 +1,7 @@
+import 'package:aitapp/domain/types/campus.dart';
+import 'package:aitapp/domain/types/day_of_week.dart';
+import 'package:aitapp/domain/types/semester.dart';
+
 class SelectFilters {
   SelectFilters({
     required this.year,
@@ -9,10 +13,10 @@ class SelectFilters {
   });
   final String year;
   final String? folder;
-  final String? campus;
-  final String? week;
-  final String? hour;
-  final String? semester;
+  final Campus? campus;
+  final DayOfWeek? week;
+  final int? hour;
+  final Semester? semester;
 
   @override
   bool operator ==(Object other) {

@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:aitapp/domain/features/get_syllabus.dart';
 import 'package:aitapp/domain/types/class_syllabus.dart';
 import 'package:aitapp/domain/types/day_of_week.dart';
+import 'package:aitapp/domain/types/semester.dart';
 import 'package:aitapp/presentation/wighets/syllabus_item.dart';
 import 'package:async/async.dart';
 import 'package:flutter/material.dart';
@@ -47,7 +48,8 @@ class SyllabusList extends HookWidget {
           classPeriod: classPeriod,
           searchWord: searchText,
           year: getSyllabus.filters.year.values.first,
-          semester: thisMonth >= 4 && thisMonth <= 8 ? '1' : '2',
+          semester:
+              thisMonth >= 4 && thisMonth <= 8 ? Semester.early : Semester.late,
         );
         syllabusList.value = list;
       } on SocketException {

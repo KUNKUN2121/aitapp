@@ -1,11 +1,6 @@
 import 'package:aitapp/presentation/wighets/class_timetable_item.dart';
 import 'package:flutter/material.dart';
 
-enum Semester {
-  early,
-  late,
-}
-
 class ClassTimeTableScreen extends StatelessWidget {
   const ClassTimeTableScreen({super.key});
 

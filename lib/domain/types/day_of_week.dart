@@ -5,7 +5,8 @@ enum DayOfWeek {
   wednesday('水', 3),
   thurstay('木', 4),
   friday('金', 5),
-  saturday('土', 6);
+  saturday('土', 6),
+  offHours('時間割外・集中講義', 0);
 
   const DayOfWeek(this.displayName, this.num);
   final String displayName;

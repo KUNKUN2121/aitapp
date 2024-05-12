@@ -34,9 +34,9 @@ class SyllabusSearchList extends HookConsumerWidget {
       try {
         await getSyllabus.create();
         final list = await getSyllabus.getSyllabusList(
-          altWeek: selectFilter!.week,
+          dayOfWeek: selectFilter!.week,
           searchWord: searchtext,
-          altPeriod: selectFilter.hour,
+          classPeriod: selectFilter.hour,
           campus: selectFilter.campus,
           semester: selectFilter.semester,
           folder: selectFilter.folder,
