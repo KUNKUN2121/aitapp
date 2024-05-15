@@ -38,7 +38,7 @@ class BuildingInfoSheet extends HookConsumerWidget {
     );
     if (selectBuilding != null) {
       content = [
-        const SizedBox(height: 12),
+        const SizedBox(height: 24),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Text(
@@ -109,6 +109,9 @@ class BuildingInfoSheet extends HookConsumerWidget {
       ];
     } else {
       content = [
+        const SizedBox(
+          height: 12,
+        ),
         SearchBarWidget(
           hintText: '教室名,建物名を入力',
           controller: textEditingController,
@@ -121,9 +124,7 @@ class BuildingInfoSheet extends HookConsumerWidget {
 
     return DraggableScrollableSheet(
       controller: controller,
-      initialChildSize: 0.4,
       minChildSize: 0.15,
-      maxChildSize: 0.50,
       builder: (context, scrollController) {
         return DecoratedBox(
           decoration: BoxDecoration(
@@ -133,25 +134,36 @@ class BuildingInfoSheet extends HookConsumerWidget {
               topRight: Radius.circular(25),
             ),
           ),
-          child: Column(
+          child: Stack(
             children: [
-              Center(
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).hintColor,
-                    borderRadius: const BorderRadius.all(
-                      Radius.circular(10),
-                    ),
-                  ),
-                  height: 4,
-                  width: 40,
-                  margin: const EdgeInsets.symmetric(vertical: 10),
-                ),
+              ListView(
+                physics: const ClampingScrollPhysics(),
+                controller: scrollController,
+                children: content,
               ),
-              Expanded(
-                child: ListView(
-                  controller: scrollController,
-                  children: content,
+              DecoratedBox(
+                decoration: BoxDecoration(
+                  color: Theme.of(context).canvasColor,
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(25),
+                    topRight: Radius.circular(25),
+                  ),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).hintColor,
+                        borderRadius: const BorderRadius.all(
+                          Radius.circular(10),
+                        ),
+                      ),
+                      height: 4,
+                      width: 40,
+                      margin: const EdgeInsets.symmetric(vertical: 10),
+                    ),
+                  ],
                 ),
               ),
             ],

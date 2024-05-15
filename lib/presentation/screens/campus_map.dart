@@ -1,4 +1,5 @@
 import 'package:aitapp/application/state/building_probvider.dart';
+import 'package:aitapp/application/state/keyboard_provider.dart';
 import 'package:aitapp/presentation/wighets/building_info_sheet.dart';
 import 'package:aitapp/presentation/wighets/svg_map.dart';
 import 'package:flutter/material.dart';
@@ -11,7 +12,6 @@ class CampusMap extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final controller = useMemoized(DraggableScrollableController.new);
-    final selectShape = ref.watch(shapeProvider);
 
     final initialMatrix = useMemoized(
       () => Matrix4.translationValues(-250, -750, 0).scaled(2.6),
@@ -47,6 +47,13 @@ class CampusMap extends HookConsumerWidget {
       },
       [],
     );
+    void bottomSheetSizeInitialize(double size) {
+      controller.animateTo(
+        size,
+        duration: const Duration(milliseconds: 150),
+        curve: Curves.easeIn,
+      );
+    }
 
     void animateResetInitialize(Matrix4 destination) {
       if (!controllerReset.isAnimating) {
@@ -57,24 +64,33 @@ class CampusMap extends HookConsumerWidget {
         ).chain(CurveTween(curve: Curves.decelerate)).animate(controllerReset);
         animationReset!.addListener(onAnimateReset);
         controllerReset.forward();
+        bottomSheetSizeInitialize(0.5);
       }
     }
 
-    if (selectShape != null) {
-      final bounds = selectShape.mapShape!.transformedPath!.getBounds();
-      final centerX = bounds.left + bounds.width / 2;
-      final centerY = bounds.top + bounds.height / 2;
-      final scale = (100 / bounds.width + 100 / bounds.height) / 2;
-      animateResetInitialize(
-        Matrix4.translationValues(
-          -centerX * scale + 200,
-          -centerY * scale + 250,
-          0,
-        ).scaled(scale),
-      );
-    }
+    ref
+      ..listen(shapeProvider, (previous, next) {
+        if (next != null) {
+          final bounds = next.mapShape!.transformedPath!.getBounds();
+          final centerX = bounds.left + bounds.width / 2;
+          final centerY = bounds.top + bounds.height / 2;
+          final scale = (100 / bounds.width + 100 / bounds.height) / 2;
+          animateResetInitialize(
+            Matrix4.translationValues(
+              -centerX * scale + 200,
+              -centerY * scale + 250,
+              0,
+            ).scaled(scale),
+          );
+        }
+      })
+      ..listen(keyboardVisibilityProvider, (previous, next) {
+        final size = next ? 1.0 : 0.5;
+        bottomSheetSizeInitialize(size);
+      });
 
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         title: const Text(
           'マップ',
