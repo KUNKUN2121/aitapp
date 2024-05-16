@@ -1,5 +1,8 @@
 # Changelog
 
+## [v1.6.1](https://github.com/piman528/aitapp/compare/v1.6.0...v1.6.1) - 2024-05-16
+- 画面が表示されないバグを修正 by @piman528 in https://github.com/piman528/aitapp/pull/75
+
 ## [v1.6.0](https://github.com/piman528/aitapp/compare/v1.5.1...v1.6.0) - 2024-05-16
 - iosのビルド設定を更新 by @piman528 in https://github.com/piman528/aitapp/pull/59
 - uiの色調整 by @piman528 in https://github.com/piman528/aitapp/pull/61
