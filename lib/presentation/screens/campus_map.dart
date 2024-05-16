@@ -1,5 +1,4 @@
 import 'package:aitapp/application/state/building_probvider.dart';
-import 'package:aitapp/application/state/keyboard_provider.dart';
 import 'package:aitapp/presentation/wighets/building_info_sheet.dart';
 import 'package:aitapp/presentation/wighets/svg_map.dart';
 import 'package:flutter/material.dart';
@@ -68,26 +67,36 @@ class CampusMap extends HookConsumerWidget {
       }
     }
 
-    ref
-      ..listen(shapeProvider, (previous, next) {
-        if (next != null) {
-          final bounds = next.mapShape!.transformedPath!.getBounds();
-          final centerX = bounds.left + bounds.width / 2;
-          final centerY = bounds.top + bounds.height / 2;
-          final scale = (100 / bounds.width + 100 / bounds.height) / 2;
-          animateResetInitialize(
-            Matrix4.translationValues(
-              -centerX * scale + 200,
-              -centerY * scale + 250,
-              0,
-            ).scaled(scale),
-          );
-        }
-      })
-      ..listen(keyboardVisibilityProvider, (previous, next) {
-        final size = next ? 1.0 : 0.5;
-        bottomSheetSizeInitialize(size);
-      });
+    ref.listen(shapeProvider, (previous, next) {
+      if (next != null) {
+        final bounds = next.mapShape!.transformedPath!.getBounds();
+        final centerX = bounds.left + bounds.width / 2;
+        final centerY = bounds.top + bounds.height / 2;
+        final scale = (100 / bounds.width + 100 / bounds.height) / 2;
+        animateResetInitialize(
+          Matrix4.translationValues(
+            -centerX * scale + 200,
+            -centerY * scale + 250,
+            0,
+          ).scaled(scale),
+        );
+      }
+    });
+    useEffect(
+      () {
+        final observer = _KeyboardVisibilityObserver(
+          ({required bool visible}) {
+            if (visible) {
+              bottomSheetSizeInitialize(1);
+            }
+          },
+          context,
+        );
+        WidgetsBinding.instance.addObserver(observer);
+        return () => WidgetsBinding.instance.removeObserver(observer);
+      },
+      [],
+    );
 
     return Scaffold(
       resizeToAvoidBottomInset: false,
@@ -120,5 +129,17 @@ class CampusMap extends HookConsumerWidget {
         ],
       ),
     );
+  }
+}
+
+class _KeyboardVisibilityObserver with WidgetsBindingObserver {
+  _KeyboardVisibilityObserver(this.onChange, this.context);
+  final void Function({required bool visible}) onChange;
+  final BuildContext context;
+
+  @override
+  void didChangeMetrics() {
+    final bottomInset = View.of(context).viewInsets.bottom;
+    onChange(visible: bottomInset > 0);
   }
 }
