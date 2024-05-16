@@ -11,7 +11,6 @@ import 'package:aitapp/presentation/screens/tabs.dart';
 import 'package:aitapp/presentation/theme/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -61,11 +60,6 @@ class App extends ConsumerWidget {
         _ => ThemeMode.system,
       },
       home: const InitHome(),
-      localizationsDelegates: const [
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
 
       // localeに日本語を登録する
       supportedLocales: const [
