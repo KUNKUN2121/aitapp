@@ -11,7 +11,6 @@ class CampusMap extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final controller = useMemoized(DraggableScrollableController.new);
-    final selectShape = ref.watch(shapeProvider);
 
     final initialMatrix = useMemoized(
       () => Matrix4.translationValues(-250, -750, 0).scaled(2.6),
@@ -47,6 +46,13 @@ class CampusMap extends HookConsumerWidget {
       },
       [],
     );
+    void bottomSheetSizeInitialize(double size) {
+      controller.animateTo(
+        size,
+        duration: const Duration(milliseconds: 150),
+        curve: Curves.easeIn,
+      );
+    }
 
     void animateResetInitialize(Matrix4 destination) {
       if (!controllerReset.isAnimating) {
@@ -57,24 +63,43 @@ class CampusMap extends HookConsumerWidget {
         ).chain(CurveTween(curve: Curves.decelerate)).animate(controllerReset);
         animationReset!.addListener(onAnimateReset);
         controllerReset.forward();
+        bottomSheetSizeInitialize(0.5);
       }
     }
 
-    if (selectShape != null) {
-      final bounds = selectShape.mapShape!.transformedPath!.getBounds();
-      final centerX = bounds.left + bounds.width / 2;
-      final centerY = bounds.top + bounds.height / 2;
-      final scale = (100 / bounds.width + 100 / bounds.height) / 2;
-      animateResetInitialize(
-        Matrix4.translationValues(
-          -centerX * scale + 200,
-          -centerY * scale + 250,
-          0,
-        ).scaled(scale),
-      );
-    }
+    ref.listen(shapeProvider, (previous, next) {
+      if (next != null) {
+        final bounds = next.mapShape!.transformedPath!.getBounds();
+        final centerX = bounds.left + bounds.width / 2;
+        final centerY = bounds.top + bounds.height / 2;
+        final scale = (100 / bounds.width + 100 / bounds.height) / 2;
+        animateResetInitialize(
+          Matrix4.translationValues(
+            -centerX * scale + 200,
+            -centerY * scale + 250,
+            0,
+          ).scaled(scale),
+        );
+      }
+    });
+    useEffect(
+      () {
+        final observer = _KeyboardVisibilityObserver(
+          ({required bool visible}) {
+            if (visible) {
+              bottomSheetSizeInitialize(1);
+            }
+          },
+          context,
+        );
+        WidgetsBinding.instance.addObserver(observer);
+        return () => WidgetsBinding.instance.removeObserver(observer);
+      },
+      [],
+    );
 
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         title: const Text(
           'マップ',
@@ -104,5 +129,17 @@ class CampusMap extends HookConsumerWidget {
         ],
       ),
     );
+  }
+}
+
+class _KeyboardVisibilityObserver with WidgetsBindingObserver {
+  _KeyboardVisibilityObserver(this.onChange, this.context);
+  final void Function({required bool visible}) onChange;
+  final BuildContext context;
+
+  @override
+  void didChangeMetrics() {
+    final bottomInset = View.of(context).viewInsets.bottom;
+    onChange(visible: bottomInset > 0);
   }
 }
