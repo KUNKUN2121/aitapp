@@ -1,5 +1,16 @@
 # Changelog
 
+## [v1.6.0](https://github.com/piman528/aitapp/compare/v1.5.1...v1.6.0) - 2024-05-16
+- iosのビルド設定を更新 by @piman528 in https://github.com/piman528/aitapp/pull/59
+- uiの色調整 by @piman528 in https://github.com/piman528/aitapp/pull/61
+- シラバス表示の修正と教科書/参考書の表示を追加 by @piman528 in https://github.com/piman528/aitapp/pull/62
+- tabのuiを変更 by @piman528 in https://github.com/piman528/aitapp/pull/63
+- お知らせの添付の表示を変更 by @piman528 in https://github.com/piman528/aitapp/pull/64
+- マップ機能の作成 by @piman528 in https://github.com/piman528/aitapp/pull/69
+- アーキテクチャの変更と最適化 by @piman528 in https://github.com/piman528/aitapp/pull/70
+- Mapのアップデート by @piman528 in https://github.com/piman528/aitapp/pull/73
+- Packageのバージョンアップ by @piman528 in https://github.com/piman528/aitapp/pull/74
+
 ## [v1.5.1](https://github.com/piman528/aitapp/compare/v1.5.0...v1.5.1) - 2024-04-16
 - 授業からシラバスを参照する際に意図しない動作を修正 by @piman528 in https://github.com/piman528/aitapp/pull/49
 - Gradleのバージョンアップ by @piman528 in https://github.com/piman528/aitapp/pull/55
