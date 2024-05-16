@@ -60,14 +60,6 @@ class App extends ConsumerWidget {
         _ => ThemeMode.system,
       },
       home: const InitHome(),
-
-      // localeに日本語を登録する
-      supportedLocales: const [
-        Locale('ja'),
-      ],
-
-      // アプリのlocaleを日本語に変更する
-      locale: const Locale('ja', 'JP'),
     );
   }
 }
