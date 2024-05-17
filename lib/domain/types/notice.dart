@@ -1,3 +1,4 @@
+// お知らせ
 abstract class Notice {
   Notice({
     required this.sender,

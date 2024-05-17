@@ -746,48 +746,48 @@ const Map<String, String> links = {
 const origin = 'https://lcam.aitech.ac.jp';
 const syllabusOrigin = 'https://syllabus.aitech.ac.jp';
 
-const List<WebAccessPage> webAccessPages = [
-  WebAccessPage(
+const List<WebAccessLink> webAccessLinks = [
+  WebAccessLink(
     title: '履修登録',
     icon: Icons.event,
     url: '$origin/portalv2/smartphone/smartPhoneHome/nextPage/entryRegist/',
   ),
-  WebAccessPage(
+  WebAccessLink(
     title: '履修取消',
     icon: Icons.event,
     url: '$origin/portalv2/smartphone/smartPhoneHome/nextPage/kmgCou04/',
   ),
-  WebAccessPage(
+  WebAccessLink(
     title: '抽選履修登録',
     icon: Icons.event,
     url:
         '$origin/portalv2/smartphone/smartPhoneHome/nextPage/lotteryFirstArrival/',
   ),
-  WebAccessPage(
+  WebAccessLink(
     title: '抽選履修登録結果',
     icon: Icons.event,
     url:
         '$origin/portalv2/smartphone/smartPhoneHome/nextPage/lotteryRegistResult/',
   ),
-  WebAccessPage(
+  WebAccessLink(
     title: '授業アンケート',
     icon: Icons.assignment,
     url:
         '$origin/portalv2/smartphone/smartPhoneContactNotice/nextPage/classEnquete/',
   ),
-  WebAccessPage(
+  WebAccessLink(
     title: '授業評価アンケート',
     icon: Icons.assignment,
     url:
         '$origin/portalv2/smartphone/smartPhoneContactNotice/nextPage/courseEvaluation/',
   ),
-  WebAccessPage(
+  WebAccessLink(
     title: '学内アンケート',
     icon: Icons.assignment,
     url:
         '$origin/portalv2/smartphone/smartPhoneContactNotice/nextPage/enqueteContact/',
   ),
-  WebAccessPage(
+  WebAccessLink(
     title: '成績照会',
     icon: Icons.bar_chart,
     url:

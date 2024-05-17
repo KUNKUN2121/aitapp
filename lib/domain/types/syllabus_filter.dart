@@ -1,3 +1,4 @@
+// シラバスフィルタ
 class SyllabusFilters {
   SyllabusFilters({
     required this.year,

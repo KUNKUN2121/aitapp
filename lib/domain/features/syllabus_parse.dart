@@ -1,5 +1,8 @@
 import 'package:aitapp/domain/types/class_syllabus.dart';
+import 'package:aitapp/domain/types/class_syllabus_detail.dart';
+import 'package:aitapp/domain/types/classification.dart';
 import 'package:aitapp/domain/types/syllabus_filter.dart';
+import 'package:aitapp/domain/types/teacher.dart';
 import 'package:collection/collection.dart';
 import 'package:universal_html/html.dart';
 import 'package:universal_html/parsing.dart';
@@ -210,22 +213,15 @@ class SyllabusParse {
     final texts = _extractDetailText(rows);
     final explainsIndex = _makeIndex(texts);
 
-    final teacher = <String>[];
-    final teacherRuby = <String>[];
-    for (var i = texts.indexOf('担当教員') + 1;
-        i < texts.indexOf('研究室・オフィスアワー');
-        i = i + 2) {
-      if (texts[i].trim().isEmpty) {
-        i++;
-      }
-      teacher.add(texts[i]);
-      teacherRuby.add(texts[i + 1]);
+    final teachers = <Teacher>[];
+    final teacherList = _extractExpain(explainsIndex, texts, '担当教員');
+    for (var i = 0; i < teacherList.length; i += 3) {
+      teachers.add(Teacher(name: teacherList[i], ruby: teacherList[i + 1]));
     }
     return ClassSyllabusDetail(
       int.tryParse(_extractExpain(explainsIndex, texts, '単位数')[0]) ?? 0,
       _parseClassification(_extractExpain(explainsIndex, texts, '単位区分')[0]),
-      teacher,
-      teacherRuby,
+      teachers,
       _extractExpain(explainsIndex, texts, '開講学期')[0],
       _extractExpain(explainsIndex, texts, '概要'),
       _extractExpain(explainsIndex, texts, '科目名')[2],

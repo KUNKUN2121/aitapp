@@ -1,5 +1,6 @@
 import 'package:aitapp/domain/types/notice.dart';
 
+// 授業お知らせ
 class ClassNotice extends Notice {
   ClassNotice({
     required super.sender,

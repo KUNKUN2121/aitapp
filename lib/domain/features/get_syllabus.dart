@@ -1,6 +1,7 @@
 import 'package:aitapp/domain/features/syllabus_parse.dart';
 import 'package:aitapp/domain/types/campus.dart';
 import 'package:aitapp/domain/types/class_syllabus.dart';
+import 'package:aitapp/domain/types/class_syllabus_detail.dart';
 import 'package:aitapp/domain/types/day_of_week.dart';
 import 'package:aitapp/domain/types/semester.dart';
 import 'package:aitapp/domain/types/syllabus_filter.dart';

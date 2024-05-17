@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
-class WebAccessPage {
-  const WebAccessPage({
+// リンク
+class WebAccessLink {
+  const WebAccessLink({
     required this.title,
     required this.url,
     required this.icon,

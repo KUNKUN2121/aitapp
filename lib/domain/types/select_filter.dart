@@ -2,6 +2,7 @@ import 'package:aitapp/domain/types/campus.dart';
 import 'package:aitapp/domain/types/day_of_week.dart';
 import 'package:aitapp/domain/types/semester.dart';
 
+// 選択シラバスフィルタ
 class SelectFilters {
   SelectFilters({
     required this.year,

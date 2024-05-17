@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'package:aitapp/domain/features/get_syllabus.dart';
 import 'package:aitapp/domain/types/class_syllabus.dart';
+import 'package:aitapp/domain/types/class_syllabus_detail.dart';
 import 'package:aitapp/presentation/wighets/build_section.dart';
 import 'package:flutter/material.dart';
 
@@ -49,11 +50,9 @@ class SyllabusDetail extends StatelessWidget {
                 const SizedBox(
                   height: 10,
                 ),
-                for (var i = 0;
-                    i < classSyllabusDetail.teacher.length;
-                    i++) ...{
+                for (final teacher in classSyllabusDetail.teachers) ...{
                   Text(
-                    '${classSyllabusDetail.teacher[i]} ${classSyllabusDetail.teacherRuby[i]}',
+                    teacher.toStr(),
                   ),
                 },
                 BuildSection(title: '概要', content: classSyllabusDetail.content),

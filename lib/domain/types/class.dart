@@ -1,3 +1,4 @@
+// 授業
 class Class {
   Class({
     required this.title,
