@@ -1,7 +1,7 @@
 import 'package:aitapp/domain/types/class_syllabus.dart';
 import 'package:aitapp/domain/types/class_syllabus_detail.dart';
 import 'package:aitapp/domain/types/classification.dart';
-import 'package:aitapp/domain/types/syllabus_filter.dart';
+import 'package:aitapp/domain/types/syllabus_filters.dart';
 import 'package:aitapp/domain/types/teacher.dart';
 import 'package:collection/collection.dart';
 import 'package:universal_html/html.dart';
@@ -48,7 +48,7 @@ class SyllabusParse {
         i++;
       }
     } else {
-      throw Exception('[parseSyllabusList]データの取得に失敗しました');
+      throw Exception('[parseSyllabusFilters]データの取得に失敗しました');
     }
     return options;
   }
@@ -58,10 +58,18 @@ class SyllabusParse {
     final rows = parseHtmlDocument(body).querySelectorAll(
       'body > form > table:nth-child(2) > tbody > tr > td > table > tbody > tr',
     );
+    final error = parseHtmlDocument(body)
+        .querySelector(
+          '#errorTag > li',
+        )
+        ?.childNodes[0];
     if (rows.isEmpty) {
-      throw Exception('[parseSyllabusList]データの取得に失敗しました');
+      if (error != null) {
+        throw Exception('${error.text}');
+      } else {
+        throw Exception('[parseSyllabusList]データの取得に失敗しました');
+      }
     }
-
     for (var i = 1; i < rows.length; i++) {
       //1授業単位
       final row = rows[i];

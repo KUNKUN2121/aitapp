@@ -3,6 +3,7 @@
 import 'package:aitapp/application/state/id_password_provider.dart';
 import 'package:aitapp/application/state/last_login_time_provider.dart';
 import 'package:aitapp/application/state/link_tap_provider.dart';
+import 'package:aitapp/application/state/select_syllabus_filter/select_syllabus_filter.dart';
 import 'package:aitapp/application/state/shared_preference_provider.dart';
 import 'package:aitapp/env.dart';
 import 'package:aitapp/presentation/screens/campus_map.dart';
@@ -122,6 +123,9 @@ class MainDrawer extends ConsumerWidget {
                       builder: (ctx) => SyllabusSearchScreen(),
                     ),
                   );
+                  ref
+                      .read(selectSyllabusFilterNotifierProvider.notifier)
+                      .initialize();
                 },
               ),
               DrawerTile(

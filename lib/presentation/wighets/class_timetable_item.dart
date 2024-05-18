@@ -7,6 +7,7 @@ import 'package:aitapp/application/state/setting_int_provider.dart';
 import 'package:aitapp/domain/types/class.dart';
 import 'package:aitapp/domain/types/day_of_week.dart';
 import 'package:aitapp/presentation/screens/syllabus_filter.dart';
+import 'package:aitapp/utils/extended_string.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -103,25 +104,6 @@ class ClassGridContainer extends StatelessWidget {
   final int classPeriod;
   final Class? clas;
 
-  String alphanumericToHalfLength(String input) {
-    return input.replaceAllMapped(RegExp(r'[^\u0020-\u007E\uFF61-\uFF9F]+'),
-        (match) {
-      return match
-          .group(0)!
-          .codeUnits
-          .map((codeUnit) {
-            if (codeUnit >= 0xFF01 && codeUnit <= 0xFF5E) {
-              // 全角英数字の範囲
-              return codeUnit - 0xFEE0;
-            } else {
-              return codeUnit;
-            }
-          })
-          .map(String.fromCharCode)
-          .join();
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -171,7 +153,7 @@ class ClassGridContainer extends StatelessWidget {
                       color: Theme.of(context).colorScheme.tertiaryContainer,
                     ),
                     child: Text(
-                      alphanumericToHalfLength(clas!.classRoom),
+                      clas!.classRoom.alphanumericToHalfLength(),
                       style: TextStyle(
                         fontSize: 10,
                         color:

@@ -81,6 +81,7 @@ Future<String> refreshFiltersSession({
   required String year,
   required String jSessionId,
 }) async {
+  debugPrint('refreshFiltersSession');
   final tempjSession = jSessionId.split('=');
   final headers = {
     'Cookie': jSessionId,

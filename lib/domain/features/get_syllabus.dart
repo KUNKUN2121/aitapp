@@ -1,11 +1,10 @@
 import 'package:aitapp/domain/features/syllabus_parse.dart';
-import 'package:aitapp/domain/types/campus.dart';
 import 'package:aitapp/domain/types/class_syllabus.dart';
 import 'package:aitapp/domain/types/class_syllabus_detail.dart';
-import 'package:aitapp/domain/types/day_of_week.dart';
-import 'package:aitapp/domain/types/semester.dart';
-import 'package:aitapp/domain/types/syllabus_filter.dart';
+import 'package:aitapp/domain/types/select_syllabus_filters.dart';
+import 'package:aitapp/domain/types/syllabus_filters.dart';
 import 'package:aitapp/infrastructure/restaccess/access_syllabus.dart';
+import 'package:flutter/material.dart';
 
 class GetSyllabus {
   late String jSessionId;
@@ -25,23 +24,19 @@ class GetSyllabus {
   }
 
   Future<List<ClassSyllabus>> getSyllabusList({
-    DayOfWeek? dayOfWeek,
-    int? classPeriod,
+    required SelectSyllabusFilters selectSyllabusFilters,
     String? searchWord,
-    Campus? campus,
-    Semester? semester,
-    String? folder,
-    required String year,
   }) async {
+    debugPrint(selectSyllabusFilters.toString());
     final body = await getSyllabusListBody(
-      campus: campus?.num,
-      semester: semester?.num,
-      week: dayOfWeek?.num,
-      hour: classPeriod,
-      year: year,
+      campus: selectSyllabusFilters.campus?.num,
+      semester: selectSyllabusFilters.semester?.num,
+      week: selectSyllabusFilters.week?.num,
+      hour: selectSyllabusFilters.hour,
+      year: selectSyllabusFilters.year,
       jSessionId: jSessionId,
-      searchWord: searchWord,
-      folder: folder,
+      searchWord: selectSyllabusFilters.word,
+      folder: selectSyllabusFilters.folder,
     );
     return parse.searchList(body);
   }
