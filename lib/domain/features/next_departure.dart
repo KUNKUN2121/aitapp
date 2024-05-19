@@ -12,21 +12,22 @@ class NextDeparture {
   final int order;
   DateTime? searchNextDeparture() {
     final now = DateTime.now().toUtc().add(const Duration(hours: 9));
-    var counter = 0;
-    final todayDaiya = dayDaiya[DateFormat('yyyy-MM-dd').format(now)];
-    if (todayDaiya == null || todayDaiya == '-') {
+    final todayDaiyaAlphabet = dayDaiya[DateFormat('yyyy-MM-dd').format(now)];
+    if (todayDaiyaAlphabet == null || todayDaiyaAlphabet == '-') {
       return null;
     }
+    var counter = 0;
+    final todayDaiya = daiya[vehicle]?[destination]?[todayDaiyaAlphabet];
 
-    final hours = daiya[vehicle]![destination]![todayDaiya]!.keys;
+    final hours = todayDaiya!.keys;
     for (final hour in hours) {
       if (hour >= now.hour) {
-        final minutes = daiya[vehicle]![destination]![todayDaiya]![hour];
+        final minutes = todayDaiya[hour];
         if (minutes != null) {
           for (final minute in minutes) {
             if (minute > now.minute || hour > now.hour) {
               if (order == counter) {
-                return DateTime.utc(now.year, now.month, now.day, hour, minute);
+                return now.copyWith(hour: hour, minute: minute);
               } else {
                 counter++;
               }
