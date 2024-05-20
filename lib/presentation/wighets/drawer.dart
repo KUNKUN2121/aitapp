@@ -15,10 +15,10 @@ import 'package:aitapp/presentation/screens/open_asset_pdf.dart';
 import 'package:aitapp/presentation/screens/settings.dart';
 import 'package:aitapp/presentation/screens/syllabus_search.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 
 class MainDrawer extends ConsumerWidget {
   const MainDrawer({super.key});
@@ -27,44 +27,37 @@ class MainDrawer extends ConsumerWidget {
     required WidgetRef ref,
     required String isMoodle,
   }) async {
-    late final InAppWebViewController webviewcontroller;
-    late final HeadlessInAppWebView headlessWebView;
+    final controller = WebViewController();
     final identity = ref.read(idPasswordProvider);
-    headlessWebView = HeadlessInAppWebView(
-      initialFile: 'assets/html/index.html',
-      onWebViewCreated: (InAppWebViewController webViewController) {
-        webviewcontroller = webViewController;
-        // Javascriptからの処理を登録
-        webViewController.addJavaScriptHandler(
-          handlerName: 'return',
-          callback: (ciphertext) {
-            launchUrl(
-              mode: LaunchMode.externalApplication,
-              Uri(
-                scheme: 'https',
-                host: 'lcam.aitech.ac.jp',
-                path: 'portalv2/login/preLogin/preSpAppSso',
-                queryParameters: {
-                  'spAppSso': 'Y',
-                  'selectLocale': 'ja',
-                  'para': ciphertext,
-                },
-              ),
-            );
-            headlessWebView.dispose();
-          },
-        );
-      },
-      onLoadStop: (controller, url) async {
-        final date = DateFormat('yyyyMMddHHmm')
-            .format(DateTime.now().toUtc().add(const Duration(hours: 9)));
-        await webviewcontroller.evaluateJavascript(
-          source:
-              "getPara('$date','${identity[0]}','${identity[1]}','$isMoodle','${Env.blowfishKey}');",
-        );
-      },
+    // jsを有効化
+    await controller.setJavaScriptMode(JavaScriptMode.unrestricted);
+    // htmlを読み込み
+    await controller.loadFlutterAsset('assets/html/index.html');
+    final date = DateFormat('yyyyMMddHHmm')
+        .format(DateTime.now().toUtc().add(const Duration(hours: 9)));
+    await controller.setNavigationDelegate(
+      NavigationDelegate(
+        onPageFinished: (url) async {
+          // paraを取得
+          final ciphertext = await controller.runJavaScriptReturningResult(
+            "getPara('$date','${identity[0]}','${identity[1]}','$isMoodle','${Env.blowfishKey}');",
+          );
+          await launchUrl(
+            mode: LaunchMode.externalApplication,
+            Uri(
+              scheme: 'https',
+              host: 'lcam.aitech.ac.jp',
+              path: 'portalv2/login/preLogin/preSpAppSso',
+              queryParameters: {
+                'spAppSso': 'Y',
+                'selectLocale': 'ja',
+                'para': ciphertext,
+              },
+            ),
+          );
+        },
+      ),
     );
-    await headlessWebView.run();
   }
 
   @override

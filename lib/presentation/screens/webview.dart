@@ -1,11 +1,11 @@
+import 'package:aitapp/application/config/const.dart';
 import 'package:aitapp/application/state/id_password_provider.dart';
 import 'package:aitapp/infrastructure/restaccess/access_lcan.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 
-class WebViewScreen extends HookConsumerWidget {
+class WebViewScreen extends ConsumerWidget {
   const WebViewScreen({super.key, required this.url, required this.title});
 
   final String url;
@@ -13,12 +13,12 @@ class WebViewScreen extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final load = useState(false);
-    final cookieManager = CookieManager.instance();
-    final webUrl = WebUri(
-      url,
-    );
+    final controller = WebViewController();
     Future<void> getLoginCookie() async {
+      // cookieManagerのインスタンスを取得する
+      final cookieManager = WebViewCookieManager();
+
+      // ログイン処理後のcookieを取得する
       final cookies = await getCookie();
       final identity = ref.read(idPasswordProvider);
       await loginLcam(
@@ -27,42 +27,44 @@ class WebViewScreen extends HookConsumerWidget {
         cookies: cookies,
       );
 
-      await cookieManager.deleteAllCookies();
+      // 以前登録されたcookieを削除する
+      await cookieManager.clearCookies();
 
+      // JSESSIONIDを注入する
       await cookieManager.setCookie(
-        url: webUrl,
-        name: 'JSESSIONID',
-        value: cookies.jSessionId.split('=')[1],
-        isSecure: true,
+        WebViewCookie(
+          domain: origin,
+          name: 'JSESSIONID',
+          value: cookies.jSessionId.split(RegExp(r'[=;]'))[1],
+          path: url,
+        ),
       );
+      // LiveApps-Cookieを注入する
       await cookieManager.setCookie(
-        url: webUrl,
-        name: 'LiveApps-Cookie',
-        value: cookies.liveAppsCookie.split('=')[1],
-        isSecure: true,
+        WebViewCookie(
+          domain: origin,
+          name: 'LiveApps-Cookie',
+          value: cookies.liveAppsCookie.split(RegExp(r'[=;]'))[1],
+          path: url,
+        ),
       );
-      load.value = true;
+      // jsを有効化
+      await controller.setJavaScriptMode(JavaScriptMode.unrestricted);
+      // fetch
+      await controller.loadRequest(
+        Uri.parse(origin + url),
+      );
     }
 
-    useEffect(
-      () {
-        getLoginCookie();
-        return null;
-      },
-      [],
-    );
+    getLoginCookie();
 
     return Scaffold(
       appBar: AppBar(
         title: Text(title),
       ),
-      body: load.value
-          ? InAppWebView(
-              initialUrlRequest: URLRequest(
-                url: webUrl,
-              ),
-            )
-          : const SizedBox(),
+      body: WebViewWidget(
+        controller: controller,
+      ),
     );
   }
 }

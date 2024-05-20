@@ -750,48 +750,45 @@ const List<WebAccessLink> webAccessLinks = [
   WebAccessLink(
     title: '履修登録',
     icon: Icons.event,
-    url: '$origin/portalv2/smartphone/smartPhoneHome/nextPage/entryRegist/',
+    url: '/portalv2/smartphone/smartPhoneHome/nextPage/entryRegist/',
   ),
   WebAccessLink(
     title: '履修取消',
     icon: Icons.event,
-    url: '$origin/portalv2/smartphone/smartPhoneHome/nextPage/kmgCou04/',
+    url: '/portalv2/smartphone/smartPhoneHome/nextPage/kmgCou04/',
   ),
   WebAccessLink(
     title: '抽選履修登録',
     icon: Icons.event,
-    url:
-        '$origin/portalv2/smartphone/smartPhoneHome/nextPage/lotteryFirstArrival/',
+    url: '/portalv2/smartphone/smartPhoneHome/nextPage/lotteryFirstArrival/',
   ),
   WebAccessLink(
     title: '抽選履修登録結果',
     icon: Icons.event,
-    url:
-        '$origin/portalv2/smartphone/smartPhoneHome/nextPage/lotteryRegistResult/',
+    url: '/portalv2/smartphone/smartPhoneHome/nextPage/lotteryRegistResult/',
   ),
   WebAccessLink(
     title: '授業アンケート',
     icon: Icons.assignment,
-    url:
-        '$origin/portalv2/smartphone/smartPhoneContactNotice/nextPage/classEnquete/',
+    url: '/portalv2/smartphone/smartPhoneContactNotice/nextPage/classEnquete/',
   ),
   WebAccessLink(
     title: '授業評価アンケート',
     icon: Icons.assignment,
     url:
-        '$origin/portalv2/smartphone/smartPhoneContactNotice/nextPage/courseEvaluation/',
+        '/portalv2/smartphone/smartPhoneContactNotice/nextPage/courseEvaluation/',
   ),
   WebAccessLink(
     title: '学内アンケート',
     icon: Icons.assignment,
     url:
-        '$origin/portalv2/smartphone/smartPhoneContactNotice/nextPage/enqueteContact/',
+        '/portalv2/smartphone/smartPhoneContactNotice/nextPage/enqueteContact/',
   ),
   WebAccessLink(
     title: '成績照会',
     icon: Icons.bar_chart,
     url:
-        '$origin/portalv2/smartphone/smartPhonePerformanceInfor/nextPage/performance/',
+        '/portalv2/smartphone/smartPhonePerformanceInfor/nextPage/performance/',
   ),
 ];
 
