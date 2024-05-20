@@ -126,6 +126,7 @@ class NoticeDetailScreen extends HookConsumerWidget {
                           'font-weight': '500',
                         }
                       : null,
+                  onTapUrl: (url) => launchUrl(Uri.parse(url)),
                 ),
                 const SizedBox(
                   height: 20,
