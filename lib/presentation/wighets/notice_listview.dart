@@ -1,14 +1,12 @@
 import 'dart:io';
 
 import 'package:aitapp/application/state/class_notices_provider.dart';
-import 'package:aitapp/application/state/id_password_provider.dart';
-import 'package:aitapp/application/state/last_login_time_provider.dart';
-import 'package:aitapp/application/state/last_notice_login_time_provider.dart';
-import 'package:aitapp/application/state/notice_token_provider.dart';
+import 'package:aitapp/application/state/get_lcam_data/get_lcam_data.dart';
+import 'package:aitapp/application/state/last_login/last_login.dart';
 import 'package:aitapp/application/state/tab_button_provider.dart';
 import 'package:aitapp/application/state/univ_notices_provider.dart';
-import 'package:aitapp/domain/features/get_notice.dart';
 import 'package:aitapp/domain/types/class_notice.dart';
+import 'package:aitapp/domain/types/last_login.dart';
 import 'package:aitapp/domain/types/notice.dart';
 import 'package:aitapp/domain/types/univ_notice.dart';
 import 'package:aitapp/presentation/wighets/notice_item.dart';
@@ -22,19 +20,22 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 class NoticeList extends HookConsumerWidget {
   const NoticeList({
     super.key,
-    required this.getNotice,
     required this.loading,
     required this.tabs,
     required this.isCommon,
   });
 
-  final GetNotice getNotice;
   final void Function({required bool state}) loading;
   final ValueNotifier<int> tabs;
   final bool isCommon;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final loginType = useMemoized(
+      () => isCommon ? LastLogin.univNotice : LastLogin.classNotice,
+    );
+    final getLcamData =
+        useMemoized(() => ref.read(getLcamDataNotifierProvider));
     final content = useState<Widget>(
       const Center(
         child: SizedBox(
@@ -119,18 +120,10 @@ class NoticeList extends HookConsumerWidget {
       isLoading.value = true;
       try {
         if (withLogin) {
-          final identity = ref.read(idPasswordProvider);
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            ref.read(lastLoginTimeProvider.notifier).updateLastLoginTime();
-          });
-          await getNotice.create(identity[0], identity[1]);
-
-          (isCommon
-                  ? ref.read(lastUnivLoginTimeProvider.notifier)
-                  : ref.read(lastClassLoginTimeProvider.notifier))
-              .state = ref.read(lastLoginTimeProvider);
+          await ref.read(getLcamDataNotifierProvider.notifier).create();
+          ref.read(lastLoginNotifierProvider.notifier).changeState(loginType);
         }
-        result = await getNotice.getNoticelist(
+        result = await getLcamData.getNoticelist(
           page: page.value,
           isCommon: isCommon,
           withLogin: withLogin,
@@ -164,8 +157,8 @@ class NoticeList extends HookConsumerWidget {
     }
 
     ref
-      ..listen(lastLoginTimeProvider, (previous, next) {
-        if (!isLoading.value && tabs.value == (isCommon ? 0 : 1)) {
+      ..listen(lastLoginNotifierProvider, (previous, next) {
+        if (next != loginType) {
           operation.value = CancelableOperation.fromFuture(
             load(withLogin: true),
           );
@@ -181,24 +174,15 @@ class NoticeList extends HookConsumerWidget {
 
     useEffect(
       () {
-        final lastNoticeLoginTimeProvider = isCommon
-            ? ref.read(lastUnivLoginTimeProvider)
-            : ref.read(lastClassLoginTimeProvider);
-        final lastLogin = ref.read(lastLoginTimeProvider);
-        if (lastNoticeLoginTimeProvider == null ||
-            lastNoticeLoginTimeProvider != lastLogin) {
+        final lastNoticeLoginProvider = ref.read(lastLoginNotifierProvider);
+        if (lastNoticeLoginProvider == LastLogin.others ||
+            lastNoticeLoginProvider != loginType) {
           operation.value = CancelableOperation.fromFuture(
             load(withLogin: true),
           );
         }
         textEditingController.addListener(() {
           filter.value = textEditingController.text;
-        });
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          (isCommon
-                  ? ref.read(univNoticeTokenProvider.notifier)
-                  : ref.read(classNoticeTokenProvider.notifier))
-              .state = getNotice;
         });
         return () {
           if (operation.value != null) {
@@ -276,7 +260,7 @@ class NoticeList extends HookConsumerWidget {
                       return NoticeItem(
                         notice: filteredResult[i],
                         index: result.indexOf(filteredResult[i]),
-                        getNotice: getNotice,
+                        getLcamData: getLcamData,
                         tap: !isLoading.value,
                         isCommon: isCommon,
                         page: page.value,

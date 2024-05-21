@@ -1,7 +1,6 @@
 import 'dart:io';
 
-import 'package:aitapp/application/state/id_password_provider.dart';
-import 'package:aitapp/domain/features/get_notice.dart';
+import 'package:aitapp/application/state/get_lcam_data/get_lcam_data.dart';
 import 'package:aitapp/domain/types/notice_detail.dart';
 import 'package:aitapp/presentation/screens/open_file_pdf.dart';
 import 'package:aitapp/presentation/wighets/attachment.dart';
@@ -19,20 +18,20 @@ class NoticeDetailScreen extends HookConsumerWidget {
   const NoticeDetailScreen({
     super.key,
     required this.index,
-    required this.getNotice,
     required this.isCommon,
     required this.title,
     required this.page,
   });
 
   final int index;
-  final GetNotice getNotice;
   final bool isCommon;
   final String title;
   final int page;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final getLcamData =
+        useMemoized(() => ref.read(getLcamDataNotifierProvider));
     final error = useState<String?>(null);
     final notice = useState<NoticeDetail?>(null);
     final operation = useRef<CancelableOperation<void>?>(null);
@@ -49,7 +48,7 @@ class NoticeDetailScreen extends HookConsumerWidget {
 
     Future<void> loadData() async {
       try {
-        notice.value = await getNotice.getNoticeDetail(
+        notice.value = await getLcamData.getNoticeDetail(
           pageNumber: index,
           isCommon: isCommon,
         );
@@ -57,9 +56,8 @@ class NoticeDetailScreen extends HookConsumerWidget {
         error.value = 'インターネットに接続できません';
       } on Exception {
         try {
-          final identity = ref.read(idPasswordProvider);
-          await getNotice.create(identity[0], identity[1]);
-          final noticelist = await getNotice.getNoticelist(
+          await ref.read(getLcamDataNotifierProvider.notifier).create();
+          final noticelist = await getLcamData.getNoticelist(
             page: page,
             isCommon: isCommon,
             withLogin: true,
@@ -67,7 +65,7 @@ class NoticeDetailScreen extends HookConsumerWidget {
           final reSearchIndex = noticelist.indexWhere(
             (element) => element.title == title,
           );
-          notice.value = await getNotice.getNoticeDetail(
+          notice.value = await getLcamData.getNoticeDetail(
             pageNumber: reSearchIndex,
             isCommon: isCommon,
           );
@@ -152,8 +150,10 @@ class NoticeDetailScreen extends HookConsumerWidget {
                           : () async {
                               isDonwloading.value = true;
                               try {
-                                final file =
-                                    await getNotice.shareFile(entries, context);
+                                final file = await getLcamData.shareFile(
+                                  entries,
+                                  context,
+                                );
                                 if (file.path.contains('.pdf')) {
                                   if (context.mounted) {
                                     await Navigator.of(context).push<void>(

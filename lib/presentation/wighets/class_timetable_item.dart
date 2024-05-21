@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:aitapp/application/config/const.dart';
 import 'package:aitapp/application/state/class_timetable_provider.dart';
-import 'package:aitapp/application/state/id_password_provider.dart';
 import 'package:aitapp/application/state/setting_int_provider.dart';
 import 'package:aitapp/domain/types/class.dart';
 import 'package:aitapp/domain/types/day_of_week.dart';
@@ -183,10 +182,7 @@ class TimeTable extends HookConsumerWidget {
       () {
         if (asyncValue.isLoading || asyncValue.hasError) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            final list = ref.read(idPasswordProvider);
-            ref
-                .read(classTimeTableProvider.notifier)
-                .fetchData(list[0], list[1], ref);
+            ref.read(classTimeTableProvider.notifier).fetchData(ref);
           });
         }
         return null;

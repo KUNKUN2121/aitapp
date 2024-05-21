@@ -1,27 +1,27 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'syllabus_filters.dart';
+part of 'get_lcam_data.dart';
 
 // **************************************************************************
 // RiverpodGenerator
 // **************************************************************************
 
-String _$syllabusFiltersNotifierHash() =>
-    r'ffb7ac05f1c1b616cc4f07e2a2ad872c8df98901';
+String _$getLcamDataNotifierHash() =>
+    r'87646d07e3ace68ca97f6f96c920ac43aa66681a';
 
-/// See also [SyllabusFiltersNotifier].
-@ProviderFor(SyllabusFiltersNotifier)
-final syllabusFiltersNotifierProvider =
-    NotifierProvider<SyllabusFiltersNotifier, SyllabusFilters?>.internal(
-  SyllabusFiltersNotifier.new,
-  name: r'syllabusFiltersNotifierProvider',
+/// See also [GetLcamDataNotifier].
+@ProviderFor(GetLcamDataNotifier)
+final getLcamDataNotifierProvider =
+    NotifierProvider<GetLcamDataNotifier, GetLcamData>.internal(
+  GetLcamDataNotifier.new,
+  name: r'getLcamDataNotifierProvider',
   debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
       ? null
-      : _$syllabusFiltersNotifierHash,
+      : _$getLcamDataNotifierHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );
 
-typedef _$SyllabusFiltersNotifier = Notifier<SyllabusFilters?>;
+typedef _$GetLcamDataNotifier = Notifier<GetLcamData>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member

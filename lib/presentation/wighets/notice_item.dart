@@ -1,4 +1,4 @@
-import 'package:aitapp/domain/features/get_notice.dart';
+import 'package:aitapp/domain/features/get_lcam_data.dart';
 import 'package:aitapp/domain/types/class_notice.dart';
 import 'package:aitapp/domain/types/notice.dart';
 import 'package:aitapp/domain/types/univ_notice.dart';
@@ -10,7 +10,7 @@ class NoticeItem extends StatelessWidget {
     super.key,
     required this.notice,
     required this.index,
-    required this.getNotice,
+    required this.getLcamData,
     required this.tap,
     required this.isCommon,
     required this.page,
@@ -18,7 +18,7 @@ class NoticeItem extends StatelessWidget {
 
   final Notice notice;
   final int index;
-  final GetNotice getNotice;
+  final GetLcamData getLcamData;
   final bool tap;
   final bool isCommon;
   final int page;
@@ -29,13 +29,12 @@ class NoticeItem extends StatelessWidget {
       children: [
         InkWell(
           onTap: () {
-            if (tap && getNotice.token != null) {
+            if (tap && getLcamData.token != null) {
               Navigator.of(context).push(
                 MaterialPageRoute<void>(
                   builder: (ctx) {
                     return NoticeDetailScreen(
                       index: index,
-                      getNotice: getNotice,
                       isCommon: isCommon,
                       title: notice.title,
                       page: page,

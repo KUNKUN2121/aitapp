@@ -7,7 +7,7 @@ part of 'select_syllabus_filter.dart';
 // **************************************************************************
 
 String _$selectSyllabusFilterNotifierHash() =>
-    r'4c9f04d5e7b1a35facda6802a63dc21b3bda6a7e';
+    r'9e09e0bed2633d91502fb455b3fce905e18276fc';
 
 /// See also [SelectSyllabusFilterNotifier].
 @ProviderFor(SelectSyllabusFilterNotifier)

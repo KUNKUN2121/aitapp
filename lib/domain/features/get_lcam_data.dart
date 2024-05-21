@@ -1,14 +1,16 @@
 import 'dart:io';
 
 import 'package:aitapp/domain/features/lcam_parce.dart';
+import 'package:aitapp/domain/types/class.dart';
 import 'package:aitapp/domain/types/cookies.dart';
+import 'package:aitapp/domain/types/day_of_week.dart';
 import 'package:aitapp/domain/types/notice.dart';
 import 'package:aitapp/domain/types/notice_detail.dart';
 import 'package:aitapp/infrastructure/restaccess/access_lcan.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 
-class GetNotice {
+class GetLcamData {
   late Cookies cookies;
   late String? token;
   final parse = LcamParse();
@@ -94,5 +96,10 @@ class GetNotice {
     } else {
       throw Exception('[shareFile]データの取得に失敗しました');
     }
+  }
+
+  Future<Map<DayOfWeek, Map<int, Class>>> getClassTimeTable() async {
+    final body = await getClassTimeTableBody(cookies: cookies);
+    return parse.classTimeTable(body);
   }
 }

@@ -1,21 +1,23 @@
-import 'package:aitapp/application/state/last_login_time_provider.dart';
-import 'package:aitapp/domain/features/get_class_timetable.dart';
+import 'package:aitapp/application/state/get_lcam_data/get_lcam_data.dart';
+import 'package:aitapp/application/state/last_login/last_login.dart';
 import 'package:aitapp/domain/types/class.dart';
 import 'package:aitapp/domain/types/day_of_week.dart';
-import 'package:flutter/material.dart';
+import 'package:aitapp/domain/types/last_login.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class ClassTimeTableNotifier
     extends StateNotifier<AsyncValue<Map<DayOfWeek, Map<int, Class>>>> {
   ClassTimeTableNotifier() : super(const AsyncValue.loading());
 
-  Future<void> fetchData(String id, String password, WidgetRef ref) async {
+  Future<void> fetchData(WidgetRef ref) async {
     state = const AsyncValue.loading();
     try {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        ref.read(lastLoginTimeProvider.notifier).updateLastLoginTime();
-      });
-      final result = await GetClassTimeTable().getClassTimeTable(id, password);
+      ref
+          .read(lastLoginNotifierProvider.notifier)
+          .changeState(LastLogin.others);
+      final getLcamData = ref.read(getLcamDataNotifierProvider);
+      await ref.read(getLcamDataNotifierProvider.notifier).create();
+      final result = await getLcamData.getClassTimeTable();
       state = AsyncValue.data(result);
     } on Exception catch (err, stack) {
       state = AsyncValue.error(err, stack);

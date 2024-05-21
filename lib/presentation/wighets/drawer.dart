@@ -1,10 +1,11 @@
 // ignore_for_file: lines_longer_than_80_chars
 
 import 'package:aitapp/application/state/id_password_provider.dart';
-import 'package:aitapp/application/state/last_login_time_provider.dart';
+import 'package:aitapp/application/state/last_login/last_login.dart';
 import 'package:aitapp/application/state/link_tap_provider.dart';
 import 'package:aitapp/application/state/select_syllabus_filter/select_syllabus_filter.dart';
 import 'package:aitapp/application/state/shared_preference_provider.dart';
+import 'package:aitapp/domain/types/last_login.dart';
 import 'package:aitapp/env.dart';
 import 'package:aitapp/presentation/screens/campus_map.dart';
 import 'package:aitapp/presentation/screens/contacts.dart';
@@ -150,8 +151,8 @@ class MainDrawer extends ConsumerWidget {
                   )
                       .then((value) {
                     ref
-                        .read(lastLoginTimeProvider.notifier)
-                        .updateLastLoginTime();
+                        .read(lastLoginNotifierProvider.notifier)
+                        .changeState(LastLogin.others);
                   });
                 },
               ),
