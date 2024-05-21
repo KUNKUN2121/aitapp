@@ -4,6 +4,7 @@ import 'package:aitapp/application/state/id_password_provider.dart';
 import 'package:aitapp/domain/features/get_notice.dart';
 import 'package:aitapp/domain/types/notice_detail.dart';
 import 'package:aitapp/presentation/screens/open_file_pdf.dart';
+import 'package:aitapp/presentation/screens/open_image.dart';
 import 'package:aitapp/presentation/wighets/attachment.dart';
 import 'package:async/async.dart';
 import 'package:flutter/material.dart';
@@ -166,6 +167,19 @@ class NoticeDetailScreen extends HookConsumerWidget {
                                     );
                                   }
                                   await file.delete();
+                                } else if (file.path
+                                    .contains(RegExp(r'\.(jpg|png|jpeg)$'))) {
+                                  if (context.mounted) {
+                                    await Navigator.of(context).push<void>(
+                                      MaterialPageRoute(
+                                        builder: (BuildContext ctx) =>
+                                            OpenFileImage(
+                                          title: basename(file.path),
+                                          file: file,
+                                        ),
+                                      ),
+                                    );
+                                  }
                                 } else {
                                   final xfile = [XFile(file.path)];
                                   await Share.shareXFiles(xfile);
