@@ -1,6 +1,6 @@
 // ignore_for_file: lines_longer_than_80_chars
 
-import 'package:aitapp/application/state/id_password_provider.dart';
+import 'package:aitapp/application/state/identity_provider.dart';
 import 'package:aitapp/application/state/last_login/last_login.dart';
 import 'package:aitapp/application/state/link_tap_provider.dart';
 import 'package:aitapp/application/state/select_syllabus_filter/select_syllabus_filter.dart';
@@ -29,7 +29,7 @@ class MainDrawer extends ConsumerWidget {
     required String isMoodle,
   }) async {
     final controller = WebViewController();
-    final identity = ref.read(idPasswordProvider);
+    final identity = ref.read(identityProvider);
     // jsを有効化
     await controller.setJavaScriptMode(JavaScriptMode.unrestricted);
     // htmlを読み込み
@@ -41,7 +41,7 @@ class MainDrawer extends ConsumerWidget {
         onPageFinished: (url) async {
           // paraを取得
           final ciphertext = await controller.runJavaScriptReturningResult(
-            "getPara('$date','${identity[0]}','${identity[1]}','$isMoodle','${Env.blowfishKey}');",
+            "getPara('$date','${identity!.id}','${identity.password}','$isMoodle','${Env.blowfishKey}');",
           );
           await launchUrl(
             mode: LaunchMode.externalApplication,
@@ -198,9 +198,7 @@ class MainDrawer extends ConsumerWidget {
                   await pref.remove('id');
                   await pref.remove('password').then(
                     (value) {
-                      ref
-                          .read(idPasswordProvider.notifier)
-                          .setIdPassword('', '');
+                      ref.read(identityProvider.notifier).clear();
                       Navigator.of(context).pushReplacement(
                         MaterialPageRoute<void>(
                           builder: (ctx) => const LoginScreen(),

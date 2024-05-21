@@ -1,5 +1,5 @@
 import 'package:aitapp/application/config/const.dart';
-import 'package:aitapp/application/state/id_password_provider.dart';
+import 'package:aitapp/application/state/identity_provider.dart';
 import 'package:aitapp/infrastructure/restaccess/access_lcan.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -20,10 +20,10 @@ class WebViewScreen extends ConsumerWidget {
 
       // ログイン処理後のcookieを取得する
       final cookies = await getCookie();
-      final identity = ref.read(idPasswordProvider);
+      final identity = ref.read(identityProvider);
       await loginLcam(
-        id: identity[0],
-        password: identity[1],
+        id: identity!.id,
+        password: identity.password,
         cookies: cookies,
       );
 

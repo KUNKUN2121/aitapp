@@ -1,4 +1,4 @@
-import 'package:aitapp/application/state/id_password_provider.dart';
+import 'package:aitapp/application/state/identity_provider.dart';
 import 'package:aitapp/application/state/last_login/last_login.dart';
 import 'package:aitapp/application/state/shared_preference_provider.dart';
 import 'package:aitapp/domain/types/last_login.dart';
@@ -49,7 +49,7 @@ class LoginScreen extends HookConsumerWidget {
       )
           .then(
         (value) {
-          ref.read(idPasswordProvider.notifier).setIdPassword(
+          ref.read(identityProvider.notifier).setIdPassword(
                 id.value,
                 password.value,
               );
