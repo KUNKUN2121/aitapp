@@ -16,7 +16,9 @@ class WebViewScreen extends ConsumerWidget {
     final controller = WebViewController();
     Future<void> getLoginCookie() async {
       // cookieManagerのインスタンスを取得する
-      final cookieManager = WebViewCookieManager();
+      final cookieManager = WebViewCookieManager.fromPlatformCreationParams(
+        const PlatformWebViewCookieManagerCreationParams(),
+      ).platform;
 
       // ログイン処理後のcookieを取得する
       final cookies = await getCookie();
@@ -62,8 +64,17 @@ class WebViewScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text(title),
       ),
-      body: WebViewWidget(
-        controller: controller,
+      body: RefreshIndicator(
+        onRefresh: controller.reload,
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: SizedBox(
+            height: MediaQuery.of(context).size.height,
+            child: WebViewWidget(
+              controller: controller,
+            ),
+          ),
+        ),
       ),
     );
   }
