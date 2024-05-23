@@ -1,35 +1,32 @@
-import 'package:aitapp/domain/features/get_lcam_data.dart';
+import 'package:aitapp/application/state/notice_load/notice_load.dart';
 import 'package:aitapp/domain/types/class_notice.dart';
 import 'package:aitapp/domain/types/notice.dart';
 import 'package:aitapp/domain/types/univ_notice.dart';
 import 'package:aitapp/presentation/screens/notice_detail.dart';
 import 'package:flutter/material.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-class NoticeItem extends StatelessWidget {
+class NoticeItem extends ConsumerWidget {
   const NoticeItem({
     super.key,
     required this.notice,
     required this.index,
-    required this.getLcamData,
-    required this.tap,
     required this.isCommon,
     required this.page,
   });
 
   final Notice notice;
   final int index;
-  final GetLcamData getLcamData;
-  final bool tap;
   final bool isCommon;
   final int page;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Column(
       children: [
         InkWell(
           onTap: () {
-            if (tap && getLcamData.token != null) {
+            if (!ref.read(noticeLoadNotifierProvider)) {
               Navigator.of(context).push(
                 MaterialPageRoute<void>(
                   builder: (ctx) {

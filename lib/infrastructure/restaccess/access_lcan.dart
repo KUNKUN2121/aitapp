@@ -76,7 +76,7 @@ Future<bool> canLoginLcam({
   return false;
 }
 
-Future<void> loginLcam({
+Future<String> loginLcam({
   required String id,
   required String password,
   required Cookies cookies,
@@ -107,7 +107,8 @@ Future<void> loginLcam({
     '$origin/portalv2/login/login/smartPhoneLogin',
   );
 
-  await httpAccess(url, headers: headers, body: data);
+  final res = await httpAccess(url, headers: headers, body: data);
+  return res.body;
 }
 
 Future<String> getStrutsToken({

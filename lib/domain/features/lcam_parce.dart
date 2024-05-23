@@ -8,6 +8,13 @@ import 'package:universal_html/html.dart';
 import 'package:universal_html/parsing.dart';
 
 class LcamParse {
+  bool isLogin(String body) {
+    final isLogin = parseHtmlDocument(body)
+        .querySelectorAll('#_errorInformation > ul > li:nth-child(1)')
+        .isEmpty;
+    return isLogin;
+  }
+
   List<ClassNotice> classNotice(String body) {
     final classNoticeList = <ClassNotice>[];
     final rows = parseHtmlDocument(body).querySelectorAll(

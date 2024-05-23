@@ -1,4 +1,5 @@
-import 'package:aitapp/presentation/wighets/notice_listview.dart';
+import 'package:aitapp/application/state/notice_load/notice_load.dart';
+import 'package:aitapp/presentation/wighets/notice_tab_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -23,16 +24,8 @@ class NoticeScreen extends HookConsumerWidget with RouteAware {
       initialLength: pageLength,
       initialIndex: currentPage.value,
     );
-    final isLoading = useState(false);
     final isDispose = useRef(false);
-
-    void loading({required bool state}) {
-      if (state != isLoading.value && !isDispose.value) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          isLoading.value = state;
-        });
-      }
-    }
+    final isLoading = ref.watch(noticeLoadNotifierProvider);
 
     useEffect(
       () {
@@ -63,7 +56,7 @@ class NoticeScreen extends HookConsumerWidget with RouteAware {
     return Column(
       children: [
         IgnorePointer(
-          ignoring: isLoading.value,
+          ignoring: isLoading,
           child: TabBar(
             tabs: const [
               Tab(text: '学内'),
@@ -71,7 +64,7 @@ class NoticeScreen extends HookConsumerWidget with RouteAware {
             ],
             controller: tabController,
             onTap: (index) {
-              if (!isLoading.value) {
+              if (!isLoading) {
                 currentPage.value = index;
               }
             },
@@ -82,12 +75,12 @@ class NoticeScreen extends HookConsumerWidget with RouteAware {
             behavior: HitTestBehavior.translucent,
             onHorizontalDragEnd: (details) {
               if (details.primaryVelocity! > 0 &&
-                  !isLoading.value &&
+                  !isLoading &&
                   0 < currentPage.value) {
                 //左ページへ
                 currentPage.value -= 1;
               } else if (details.primaryVelocity! < 0 &&
-                  !isLoading.value &&
+                  !isLoading &&
                   pageLength - 1 > currentPage.value) {
                 //右ページへ
                 currentPage.value += 1;
@@ -96,15 +89,11 @@ class NoticeScreen extends HookConsumerWidget with RouteAware {
             child: TabBarView(
               physics: const NeverScrollableScrollPhysics(),
               controller: tabController,
-              children: [
-                NoticeList(
-                  loading: loading,
-                  tabs: currentPage,
+              children: const [
+                NoticeTabPage(
                   isCommon: true,
                 ),
-                NoticeList(
-                  loading: loading,
-                  tabs: currentPage,
+                NoticeTabPage(
                   isCommon: false,
                 ),
               ],

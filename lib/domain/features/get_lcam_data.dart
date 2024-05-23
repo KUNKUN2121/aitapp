@@ -15,10 +15,11 @@ class GetLcamData {
   late String? token;
   final parse = LcamParse();
 
-  Future<void> create(String id, String password) async {
+  Future<bool> create(String id, String password) async {
     token = null;
     cookies = await getCookie();
-    await loginLcam(id: id, password: password, cookies: cookies);
+    return parse
+        .isLogin(await loginLcam(id: id, password: password, cookies: cookies));
   }
 
   Future<List<Notice>> getNoticelist({

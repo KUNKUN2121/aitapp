@@ -1,27 +1,27 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'get_lcam_data.dart';
+part of 'univ_notice.dart';
 
 // **************************************************************************
 // RiverpodGenerator
 // **************************************************************************
 
-String _$getLcamDataNotifierHash() =>
-    r'8be4880dc29b59402254255fc5cdc11cdc1b2c6b';
+String _$univNoticesNotifierHash() =>
+    r'191856aff411daa5bba3179e3a78cb2421bb9a97';
 
-/// See also [GetLcamDataNotifier].
-@ProviderFor(GetLcamDataNotifier)
-final getLcamDataNotifierProvider =
-    NotifierProvider<GetLcamDataNotifier, GetLcamData>.internal(
-  GetLcamDataNotifier.new,
-  name: r'getLcamDataNotifierProvider',
+/// See also [UnivNoticesNotifier].
+@ProviderFor(UnivNoticesNotifier)
+final univNoticesNotifierProvider =
+    NotifierProvider<UnivNoticesNotifier, NoticeCatche?>.internal(
+  UnivNoticesNotifier.new,
+  name: r'univNoticesNotifierProvider',
   debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
       ? null
-      : _$getLcamDataNotifierHash,
+      : _$univNoticesNotifierHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );
 
-typedef _$GetLcamDataNotifier = Notifier<GetLcamData>;
+typedef _$UnivNoticesNotifier = Notifier<NoticeCatche?>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member

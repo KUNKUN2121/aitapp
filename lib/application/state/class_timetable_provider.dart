@@ -12,11 +12,11 @@ class ClassTimeTableNotifier
   Future<void> fetchData(WidgetRef ref) async {
     state = const AsyncValue.loading();
     try {
+      final getLcamData = ref.read(getLcamDataNotifierProvider);
+      await ref.read(getLcamDataNotifierProvider.notifier).create();
       ref
           .read(lastLoginNotifierProvider.notifier)
           .changeState(LastLogin.others);
-      final getLcamData = ref.read(getLcamDataNotifierProvider);
-      await ref.read(getLcamDataNotifierProvider.notifier).create();
       final result = await getLcamData.getClassTimeTable();
       state = AsyncValue.data(result);
     } on Exception catch (err, stack) {

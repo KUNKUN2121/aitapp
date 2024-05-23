@@ -36,7 +36,7 @@ class WebViewScreen extends ConsumerWidget {
           domain: origin,
           name: 'JSESSIONID',
           value: cookies.jSessionId.split(RegExp(r'[=;]'))[1],
-          path: url,
+          path: '/portalv2',
         ),
       );
       // LiveApps-Cookieを注入する
@@ -45,7 +45,7 @@ class WebViewScreen extends ConsumerWidget {
           domain: origin,
           name: 'LiveApps-Cookie',
           value: cookies.liveAppsCookie.split(RegExp(r'[=;]'))[1],
-          path: url,
+          path: '/portalv2',
         ),
       );
       // jsを有効化
