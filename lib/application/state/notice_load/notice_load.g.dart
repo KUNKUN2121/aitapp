@@ -7,7 +7,7 @@ part of 'notice_load.dart';
 // **************************************************************************
 
 String _$noticeLoadNotifierHash() =>
-    r'b40e1d6533b387d260ae67ca5f24d11715c6309a';
+    r'2d1dc0add48cc15fccd9b5eb86ea2fb40fcdd557';
 
 /// See also [NoticeLoadNotifier].
 @ProviderFor(NoticeLoadNotifier)

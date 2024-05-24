@@ -4,6 +4,7 @@ abstract class Notice {
     required this.sender,
     required this.title,
     required this.isInportant,
+    required this.index,
   });
   // 発信者
   final String sender;
@@ -11,4 +12,6 @@ abstract class Notice {
   final String title;
   // 重要かどうか
   final bool isInportant;
+  // インデックス
+  final int index;
 }

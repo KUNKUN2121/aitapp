@@ -24,9 +24,9 @@ class LcamParse {
       throw Exception('[parseClassNotice]データの取得に失敗しました');
     }
 
-    for (final row in rows) {
+    for (var i = 0; i < rows.length; i++) {
       //1通知ごと
-      final texts = _extractText(row);
+      final texts = _extractText(rows[i]);
 
       var c = 0;
       var sender = '';
@@ -55,6 +55,7 @@ class LcamParse {
           subject: texts[2],
           makeupClassAt: makeupClassAt,
           isInportant: isImportant,
+          index: i,
         ),
       );
     }
@@ -237,8 +238,8 @@ class LcamParse {
       throw Exception('[parseUnivNotice]データの取得に失敗しました');
     }
 
-    for (final row in rows) {
-      final texts = _extractText(row);
+    for (var i = 0; i < rows.length; i++) {
+      final texts = _extractText(rows[i]);
       var c = 0;
       var sender = '';
       var title = '';
@@ -265,6 +266,7 @@ class LcamParse {
           title: title,
           sendAt: sendAt,
           isInportant: isImportant,
+          index: i,
         ),
       );
     }

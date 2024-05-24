@@ -1,20 +1,24 @@
 import 'package:aitapp/application/state/notice_load/notice_load.dart';
 import 'package:aitapp/application/state/tab_button_provider.dart';
+import 'package:aitapp/domain/types/notice.dart';
 import 'package:aitapp/presentation/wighets/notice_item.dart';
 import 'package:aitapp/presentation/wighets/search_bar.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-class NoticeListWidget extends ConsumerWidget {
+class NoticeListWidget extends HookConsumerWidget {
   const NoticeListWidget({
     super.key,
     required this.notices,
+    required this.page,
     required this.onLast,
     required this.onRefresh,
     required this.isCommon,
     required this.textController,
   });
-  final List<NoticeItem> notices;
+  final int page;
+  final List<Notice> notices;
   final void Function()? onLast;
   final Future<void> Function() onRefresh;
   final bool isCommon;
@@ -22,13 +26,17 @@ class NoticeListWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final scrollKey = ValueKey(
-      isCommon ? 'univScrollOffset' : 'classScrollOffset',
+    final scrollKey = useMemoized(
+      () => ValueKey(
+        isCommon ? 'univScrollOffset' : 'classScrollOffset',
+      ),
     );
-    final controller = ScrollController(
-      initialScrollOffset:
-          (PageStorage.of(context).readState(context, identifier: scrollKey) ??
-              0.0) as double,
+    final controller = useMemoized(
+      () => ScrollController(
+        initialScrollOffset: (PageStorage.of(context)
+                .readState(context, identifier: scrollKey) ??
+            0.0) as double,
+      ),
     );
     ref.listen(tabButtonProvider, (previous, next) {
       controller.animateTo(
@@ -37,6 +45,7 @@ class NoticeListWidget extends ConsumerWidget {
         duration: const Duration(milliseconds: 500),
       );
     });
+
     return Column(
       children: [
         LinearProgressIndicator(
@@ -81,7 +90,11 @@ class NoticeListWidget extends ConsumerWidget {
                             onLast!();
                           }
                         }
-                        return notices[i];
+                        return NoticeItem(
+                          notice: notices[i],
+                          isCommon: isCommon,
+                          page: page,
+                        );
                       },
                       childCount: notices.length,
                     ),

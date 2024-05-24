@@ -6,6 +6,7 @@ class ClassNotice extends Notice {
     required super.sender,
     required super.title,
     required super.isInportant,
+    required super.index,
     required this.subject,
     this.makeupClassAt,
   });

@@ -7,7 +7,7 @@ part of 'class_notice.dart';
 // **************************************************************************
 
 String _$classNoticesNotifierHash() =>
-    r'3a7d3e1900fcd233cd2eb205b52f9aaf27b7174b';
+    r'a9b6555d4026ec263f05cd1225469ffb91239db3';
 
 /// See also [ClassNoticesNotifier].
 @ProviderFor(ClassNoticesNotifier)

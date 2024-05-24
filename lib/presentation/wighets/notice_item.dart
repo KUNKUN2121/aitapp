@@ -10,13 +10,11 @@ class NoticeItem extends ConsumerWidget {
   const NoticeItem({
     super.key,
     required this.notice,
-    required this.index,
     required this.isCommon,
     required this.page,
   });
 
   final Notice notice;
-  final int index;
   final bool isCommon;
   final int page;
 
@@ -31,7 +29,7 @@ class NoticeItem extends ConsumerWidget {
                 MaterialPageRoute<void>(
                   builder: (ctx) {
                     return NoticeDetailScreen(
-                      index: index,
+                      index: notice.index,
                       isCommon: isCommon,
                       title: notice.title,
                       page: page,

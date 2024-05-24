@@ -1,9 +1,12 @@
+import 'dart:io';
 import 'package:aitapp/application/state/class_notice/class_notice.dart';
 import 'package:aitapp/application/state/get_lcam_data/get_lcam_data.dart';
 import 'package:aitapp/application/state/last_login/last_login.dart';
 import 'package:aitapp/application/state/notice_load/notice_load.dart';
 import 'package:aitapp/application/state/univ_notice/univ_notice.dart';
+import 'package:aitapp/domain/types/class_notice.dart';
 import 'package:aitapp/domain/types/last_login.dart';
+import 'package:aitapp/domain/types/notice.dart';
 import 'package:aitapp/domain/types/notice_catche.dart';
 import 'package:async/async.dart';
 import 'package:flutter/material.dart';
@@ -13,10 +16,45 @@ class LoadNoticeListUseCase {
   LoadNoticeListUseCase({
     required this.ref,
     required this.isCommon,
+    required this.context,
+    required this.error,
   });
   final WidgetRef ref;
   final bool isCommon;
+  final BuildContext context;
+  final ValueNotifier<String?> error;
   CancelableOperation<void>? loadOperation;
+
+  List<Notice> filteredList(List<Notice> list, String text) {
+    final filter = text;
+    if (isCommon) {
+      return list
+          .where(
+            (notice) =>
+                notice.title.toLowerCase().contains(
+                      filter.toLowerCase(),
+                    ) ||
+                notice.sender.toLowerCase().contains(
+                      filter.toLowerCase(),
+                    ),
+          )
+          .toList();
+    }
+    return list
+        .where(
+          (notice) =>
+              (notice as ClassNotice).subject.toLowerCase().contains(
+                    filter.toLowerCase(),
+                  ) ||
+              notice.title.toLowerCase().contains(
+                    filter.toLowerCase(),
+                  ) ||
+              notice.sender.toLowerCase().contains(
+                    filter.toLowerCase(),
+                  ),
+        )
+        .toList();
+  }
 
   void cancel() {
     loadOperation?.cancel();
@@ -24,11 +62,28 @@ class LoadNoticeListUseCase {
 
   Future<void> load({
     bool withLogin = false,
+    bool isRetry = false,
   }) async {
-    loadOperation = CancelableOperation.fromFuture(
-      _load(withLogin: withLogin),
-    );
-    await loadOperation?.value;
+    try {
+      error.value = null;
+      loadOperation = CancelableOperation.fromFuture(
+        _load(withLogin: withLogin),
+      );
+      await loadOperation!.value;
+    } on SocketException {
+      if (context.mounted) {
+        error.value = 'インターネットに接続できません';
+      }
+    } on Exception catch (err) {
+      if (!isRetry) {
+        await load(
+          withLogin: true,
+          isRetry: true,
+        );
+      } else if (context.mounted) {
+        error.value = err.toString();
+      }
+    }
   }
 
   Future<void> _load({

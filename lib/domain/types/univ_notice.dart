@@ -6,6 +6,7 @@ class UnivNotice extends Notice {
     required super.sender,
     required super.title,
     required super.isInportant,
+    required super.index,
     required this.sendAt,
   });
   // 送信日時

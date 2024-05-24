@@ -7,7 +7,7 @@ part of 'univ_notice.dart';
 // **************************************************************************
 
 String _$univNoticesNotifierHash() =>
-    r'191856aff411daa5bba3179e3a78cb2421bb9a97';
+    r'f4bb77f2c39716df63772ebf68a46b0ef0bc2113';
 
 /// See also [UnivNoticesNotifier].
 @ProviderFor(UnivNoticesNotifier)
