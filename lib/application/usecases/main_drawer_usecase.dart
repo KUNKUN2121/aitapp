@@ -1,5 +1,6 @@
 import 'package:aitapp/application/state/identity_provider.dart';
 import 'package:aitapp/application/state/last_login/last_login.dart';
+import 'package:aitapp/application/state/link_tap_provider.dart';
 import 'package:aitapp/application/state/select_syllabus_filter/select_syllabus_filter.dart';
 import 'package:aitapp/application/state/shared_preference_provider.dart';
 import 'package:aitapp/domain/types/last_login.dart';
@@ -44,6 +45,7 @@ class MainDrawerUseCase {
   Future<void> loginCampus({
     required String isMoodle,
   }) async {
+    ref.read(linkTapProvider.notifier).state = true;
     final controller = WebViewController();
     final identity = ref.read(identityProvider);
     // jsを有効化
