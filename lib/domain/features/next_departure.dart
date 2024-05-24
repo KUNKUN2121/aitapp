@@ -27,7 +27,7 @@ class NextDeparture {
           for (final minute in minutes) {
             if (minute > now.minute || hour > now.hour) {
               if (order == counter) {
-                return now.copyWith(hour: hour, minute: minute);
+                return DateTime.utc(now.year, now.month, now.day, hour, minute);
               } else {
                 counter++;
               }
