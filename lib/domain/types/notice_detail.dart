@@ -1,4 +1,5 @@
-class NoticeDetail {
+// お知らせ詳細
+abstract class NoticeDetail {
   NoticeDetail({
     required this.sender,
     required this.title,

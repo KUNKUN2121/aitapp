@@ -1,7 +1,8 @@
 import 'dart:io';
 
-import 'package:aitapp/application/state/filter_provider.dart';
+import 'package:aitapp/application/state/select_syllabus_filter/select_syllabus_filter.dart';
 import 'package:aitapp/domain/features/get_syllabus.dart';
+import 'package:aitapp/domain/types/select_syllabus_filters.dart';
 import 'package:aitapp/presentation/wighets/syllabus_item.dart';
 import 'package:async/async.dart';
 import 'package:flutter/material.dart';
@@ -11,17 +12,15 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 class SyllabusSearchList extends HookConsumerWidget {
   const SyllabusSearchList({
     super.key,
-    this.searchtext,
+    required this.getSyllabus,
   });
-  final String? searchtext;
+  final GetSyllabus getSyllabus;
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final getSyllabus = useMemoized(GetSyllabus.new);
     final operation = useRef<CancelableOperation<void>?>(null);
     final content = useState<Widget>(const SizedBox());
 
-    Future<void> load() async {
-      final selectFilter = ref.read(selectFiltersProvider);
+    Future<void> load(SelectSyllabusFilters selectFilter) async {
       content.value = const Expanded(
         child: Center(
           child: SizedBox(
@@ -32,15 +31,8 @@ class SyllabusSearchList extends HookConsumerWidget {
         ),
       );
       try {
-        await getSyllabus.create();
         final list = await getSyllabus.getSyllabusList(
-          dayOfWeek: selectFilter!.week,
-          searchWord: searchtext,
-          classPeriod: selectFilter.hour,
-          campus: selectFilter.campus,
-          semester: selectFilter.semester,
-          folder: selectFilter.folder,
-          year: selectFilter.year,
+          selectSyllabusFilters: selectFilter,
         );
         content.value = Expanded(
           child: ListView.builder(
@@ -62,26 +54,21 @@ class SyllabusSearchList extends HookConsumerWidget {
       }
     }
 
-    ref.listen(selectFiltersProvider, (previous, next) {
-      if (next != null) {
-        operation.value = CancelableOperation.fromFuture(load());
+    ref.listen(selectSyllabusFilterNotifierProvider, (previous, next) {
+      if (next != null && !next.isNull()) {
+        operation.value = CancelableOperation.fromFuture(load(next));
+      } else {
+        content.value = const SizedBox();
       }
     });
 
     useEffect(
       () {
         return () {
-          operation.value!.cancel();
+          operation.value?.cancel();
         };
       },
       [],
-    );
-    useEffect(
-      () {
-        operation.value = CancelableOperation.fromFuture(load());
-        return () {};
-      },
-      [searchtext],
     );
 
     return content.value;

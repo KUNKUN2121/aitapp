@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:aitapp/domain/features/get_syllabus.dart';
 import 'package:aitapp/domain/types/class_syllabus.dart';
 import 'package:aitapp/domain/types/day_of_week.dart';
+import 'package:aitapp/domain/types/select_syllabus_filters.dart';
 import 'package:aitapp/domain/types/semester.dart';
 import 'package:aitapp/presentation/wighets/syllabus_item.dart';
 import 'package:async/async.dart';
@@ -15,12 +16,10 @@ class SyllabusList extends HookWidget {
     this.dayOfWeek,
     this.classPeriod,
     this.filterText,
-    this.searchText,
   });
   final DayOfWeek? dayOfWeek;
   final int? classPeriod;
   final String? filterText;
-  final String? searchText;
 
   @override
   Widget build(BuildContext context) {
@@ -44,12 +43,14 @@ class SyllabusList extends HookWidget {
         final thisMonth = DateTime.now().month;
         await getSyllabus.create();
         final list = await getSyllabus.getSyllabusList(
-          dayOfWeek: dayOfWeek,
-          classPeriod: classPeriod,
-          searchWord: searchText,
-          year: getSyllabus.filters.year.values.first,
-          semester:
-              thisMonth >= 4 && thisMonth <= 8 ? Semester.early : Semester.late,
+          selectSyllabusFilters: SelectSyllabusFilters(
+            week: dayOfWeek,
+            hour: classPeriod,
+            year: getSyllabus.filters.year.values.first,
+            semester: thisMonth >= 4 && thisMonth <= 8
+                ? Semester.early
+                : Semester.late,
+          ),
         );
         syllabusList.value = list;
       } on SocketException {

@@ -1,5 +1,6 @@
 import 'package:aitapp/domain/types/map_shape.dart';
 
+// 建物情報
 class BuildingInfo {
   BuildingInfo({
     required this.id,

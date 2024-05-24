@@ -1,3 +1,4 @@
+// 連絡先
 class Contact {
   const Contact({
     required this.name,

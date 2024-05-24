@@ -11,16 +11,16 @@ class CourseRegistration extends StatelessWidget {
       appBar: AppBar(title: const Text('履修/アンケート/成績')),
       body: ListView(
         children: [
-          for (final webAccessPage in webAccessPages) ...{
+          for (final webAccessLink in webAccessLinks) ...{
             ListTile(
-              title: Text(webAccessPage.title),
-              leading: Icon(webAccessPage.icon),
+              title: Text(webAccessLink.title),
+              leading: Icon(webAccessLink.icon),
               onTap: () {
                 Navigator.of(context).push(
                   MaterialPageRoute<void>(
                     builder: (ctx) => WebViewScreen(
-                      title: webAccessPage.title,
-                      url: webAccessPage.url,
+                      title: webAccessLink.title,
+                      url: webAccessLink.url,
                     ),
                   ),
                 );

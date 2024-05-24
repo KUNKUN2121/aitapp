@@ -76,7 +76,7 @@ Future<bool> canLoginLcam({
   return false;
 }
 
-Future<void> loginLcam({
+Future<String> loginLcam({
   required String id,
   required String password,
   required Cookies cookies,
@@ -85,7 +85,7 @@ Future<void> loginLcam({
   final headers = {
     'Origin': origin,
     'Referer': '$origin/portalv2/sp',
-    'Cookie': cookies.toHeaderString,
+    'Cookie': cookies.toString(),
   }
     ..addAll(constHeader)
     ..addAll(secFetchHeader)
@@ -107,7 +107,8 @@ Future<void> loginLcam({
     '$origin/portalv2/login/login/smartPhoneLogin',
   );
 
-  await httpAccess(url, headers: headers, body: data);
+  final res = await httpAccess(url, headers: headers, body: data);
+  return res.body;
 }
 
 Future<String> getStrutsToken({
@@ -122,7 +123,7 @@ Future<String> getStrutsToken({
     contactType = 'classContact';
   }
   final headers = {
-    'Cookie': cookies.toHeaderString,
+    'Cookie': cookies.toString(),
     'Referer':
         '$origin/portalv2/smartphone/smartPhoneHome/nextPage/contactNotice',
   }
@@ -148,7 +149,7 @@ Future<String> getNoticeBody({
     'Origin': origin,
     'Referer':
         '$origin/portalv2/smartphone/smartPhoneContactNotice/nextPage/${noticeType.toLowerCase()}Contact',
-    'Cookie': cookies.toHeaderString,
+    'Cookie': cookies.toString(),
   }
     ..addAll(constHeader)
     ..addAll(secFetchHeader)
@@ -183,7 +184,7 @@ Future<String> getNoticeBodyNext({
     'Origin': origin,
     'Referer':
         '$origin/portalv2/smartphone/smartPhone${noticeType}Contact/select${noticeType}ContactList',
-    'Cookie': cookies.toHeaderString,
+    'Cookie': cookies.toString(),
   }
     ..addAll(constHeader)
     ..addAll(secFetchHeader)
@@ -209,7 +210,7 @@ Future<String> getNoticeBodyNext({
 Future<String> getClassTimeTableBody({required Cookies cookies}) async {
   debugPrint('getClassTimeTableBody');
   final headers = {
-    'Cookie': cookies.toHeaderString,
+    'Cookie': cookies.toString(),
   }
     ..addAll(constHeader)
     ..addAll(secFetchHeader);
@@ -235,7 +236,7 @@ Future<String> getNoticeDetailBody({
     'Origin': origin,
     'Referer':
         '$origin/portalv2/smartphone/smartPhone${noticeType}Contact/nextSelect${noticeType}ContactList',
-    'Cookie': cookies.toHeaderString,
+    'Cookie': cookies.toString(),
   }
     ..addAll(constHeader)
     ..addAll(secFetchHeader)
@@ -261,7 +262,7 @@ Future<Response> getFile({
 }) async {
   debugPrint('getfile');
   final headers = {
-    'Cookie': cookies.toHeaderString,
+    'Cookie': cookies.toString(),
   }..addAll(constHeader);
   final url = Uri.parse('$origin$fileUrl');
 

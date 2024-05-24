@@ -1,9 +1,10 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:aitapp/application/state/id_password_provider.dart';
+import 'package:aitapp/application/state/identity_provider.dart';
 import 'package:aitapp/application/state/setting_int_provider.dart';
 import 'package:aitapp/application/state/shared_preference_provider.dart';
+import 'package:aitapp/domain/types/identity.dart';
 import 'package:aitapp/infrastructure/restaccess/access_latest_version.dart';
 import 'package:aitapp/presentation/dialogs/update_dialog.dart';
 import 'package:aitapp/presentation/screens/login.dart';
@@ -69,12 +70,15 @@ class InitHome extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    Future<List<String>> loadIdPass() async {
+    Future<Identity?> loadIdPass() async {
       final prefs = await SharedPreferences.getInstance();
-      final id = prefs.getString('id') ?? '';
-      final password = prefs.getString('password') ?? '';
-      ref.read(idPasswordProvider.notifier).setIdPassword(id, password);
-      return [id, password];
+      final id = prefs.getString('id');
+      final password = prefs.getString('password');
+      if (id == null || password == null) {
+        return null;
+      }
+      ref.read(identityProvider.notifier).setIdPassword(id, password);
+      return Identity(id: id, password: password);
     }
 
     Future<bool> checkVersion() async {
@@ -107,16 +111,10 @@ class InitHome extends HookConsumerWidget {
     return FutureBuilder(
       future: loadIdPass(),
       builder: (context, snapshot) {
-        if (snapshot.hasData &&
-            snapshot.data?[0] != '' &&
-            snapshot.data?[1] != '') {
+        if (snapshot.hasData) {
           return const TabScreen();
-        } else if (snapshot.hasData &&
-            snapshot.data?[0] == '' &&
-            snapshot.data?[1] == '') {
-          return const LoginScreen();
         } else {
-          return const SizedBox();
+          return const LoginScreen();
         }
       },
     );

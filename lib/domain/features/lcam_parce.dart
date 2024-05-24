@@ -8,6 +8,13 @@ import 'package:universal_html/html.dart';
 import 'package:universal_html/parsing.dart';
 
 class LcamParse {
+  bool isLogin(String body) {
+    final isLogin = parseHtmlDocument(body)
+        .querySelectorAll('#_errorInformation > ul > li:nth-child(1)')
+        .isEmpty;
+    return isLogin;
+  }
+
   List<ClassNotice> classNotice(String body) {
     final classNoticeList = <ClassNotice>[];
     final rows = parseHtmlDocument(body).querySelectorAll(
@@ -17,9 +24,9 @@ class LcamParse {
       throw Exception('[parseClassNotice]データの取得に失敗しました');
     }
 
-    for (final row in rows) {
+    for (var i = 0; i < rows.length; i++) {
       //1通知ごと
-      final texts = _extractText(row);
+      final texts = _extractText(rows[i]);
 
       var c = 0;
       var sender = '';
@@ -48,6 +55,7 @@ class LcamParse {
           subject: texts[2],
           makeupClassAt: makeupClassAt,
           isInportant: isImportant,
+          index: i,
         ),
       );
     }
@@ -230,8 +238,8 @@ class LcamParse {
       throw Exception('[parseUnivNotice]データの取得に失敗しました');
     }
 
-    for (final row in rows) {
-      final texts = _extractText(row);
+    for (var i = 0; i < rows.length; i++) {
+      final texts = _extractText(rows[i]);
       var c = 0;
       var sender = '';
       var title = '';
@@ -258,6 +266,7 @@ class LcamParse {
           title: title,
           sendAt: sendAt,
           isInportant: isImportant,
+          index: i,
         ),
       );
     }

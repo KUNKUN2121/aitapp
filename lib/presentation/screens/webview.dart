@@ -1,11 +1,10 @@
-import 'package:aitapp/application/state/id_password_provider.dart';
-import 'package:aitapp/infrastructure/restaccess/access_lcan.dart';
+import 'package:aitapp/application/config/const.dart';
+import 'package:aitapp/application/state/get_lcam_data/get_lcam_data.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 
-class WebViewScreen extends HookConsumerWidget {
+class WebViewScreen extends ConsumerWidget {
   const WebViewScreen({super.key, required this.url, required this.title});
 
   final String url;
@@ -13,56 +12,38 @@ class WebViewScreen extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final load = useState(false);
-    final cookieManager = CookieManager.instance();
-    final webUrl = WebUri(
-      url,
-    );
+    final controller = WebViewController();
     Future<void> getLoginCookie() async {
-      final cookies = await getCookie();
-      final identity = ref.read(idPasswordProvider);
-      await loginLcam(
-        id: identity[0],
-        password: identity[1],
-        cookies: cookies,
-      );
+      // getLcamDataを取得
+      final getLcamDataNotifier =
+          ref.read(getLcamDataNotifierProvider.notifier);
+      final getLcamData = ref.read(getLcamDataNotifierProvider);
 
-      await cookieManager.deleteAllCookies();
+      // ログイン処理
+      await getLcamDataNotifier.create();
 
-      await cookieManager.setCookie(
-        url: webUrl,
-        name: 'JSESSIONID',
-        value: cookies.jSessionId.split('=')[1],
-        isSecure: true,
+      // 以前登録されたcookieを削除する
+      await WebViewCookieManager.fromPlatformCreationParams(
+        const PlatformWebViewCookieManagerCreationParams(),
+      ).platform.clearCookies();
+      // jsを有効化
+      await controller.setJavaScriptMode(JavaScriptMode.unrestricted);
+      // fetch
+      await controller.loadRequest(
+        Uri.parse(origin + url),
+        headers: {'Cookie': getLcamData.cookies.toString()},
       );
-      await cookieManager.setCookie(
-        url: webUrl,
-        name: 'LiveApps-Cookie',
-        value: cookies.liveAppsCookie.split('=')[1],
-        isSecure: true,
-      );
-      load.value = true;
     }
 
-    useEffect(
-      () {
-        getLoginCookie();
-        return null;
-      },
-      [],
-    );
+    getLoginCookie();
 
     return Scaffold(
       appBar: AppBar(
         title: Text(title),
       ),
-      body: load.value
-          ? InAppWebView(
-              initialUrlRequest: URLRequest(
-                url: webUrl,
-              ),
-            )
-          : const SizedBox(),
+      body: WebViewWidget(
+        controller: controller,
+      ),
     );
   }
 }

@@ -1,8 +1,10 @@
+import 'dart:async';
 import 'dart:io';
 
-import 'package:aitapp/application/state/filter_provider.dart';
+import 'package:aitapp/application/state/select_syllabus_filter/select_syllabus_filter.dart';
+import 'package:aitapp/application/state/syllabus_filter/syllabus_filters.dart';
 import 'package:aitapp/domain/features/get_syllabus.dart';
-import 'package:aitapp/domain/types/select_filter.dart';
+import 'package:aitapp/domain/types/select_syllabus_filters.dart';
 import 'package:aitapp/presentation/wighets/filter_drawer.dart';
 import 'package:aitapp/presentation/wighets/search_bar.dart';
 import 'package:aitapp/presentation/wighets/syllabus_search_list.dart';
@@ -19,40 +21,33 @@ class SyllabusSearchScreen extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final controller = useTextEditingController();
-    final syllabusList = useState<Widget>(const SizedBox());
-    final typeWord = useState('');
     final getSyllabus = useMemoized(GetSyllabus.new);
+    final focusNode = useMemoized(FocusNode.new);
 
     void onSubmit(
-      //検索処理
+      // エンターが押されたときに実行される 検索処理
       String word,
     ) {
-      syllabusList.value = SyllabusSearchList(
-        searchtext: typeWord.value,
-      );
+      ref
+          .read(selectSyllabusFilterNotifierProvider.notifier)
+          .changeWord(word: word);
     }
 
-    void setFilters({
-      required SelectFilters selectFilters,
-    }) {
-      //フィルターが変化
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        ref.read(selectFiltersProvider.notifier).state = selectFilters;
-        onSubmit(typeWord.value);
-      });
+    void onClear() {
+      // 検索ワード削除
+      controller.text = '';
+      ref
+          .read(selectSyllabusFilterNotifierProvider.notifier)
+          .changeWord(word: '');
     }
 
     Future<void> getFilters() async {
       //フィルター取得
       try {
         await getSyllabus.create();
-        if (ref.read(syllabusFiltersProvider) == null) {
-          ref.read(syllabusFiltersProvider.notifier).state =
-              getSyllabus.filters;
-          ref.read(selectFiltersProvider.notifier).state = SelectFilters(
-            year: getSyllabus.filters.year.values.first,
-          );
-        }
+        await ref
+            .read(syllabusFiltersNotifierProvider.notifier)
+            .create(getSyllabus);
       } on SocketException {
         await Fluttertoast.showToast(msg: 'インターネットに接続できません');
       } on Exception catch (err) {
@@ -60,13 +55,28 @@ class SyllabusSearchScreen extends HookConsumerWidget {
       }
     }
 
+    void setFilters({
+      required SelectSyllabusFilters selectFilters,
+    }) {
+      //フィルターが変化
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ref
+            .read(selectSyllabusFilterNotifierProvider.notifier)
+            .change(filter: selectFilters);
+      });
+    }
+
     useEffect(
       () {
-        controller.addListener(() {
-          typeWord.value = controller.text;
+        focusNode.addListener(() {
+          if (!focusNode.hasFocus) {
+            controller.text =
+                ref.watch(selectSyllabusFilterNotifierProvider)?.word ?? '';
+          }
         });
+
         getFilters();
-        return null;
+        return focusNode.dispose;
       },
       [],
     );
@@ -92,14 +102,16 @@ class SyllabusSearchScreen extends HookConsumerWidget {
             children: [
               Expanded(
                 child: SearchBarWidget(
+                  onSuffixIconPusshed: onClear,
                   onSubmitted: onSubmit,
+                  focusNode: focusNode,
                   controller: controller,
                   hintText: '教授名、授業名で検索',
                 ),
               ),
               IconButton(
                 onPressed: () {
-                  if (ref.read(syllabusFiltersProvider) != null) {
+                  if (ref.read(syllabusFiltersNotifierProvider) != null) {
                     _scaffoldKey.currentState?.openEndDrawer();
                   }
                 },
@@ -110,7 +122,7 @@ class SyllabusSearchScreen extends HookConsumerWidget {
               ),
             ],
           ),
-          syllabusList.value,
+          SyllabusSearchList(getSyllabus: getSyllabus),
         ],
       ),
     );
