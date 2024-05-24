@@ -3,9 +3,12 @@
 import 'package:aitapp/application/usecases/main_drawer_usecase.dart';
 import 'package:aitapp/presentation/screens/campus_map.dart';
 import 'package:aitapp/presentation/screens/contacts.dart';
+import 'package:aitapp/presentation/screens/course_registration.dart';
 import 'package:aitapp/presentation/screens/links.dart';
+import 'package:aitapp/presentation/screens/login.dart';
 import 'package:aitapp/presentation/screens/open_asset_pdf.dart';
 import 'package:aitapp/presentation/screens/settings.dart';
+import 'package:aitapp/presentation/screens/syllabus_search.dart';
 import 'package:aitapp/presentation/wighets/drawer_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -56,27 +59,31 @@ class MainDrawer extends ConsumerWidget {
               DrawerTile(
                 icon: Icons.search,
                 title: 'シラバス検索',
-                onTap: usecase.openSyllabusSearch,
+                onTap: () {
+                  usecase.openSyllabusSearch(SyllabusSearchScreen());
+                },
               ),
               DrawerTile(
                 icon: Icons.link,
                 title: 'L-Cam',
                 onTap: () async {
-                  await usecase.loginCampus(isMoodle: 'N');
+                  await usecase.loginCampus(isMoodle: false);
                 },
               ),
               DrawerTile(
                 icon: Icons.link,
                 title: 'Moodle',
                 onTap: () async {
-                  await usecase.loginCampus(isMoodle: 'Y');
+                  await usecase.loginCampus(isMoodle: true);
                 },
               ),
               const Divider(),
               DrawerTile(
                 icon: Icons.event,
                 title: '履修/アンケート/成績',
-                onTap: usecase.openWebView,
+                onTap: () {
+                  usecase.openWebView(const CourseRegistration());
+                },
               ),
               DrawerTile(
                 icon: Icons.link,
@@ -103,7 +110,9 @@ class MainDrawer extends ConsumerWidget {
               DrawerTile(
                 icon: Icons.logout,
                 title: 'ログアウト',
-                onTap: usecase.removeIdentity,
+                onTap: () {
+                  usecase.removeIdentity(const LoginScreen());
+                },
               ),
             ],
           ),

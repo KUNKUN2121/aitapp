@@ -5,9 +5,6 @@ import 'package:aitapp/application/state/select_syllabus_filter/select_syllabus_
 import 'package:aitapp/application/state/shared_preference_provider.dart';
 import 'package:aitapp/domain/types/last_login.dart';
 import 'package:aitapp/env.dart';
-import 'package:aitapp/presentation/screens/course_registration.dart';
-import 'package:aitapp/presentation/screens/login.dart';
-import 'package:aitapp/presentation/screens/syllabus_search.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -27,25 +24,28 @@ class MainDrawerUseCase {
     );
   }
 
-  Future<void> removeIdentity() async {
-    final pref = ref.read(sharedPreferencesProvider);
-    await pref.remove('id');
-    await pref.remove('password').then(
-      (value) {
-        ref.read(identityProvider.notifier).clear();
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute<void>(
-            builder: (ctx) => const LoginScreen(),
-          ),
-        );
-      },
+  Future<void> _replaceGo(Widget widget) async {
+    await Navigator.of(context).pushReplacement(
+      MaterialPageRoute<void>(
+        builder: (ctx) => widget,
+      ),
     );
   }
 
+  Future<void> removeIdentity(Widget widget) async {
+    final pref = ref.read(sharedPreferencesProvider);
+    await pref.remove('id');
+    await pref.remove('password');
+    ref.read(identityProvider.notifier).clear();
+    await _replaceGo(widget);
+  }
+
   Future<void> loginCampus({
-    required String isMoodle,
+    required bool isMoodle,
   }) async {
-    ref.read(linkTapProvider.notifier).state = true;
+    if (!isMoodle) {
+      ref.read(linkTapProvider.notifier).state = true;
+    }
     final controller = WebViewController();
     final identity = ref.read(identityProvider);
     // jsを有効化
@@ -60,7 +60,7 @@ class MainDrawerUseCase {
           // paraを取得
           final ciphertext = await controller.runJavaScriptReturningResult(
             // ignore: lines_longer_than_80_chars
-            "getPara('$date','${identity!.id}','${identity.password}','$isMoodle','${Env.blowfishKey}');",
+            "getPara('$date','${identity!.id}','${identity.password}','${isMoodle ? 'Y' : 'N'}','${Env.blowfishKey}');",
           );
           await launchUrl(
             mode: LaunchMode.externalApplication,
@@ -80,16 +80,13 @@ class MainDrawerUseCase {
     );
   }
 
-  Future<void> openSyllabusSearch() async {
-    await go(SyllabusSearchScreen());
+  Future<void> openSyllabusSearch(Widget widget) async {
+    await go(widget);
     ref.read(selectSyllabusFilterNotifierProvider.notifier).initialize();
   }
 
-  void openWebView() {
-    go(const CourseRegistration()).then((value) {
-      ref
-          .read(lastLoginNotifierProvider.notifier)
-          .changeState(LastLogin.others);
-    });
+  Future<void> openWebView(Widget widget) async {
+    await go(widget);
+    ref.read(lastLoginNotifierProvider.notifier).changeState(LastLogin.others);
   }
 }
