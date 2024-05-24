@@ -90,7 +90,7 @@ class GetLcamData {
     );
     final contentType = response.headers['content-type']!;
     if (contentType != 'text/html;charset=utf-8') {
-      final directory = await getApplicationDocumentsDirectory();
+      final directory = await getTemporaryDirectory();
       final file = File('${directory.path}/${entry.key}');
       await file.writeAsBytes(response.bodyBytes);
       return file;

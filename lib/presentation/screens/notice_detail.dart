@@ -167,7 +167,6 @@ class NoticeDetailScreen extends HookConsumerWidget {
                                       ),
                                     );
                                   }
-                                  await file.delete();
                                 } else if (file.path
                                     .contains(RegExp(r'\.(jpg|png|jpeg)$'))) {
                                   if (context.mounted) {

@@ -15,20 +15,10 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  final directory = await getApplicationDocumentsDirectory();
-  final plist = directory.listSync();
-  for (final p in plist) {
-    try {
-      await p.delete();
-    } on Exception {
-      // ファイルの削除に失敗した場合
-    }
-  }
   runApp(
     ProviderScope(
       overrides: [

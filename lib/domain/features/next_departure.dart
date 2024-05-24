@@ -21,16 +21,14 @@ class NextDeparture {
 
     final hours = todayDaiya!.keys;
     for (final hour in hours) {
-      if (hour >= now.hour) {
-        final minutes = todayDaiya[hour];
-        if (minutes != null) {
-          for (final minute in minutes) {
-            if (minute > now.minute || hour > now.hour) {
-              if (order == counter) {
-                return DateTime.utc(now.year, now.month, now.day, hour, minute);
-              } else {
-                counter++;
-              }
+      final minutes = todayDaiya[hour];
+      if (hour >= now.hour && minutes != null) {
+        for (final minute in minutes) {
+          if (minute > now.minute || hour > now.hour) {
+            if (order == counter) {
+              return DateTime.utc(now.year, now.month, now.day, hour, minute);
+            } else {
+              counter++;
             }
           }
         }
