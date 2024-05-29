@@ -9,7 +9,7 @@ Future<Response> getSyllabusSession() async {
     ..addAll(constHeader)
     ..addAll(secFetchHeader);
 
-  final url = Uri.parse('$syllabusOrigin/ext_syllabus/');
+  final url = Uri.parse('https://$syllabusOrigin/ext_syllabus/');
 
   final res = await httpAccess(url, headers: headers);
 
@@ -28,8 +28,8 @@ Future<String> getSyllabusListBody({
 }) async {
   debugPrint('getSyllabusListBody');
   final headers = {
-    'Origin': syllabusOrigin,
-    'Referer': '$syllabusOrigin/ext_syllabus/',
+    'Origin': 'https://$syllabusOrigin',
+    'Referer': 'https://$syllabusOrigin/ext_syllabus/',
     'Cookie': jSessionId,
   }
     ..addAll(constHeader)
@@ -52,7 +52,8 @@ Future<String> getSyllabusListBody({
     'bottonType': 'search',
   };
 
-  final url = Uri.parse('$syllabusOrigin/ext_syllabus/syllabusSearch.do');
+  final url =
+      Uri.parse('https://$syllabusOrigin/ext_syllabus/syllabusSearch.do');
 
   final res = await httpAccess(url, headers: headers, body: data);
 
@@ -63,13 +64,14 @@ Future<String> getSyllabus(String detailUrl, String jSessionId) async {
   debugPrint('getSyllabus');
   final headers = {
     'Cookie': jSessionId,
-    'Referer': '$syllabusOrigin/ext_syllabus/syllabusSearch.do;$jSessionId',
+    'Referer':
+        'https://$syllabusOrigin/ext_syllabus/syllabusSearch.do;$jSessionId',
   }
     ..addAll(constHeader)
     ..addAll(secFetchHeader);
 
   final url = Uri.parse(
-    '$syllabusOrigin$detailUrl',
+    'https://$syllabusOrigin$detailUrl',
   );
 
   final res = await httpAccess(url, headers: headers);
@@ -106,7 +108,7 @@ Future<String> refreshFiltersSession({
   };
 
   final url = Uri.parse(
-    '$syllabusOrigin/ext_syllabus/syllabusSearch.do;jsessionid=${tempjSession[1]}',
+    'https://$syllabusOrigin/ext_syllabus/syllabusSearch.do;jsessionid=${tempjSession[1]}',
   );
 
   final res = await httpAccess(url, headers: headers, body: data);

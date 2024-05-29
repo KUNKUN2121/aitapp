@@ -13,6 +13,9 @@ class WebViewScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final controller = WebViewController();
+    final cookieManager = WebViewCookieManager.fromPlatformCreationParams(
+      const PlatformWebViewCookieManagerCreationParams(),
+    ).platform;
     Future<void> getLoginCookie() async {
       // getLcamDataを取得
       final getLcamDataNotifier =
@@ -23,16 +26,30 @@ class WebViewScreen extends ConsumerWidget {
       await getLcamDataNotifier.create();
 
       // 以前登録されたcookieを削除する
-      await WebViewCookieManager.fromPlatformCreationParams(
-        const PlatformWebViewCookieManagerCreationParams(),
-      ).platform.clearCookies();
+      await cookieManager.clearCookies();
+
+      // JSESSIONIDを注入する
+      await cookieManager.setCookie(
+        WebViewCookie(
+          domain: origin,
+          name: 'JSESSIONID',
+          value: getLcamData.cookies.jSessionId.split(RegExp(r'[=;]'))[1],
+          path: '/portalv2',
+        ),
+      );
+      // LiveApps-Cookieを注入する
+      await cookieManager.setCookie(
+        WebViewCookie(
+          domain: origin,
+          name: 'LiveApps-Cookie',
+          value: getLcamData.cookies.liveAppsCookie.split(RegExp(r'[=;]'))[1],
+          path: '/portalv2',
+        ),
+      );
       // jsを有効化
       await controller.setJavaScriptMode(JavaScriptMode.unrestricted);
       // fetch
-      await controller.loadRequest(
-        Uri.parse(origin + url),
-        headers: {'Cookie': getLcamData.cookies.toString()},
-      );
+      await controller.loadRequest(Uri.parse('https://$origin$url'));
     }
 
     getLoginCookie();

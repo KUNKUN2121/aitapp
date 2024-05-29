@@ -42,7 +42,7 @@ Future<Response> httpAccess(
 
 Future<Cookies> getCookie() async {
   debugPrint('getcookie');
-  final url = Uri.parse('$origin/portalv2/sp');
+  final url = Uri.parse('https://$origin/portalv2/sp');
 
   final res = await httpAccess(url, headers: constHeader);
 
@@ -66,7 +66,7 @@ Future<bool> canLoginLcam({
     'password': password,
   };
 
-  final url = Uri.parse('$origin/portalv2/login/login/spAppLogin/');
+  final url = Uri.parse('https://$origin/portalv2/login/login/spAppLogin/');
 
   final res = await httpAccess(url, headers: headers, body: data);
   final json = jsonDecode(res.body) as Map;
@@ -83,8 +83,8 @@ Future<String> loginLcam({
 }) async {
   debugPrint('loginlcam');
   final headers = {
-    'Origin': origin,
-    'Referer': '$origin/portalv2/sp',
+    'Origin': 'https://$origin',
+    'Referer': 'https://$origin/portalv2/sp',
     'Cookie': cookies.toString(),
   }
     ..addAll(constHeader)
@@ -100,11 +100,11 @@ Future<String> loginLcam({
     'spFlg': '1',
     'locale': 'ja',
     'spAppFlag': '1',
-    'clientLocationUrl': '$origin/',
+    'clientLocationUrl': 'https://$origin/',
   };
 
   final url = Uri.parse(
-    '$origin/portalv2/login/login/smartPhoneLogin',
+    'https://$origin/portalv2/login/login/smartPhoneLogin',
   );
 
   final res = await httpAccess(url, headers: headers, body: data);
@@ -125,13 +125,13 @@ Future<String> getStrutsToken({
   final headers = {
     'Cookie': cookies.toString(),
     'Referer':
-        '$origin/portalv2/smartphone/smartPhoneHome/nextPage/contactNotice',
+        'https://$origin/portalv2/smartphone/smartPhoneHome/nextPage/contactNotice',
   }
     ..addAll(constHeader)
     ..addAll(secFetchHeader);
 
   final url = Uri.parse(
-    '$origin/portalv2/smartphone/smartPhoneContactNotice/nextPage/$contactType',
+    'https://$origin/portalv2/smartphone/smartPhoneContactNotice/nextPage/$contactType',
   );
 
   final res = await httpAccess(url, headers: headers);
@@ -146,9 +146,9 @@ Future<String> getNoticeBody({
   final noticeType = isCommon ? 'Common' : 'Class';
   debugPrint('get${noticeType}NoticeBody');
   final headers = {
-    'Origin': origin,
+    'Origin': 'https://$origin',
     'Referer':
-        '$origin/portalv2/smartphone/smartPhoneContactNotice/nextPage/${noticeType.toLowerCase()}Contact',
+        'https://$origin/portalv2/smartphone/smartPhoneContactNotice/nextPage/${noticeType.toLowerCase()}Contact',
     'Cookie': cookies.toString(),
   }
     ..addAll(constHeader)
@@ -164,7 +164,7 @@ Future<String> getNoticeBody({
   };
 
   final url = Uri.parse(
-    '$origin/portalv2/smartphone/smartPhone${noticeType}Contact/select${noticeType}ContactList',
+    'https://$origin/portalv2/smartphone/smartPhone${noticeType}Contact/select${noticeType}ContactList',
   );
 
   final res = await httpAccess(url, headers: headers, body: data);
@@ -181,9 +181,9 @@ Future<String> getNoticeBodyNext({
   final noticeType = isCommon ? 'Common' : 'Class';
   debugPrint('get${noticeType}NoticeBodyNext');
   final headers = {
-    'Origin': origin,
+    'Origin': 'https://origin',
     'Referer':
-        '$origin/portalv2/smartphone/smartPhone${noticeType}Contact/select${noticeType}ContactList',
+        'https://$origin/portalv2/smartphone/smartPhone${noticeType}Contact/select${noticeType}ContactList',
     'Cookie': cookies.toString(),
   }
     ..addAll(constHeader)
@@ -199,7 +199,7 @@ Future<String> getNoticeBodyNext({
   };
 
   final url = Uri.parse(
-    '$origin/portalv2/smartphone/smartPhone${noticeType}Contact/nextSelect${noticeType}ContactList',
+    'https://$origin/portalv2/smartphone/smartPhone${noticeType}Contact/nextSelect${noticeType}ContactList',
   );
 
   final res = await httpAccess(url, headers: headers, body: data);
@@ -216,7 +216,7 @@ Future<String> getClassTimeTableBody({required Cookies cookies}) async {
     ..addAll(secFetchHeader);
 
   final url = Uri.parse(
-    '$origin/portalv2/smartphone/smartPhoneHome/nextPage/timeTable',
+    'https://$origin/portalv2/smartphone/smartPhoneHome/nextPage/timeTable',
   );
 
   final res = await httpAccess(url, headers: headers);
@@ -233,9 +233,9 @@ Future<String> getNoticeDetailBody({
   final noticeType = isCommon ? 'Common' : 'Class';
   debugPrint('get${noticeType}NoticeDetailBody');
   final headers = {
-    'Origin': origin,
+    'Origin': 'https://origin',
     'Referer':
-        '$origin/portalv2/smartphone/smartPhone${noticeType}Contact/nextSelect${noticeType}ContactList',
+        'https://$origin/portalv2/smartphone/smartPhone${noticeType}Contact/nextSelect${noticeType}ContactList',
     'Cookie': cookies.toString(),
   }
     ..addAll(constHeader)
@@ -249,7 +249,7 @@ Future<String> getNoticeDetailBody({
   };
 
   final url = Uri.parse(
-    '$origin/portalv2/smartphone/smartPhone${noticeType}Contact/goDetail/$index',
+    'https://$origin/portalv2/smartphone/smartPhone${noticeType}Contact/goDetail/$index',
   );
 
   final res = await httpAccess(url, headers: headers, body: data);
@@ -264,7 +264,7 @@ Future<Response> getFile({
   final headers = {
     'Cookie': cookies.toString(),
   }..addAll(constHeader);
-  final url = Uri.parse('$origin$fileUrl');
+  final url = Uri.parse('https://$origin$fileUrl');
 
   final res = await httpAccess(url, headers: headers);
 

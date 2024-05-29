@@ -40,11 +40,7 @@ class NoticeTabPage extends HookConsumerWidget {
         controller.addListener(() {
           result.value = controller.text;
         });
-        if (ref.read(lastLoginNotifierProvider) !=
-            (isCommon ? LastLogin.univNotice : LastLogin.classNotice)) {
-          usecase.load(withLogin: true);
-        }
-        return usecase.cancel;
+        return usecase.dispose;
       },
       [],
     );

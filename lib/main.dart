@@ -15,20 +15,10 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  final directory = await getApplicationDocumentsDirectory();
-  final plist = directory.listSync();
-  for (final p in plist) {
-    try {
-      await p.delete();
-    } on Exception {
-      // ファイルの削除に失敗した場合
-    }
-  }
   runApp(
     ProviderScope(
       overrides: [
@@ -70,15 +60,18 @@ class InitHome extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    Future<Identity?> loadIdPass() async {
-      final prefs = await SharedPreferences.getInstance();
+    final identity = ref.watch(identityProvider);
+    void loadIdPass() {
+      final prefs = ref.read(sharedPreferencesProvider);
       final id = prefs.getString('id');
       final password = prefs.getString('password');
-      if (id == null || password == null) {
-        return null;
+      if (id != null && password != null) {
+        WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+          ref.read(identityProvider.notifier).setIdPassword(
+                Identity(id: id, password: password),
+              );
+        });
       }
-      ref.read(identityProvider.notifier).setIdPassword(id, password);
-      return Identity(id: id, password: password);
     }
 
     Future<bool> checkVersion() async {
@@ -94,29 +87,28 @@ class InitHome extends HookConsumerWidget {
       return false;
     }
 
-    useEffect(() {
-      checkVersion().then(
-        (value) => value
-            ? showDialog<Widget>(
-                context: context,
-                builder: (BuildContext ctx) {
-                  return const UpdateDialog();
-                },
-              )
-            : null,
-      );
-      return null;
-    });
-
-    return FutureBuilder(
-      future: loadIdPass(),
-      builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          return const TabScreen();
-        } else {
-          return const LoginScreen();
-        }
+    useEffect(
+      () {
+        loadIdPass();
+        checkVersion().then(
+          (value) => value
+              ? showDialog<Widget>(
+                  context: context,
+                  builder: (BuildContext ctx) {
+                    return const UpdateDialog();
+                  },
+                )
+              : null,
+        );
+        return null;
       },
+      [],
     );
+
+    if (identity != null) {
+      return const TabScreen();
+    } else {
+      return const LoginScreen();
+    }
   }
 }

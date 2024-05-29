@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:aitapp/domain/features/lcam_parce.dart';
+import 'package:aitapp/domain/features/lcam_parse.dart';
 import 'package:aitapp/domain/types/class.dart';
 import 'package:aitapp/domain/types/cookies.dart';
 import 'package:aitapp/domain/types/day_of_week.dart';
@@ -90,7 +90,7 @@ class GetLcamData {
     );
     final contentType = response.headers['content-type']!;
     if (contentType != 'text/html;charset=utf-8') {
-      final directory = await getApplicationDocumentsDirectory();
+      final directory = await getTemporaryDirectory();
       final file = File('${directory.path}/${entry.key}');
       await file.writeAsBytes(response.bodyBytes);
       return file;
