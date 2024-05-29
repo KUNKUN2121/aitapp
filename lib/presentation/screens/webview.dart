@@ -49,9 +49,7 @@ class WebViewScreen extends ConsumerWidget {
       // jsを有効化
       await controller.setJavaScriptMode(JavaScriptMode.unrestricted);
       // fetch
-      await controller.loadRequest(
-        Uri.parse(origin + url),
-      );
+      await controller.loadRequest(Uri.parse('https://$origin$url'));
     }
 
     getLoginCookie();

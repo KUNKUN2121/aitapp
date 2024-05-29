@@ -743,8 +743,8 @@ const Map<String, String> links = {
   'ハラスメントへの取り組み': 'https://www.ait.ac.jp/campuslife/disasters/',
   '緊急災害時の対応': 'https://www.ait.ac.jp/campuslife/disasters/',
 };
-const origin = 'https://lcam.aitech.ac.jp';
-const syllabusOrigin = 'https://syllabus.aitech.ac.jp';
+const origin = 'lcam.aitech.ac.jp';
+const syllabusOrigin = 'syllabus.aitech.ac.jp';
 
 const List<WebAccessLink> webAccessLinks = [
   WebAccessLink(
