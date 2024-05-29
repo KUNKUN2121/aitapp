@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:aitapp/domain/features/lcam_parce.dart';
+import 'package:aitapp/domain/features/lcam_parse.dart';
 import 'package:aitapp/domain/types/class.dart';
 import 'package:aitapp/domain/types/cookies.dart';
 import 'package:aitapp/domain/types/day_of_week.dart';

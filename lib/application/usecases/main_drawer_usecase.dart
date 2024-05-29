@@ -36,8 +36,8 @@ class MainDrawerUseCase {
     final pref = ref.read(sharedPreferencesProvider);
     await pref.remove('id');
     await pref.remove('password');
-    ref.read(identityProvider.notifier).clear();
     await _replaceGo(widget);
+    ref.read(identityProvider.notifier).clear();
   }
 
   Future<void> loginCampus({

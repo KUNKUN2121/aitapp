@@ -1,7 +1,7 @@
 import 'dart:ui';
 
-class ConvertHexColor {
-  Color from(String hexString) {
+extension ConvertHexColor on Color {
+  static Color from(String hexString) {
     final buffer = StringBuffer();
     if (hexString.length == 6 || hexString.length == 7) {
       buffer

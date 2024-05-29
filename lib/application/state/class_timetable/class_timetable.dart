@@ -3,13 +3,18 @@ import 'package:aitapp/application/state/last_login/last_login.dart';
 import 'package:aitapp/domain/types/class.dart';
 import 'package:aitapp/domain/types/day_of_week.dart';
 import 'package:aitapp/domain/types/last_login.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-class ClassTimeTableNotifier
-    extends StateNotifier<AsyncValue<Map<DayOfWeek, Map<int, Class>>>> {
-  ClassTimeTableNotifier() : super(const AsyncValue.loading());
+part 'class_timetable.g.dart';
 
-  Future<void> fetchData(WidgetRef ref) async {
+@riverpod
+class ClassTimeTableNotifier extends _$ClassTimeTableNotifier {
+  @override
+  AsyncValue<Map<DayOfWeek, Map<int, Class>>> build() {
+    return const AsyncValue.loading();
+  }
+
+  Future<void> fetchData() async {
     state = const AsyncValue.loading();
     try {
       final getLcamData = ref.read(getLcamDataNotifierProvider);
@@ -24,10 +29,3 @@ class ClassTimeTableNotifier
     }
   }
 }
-
-final classTimeTableProvider = StateNotifierProvider<ClassTimeTableNotifier,
-    AsyncValue<Map<DayOfWeek, Map<int, Class>>>>(
-  (ref) {
-    return ClassTimeTableNotifier();
-  },
-);

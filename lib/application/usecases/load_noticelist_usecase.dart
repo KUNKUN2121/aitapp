@@ -18,11 +18,26 @@ class LoadNoticeListUseCase {
     required this.isCommon,
     required this.context,
     required this.error,
-  });
+  }) : loginType = isCommon ? LastLogin.univNotice : LastLogin.classNotice {
+    getLcamDataNotifier = ref.read(getLcamDataNotifierProvider.notifier);
+    lastLoginNotifier = ref.read(lastLoginNotifierProvider.notifier);
+    classNoticesNotifier = ref.read(classNoticesNotifierProvider.notifier);
+    noticeLoadNotifier = ref.read(noticeLoadNotifierProvider.notifier);
+    univNoticesNotifier = ref.read(univNoticesNotifierProvider.notifier);
+    if (ref.read(lastLoginNotifierProvider) != loginType) {
+      load(withLogin: true);
+    }
+  }
+  late final UnivNoticesNotifier univNoticesNotifier;
+  late final NoticeLoadNotifier noticeLoadNotifier;
+  late final ClassNoticesNotifier classNoticesNotifier;
+  late final LastLoginNotifier lastLoginNotifier;
+  late final GetLcamDataNotifier getLcamDataNotifier;
   final WidgetRef ref;
   final bool isCommon;
   final BuildContext context;
   final ValueNotifier<String?> error;
+  final LastLogin loginType;
   CancelableOperation<void>? loadOperation;
 
   List<Notice> filteredList(List<Notice> list, String text) {
@@ -56,7 +71,7 @@ class LoadNoticeListUseCase {
         .toList();
   }
 
-  void cancel() {
+  void dispose() {
     loadOperation?.cancel();
   }
 
@@ -89,21 +104,14 @@ class LoadNoticeListUseCase {
   Future<void> _load({
     bool withLogin = false,
   }) async {
-    final loginType = isCommon ? LastLogin.univNotice : LastLogin.classNotice;
-    final getLcamDataNotifier = ref.read(getLcamDataNotifierProvider.notifier);
-    final lastLoginNotifier = ref.read(lastLoginNotifierProvider.notifier);
-    final classNoticesNotifier =
-        ref.read(classNoticesNotifierProvider.notifier);
-    final getLcamData = ref.read(getLcamDataNotifierProvider);
-    final noticeLoadNotifier = ref.read(noticeLoadNotifierProvider.notifier);
-    final isLoading = ref.read(noticeLoadNotifierProvider);
-    final univNoticesNotifier = ref.read(univNoticesNotifierProvider.notifier);
     final noticeCatche = isCommon
         ? ref.read(univNoticesNotifierProvider)
         : ref.read(classNoticesNotifierProvider);
+    final getLcamData = ref.read(getLcamDataNotifierProvider);
+    final isloading = ref.read(noticeLoadNotifierProvider);
 
     if ((noticeCatche != null && noticeCatche.isLast && !withLogin) ||
-        (isLoading && !withLogin)) {
+        (isloading && !withLogin)) {
       return;
     }
 

@@ -60,15 +60,18 @@ class InitHome extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    Future<Identity?> loadIdPass() async {
-      final prefs = await SharedPreferences.getInstance();
+    final identity = ref.watch(identityProvider);
+    void loadIdPass() {
+      final prefs = ref.read(sharedPreferencesProvider);
       final id = prefs.getString('id');
       final password = prefs.getString('password');
-      if (id == null || password == null) {
-        return null;
+      if (id != null && password != null) {
+        WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+          ref.read(identityProvider.notifier).setIdPassword(
+                Identity(id: id, password: password),
+              );
+        });
       }
-      ref.read(identityProvider.notifier).setIdPassword(id, password);
-      return Identity(id: id, password: password);
     }
 
     Future<bool> checkVersion() async {
@@ -84,29 +87,28 @@ class InitHome extends HookConsumerWidget {
       return false;
     }
 
-    useEffect(() {
-      checkVersion().then(
-        (value) => value
-            ? showDialog<Widget>(
-                context: context,
-                builder: (BuildContext ctx) {
-                  return const UpdateDialog();
-                },
-              )
-            : null,
-      );
-      return null;
-    });
-
-    return FutureBuilder(
-      future: loadIdPass(),
-      builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          return const TabScreen();
-        } else {
-          return const LoginScreen();
-        }
+    useEffect(
+      () {
+        loadIdPass();
+        checkVersion().then(
+          (value) => value
+              ? showDialog<Widget>(
+                  context: context,
+                  builder: (BuildContext ctx) {
+                    return const UpdateDialog();
+                  },
+                )
+              : null,
+        );
+        return null;
       },
+      [],
     );
+
+    if (identity != null) {
+      return const TabScreen();
+    } else {
+      return const LoginScreen();
+    }
   }
 }

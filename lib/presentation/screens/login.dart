@@ -1,6 +1,7 @@
 import 'package:aitapp/application/state/identity_provider.dart';
 import 'package:aitapp/application/state/last_login/last_login.dart';
 import 'package:aitapp/application/state/shared_preference_provider.dart';
+import 'package:aitapp/domain/types/identity.dart';
 import 'package:aitapp/domain/types/last_login.dart';
 import 'package:aitapp/infrastructure/restaccess/access_lcan.dart';
 import 'package:aitapp/presentation/screens/tabs.dart';
@@ -24,10 +25,7 @@ class LoginScreen extends HookConsumerWidget {
       late final bool loginBool;
       if (formKey.currentState!.validate()) {
         formKey.currentState!.save();
-        loginBool = await canLoginLcam(
-          id: id.value,
-          password: password.value,
-        );
+        loginBool = await canLoginLcam(id: id.value, password: password.value);
         ref
             .read(lastLoginNotifierProvider.notifier)
             .changeState(LastLogin.others);
@@ -42,17 +40,11 @@ class LoginScreen extends HookConsumerWidget {
       isError.value = false;
       final pref = ref.read(sharedPreferencesProvider);
       await pref.setString('id', id.value);
-      await pref
-          .setString(
-        'password',
-        password.value,
-      )
-          .then(
+      await pref.setString('password', password.value).then(
         (value) {
-          ref.read(identityProvider.notifier).setIdPassword(
-                id.value,
-                password.value,
-              );
+          ref
+              .read(identityProvider.notifier)
+              .setIdPassword(Identity(id: id.value, password: password.value));
           Navigator.of(context).pushReplacement(
             MaterialPageRoute<void>(
               builder: (ctx) => const TabScreen(),

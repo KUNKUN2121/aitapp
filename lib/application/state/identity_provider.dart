@@ -4,8 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 class IdentityNotifier extends StateNotifier<Identity?> {
   IdentityNotifier() : super(null);
 
-  void setIdPassword(String id, String password) {
-    state = Identity(id: id, password: password);
+  // ignore: use_setters_to_change_properties
+  void setIdPassword(Identity identity) {
+    state = identity;
   }
 
   void clear() {
