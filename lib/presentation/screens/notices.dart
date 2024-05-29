@@ -24,17 +24,7 @@ class NoticeScreen extends HookConsumerWidget with RouteAware {
       initialLength: pageLength,
       initialIndex: currentPage.value,
     );
-    final isDispose = useRef(false);
     final isLoading = ref.watch(noticeLoadNotifierProvider);
-
-    useEffect(
-      () {
-        return () {
-          isDispose.value = true;
-        };
-      },
-      [],
-    );
 
     useEffect(
       () {
