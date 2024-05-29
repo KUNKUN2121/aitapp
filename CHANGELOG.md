@@ -1,5 +1,11 @@
 # Changelog
 
+## [v1.6.2](https://github.com/piman528/aitapp/compare/v1.6.1...v1.6.2) - 2024-05-29
+- 画像の表示機能の追加 by @piman528 in https://github.com/piman528/aitapp/pull/81
+- コードを処理と表示で分割 by @piman528 in https://github.com/piman528/aitapp/pull/82
+- webviewの問題の修正と最適化 by @piman528 in https://github.com/piman528/aitapp/pull/85
+- パッケージの更新 by @piman528 in https://github.com/piman528/aitapp/pull/87
+
 ## [v1.6.1](https://github.com/piman528/aitapp/compare/v1.6.0...v1.6.1) - 2024-05-16
 - 画面が表示されないバグを修正 by @piman528 in https://github.com/piman528/aitapp/pull/75
 
