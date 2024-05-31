@@ -6,6 +6,7 @@ import 'package:aitapp/domain/features/get_syllabus.dart';
 import 'package:aitapp/domain/types/class_syllabus.dart';
 import 'package:aitapp/domain/types/class_syllabus_detail.dart';
 import 'package:aitapp/presentation/wighets/build_section.dart';
+import 'package:aitapp/presentation/wighets/loading.dart';
 import 'package:flutter/material.dart';
 
 class SyllabusDetail extends StatelessWidget {
@@ -107,13 +108,7 @@ class SyllabusDetail extends StatelessWidget {
               ),
             );
           } else {
-            return const Center(
-              child: SizedBox(
-                height: 25, //指定
-                width: 25, //指定
-                child: CircularProgressIndicator(),
-              ),
-            );
+            return const LoadingWidget();
           }
         },
       ),

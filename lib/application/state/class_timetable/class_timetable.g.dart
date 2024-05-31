@@ -7,12 +7,11 @@ part of 'class_timetable.dart';
 // **************************************************************************
 
 String _$classTimeTableNotifierHash() =>
-    r'ab06f6fef41523f9c0d5f5aa4743a57f0cd8e22e';
+    r'f7255ad62cdaf6a344bcbb253759bf255aae2df4';
 
 /// See also [ClassTimeTableNotifier].
 @ProviderFor(ClassTimeTableNotifier)
-final classTimeTableNotifierProvider = AutoDisposeNotifierProvider<
-    ClassTimeTableNotifier,
+final classTimeTableNotifierProvider = NotifierProvider<ClassTimeTableNotifier,
     AsyncValue<Map<DayOfWeek, Map<int, Class>>>>.internal(
   ClassTimeTableNotifier.new,
   name: r'classTimeTableNotifierProvider',
@@ -24,6 +23,6 @@ final classTimeTableNotifierProvider = AutoDisposeNotifierProvider<
 );
 
 typedef _$ClassTimeTableNotifier
-    = AutoDisposeNotifier<AsyncValue<Map<DayOfWeek, Map<int, Class>>>>;
+    = Notifier<AsyncValue<Map<DayOfWeek, Map<int, Class>>>>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member

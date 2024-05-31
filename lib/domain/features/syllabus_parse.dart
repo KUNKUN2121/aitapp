@@ -1,6 +1,7 @@
 import 'package:aitapp/domain/types/class_syllabus.dart';
 import 'package:aitapp/domain/types/class_syllabus_detail.dart';
 import 'package:aitapp/domain/types/classification.dart';
+import 'package:aitapp/domain/types/exception.dart';
 import 'package:aitapp/domain/types/syllabus_filters.dart';
 import 'package:aitapp/domain/types/teacher.dart';
 import 'package:collection/collection.dart';
@@ -48,7 +49,7 @@ class SyllabusParse {
         i++;
       }
     } else {
-      throw Exception('[parseSyllabusFilters]データの取得に失敗しました');
+      throw const GetDataException('[parseSyllabusFilters]データの取得に失敗しました');
     }
     return options;
   }
@@ -65,9 +66,11 @@ class SyllabusParse {
         ?.childNodes[0];
     if (rows.isEmpty) {
       if (error != null) {
-        throw Exception('${error.text}');
+        throw const NotFoundException(
+          '検索条件と十分に一致する結果が見つかりません。\n条件を変えて再度検索してください',
+        );
       } else {
-        throw Exception('[parseSyllabusList]データの取得に失敗しました');
+        throw const GetDataException('[parseSyllabusList]データの取得に失敗しました');
       }
     }
     for (var i = 1; i < rows.length; i++) {
@@ -216,7 +219,7 @@ class SyllabusParse {
       'body > table:nth-child(16) > tbody > tr > td > table > tbody > tr',
     );
     if (rows.isEmpty) {
-      throw Exception('[parseSyllabus]データの取得に失敗しました');
+      throw const GetDataException('[parseSyllabus]データの取得に失敗しました');
     }
     final texts = _extractDetailText(rows);
     final explainsIndex = _makeIndex(texts);

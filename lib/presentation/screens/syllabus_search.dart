@@ -1,16 +1,14 @@
-import 'dart:async';
-import 'dart:io';
-
 import 'package:aitapp/application/state/select_syllabus_filter/select_syllabus_filter.dart';
 import 'package:aitapp/application/state/syllabus_filter/syllabus_filters.dart';
+import 'package:aitapp/application/state/syllabus_search/syllabus_search.dart';
+import 'package:aitapp/application/usecases/syllabus_search_usecase.dart';
 import 'package:aitapp/domain/features/get_syllabus.dart';
-import 'package:aitapp/domain/types/select_syllabus_filters.dart';
 import 'package:aitapp/presentation/wighets/filter_drawer.dart';
+import 'package:aitapp/presentation/wighets/loading.dart';
 import 'package:aitapp/presentation/wighets/search_bar.dart';
-import 'package:aitapp/presentation/wighets/syllabus_search_list.dart';
+import 'package:aitapp/presentation/wighets/syllabus_item.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 class SyllabusSearchScreen extends HookConsumerWidget {
@@ -23,48 +21,14 @@ class SyllabusSearchScreen extends HookConsumerWidget {
     final controller = useTextEditingController();
     final getSyllabus = useMemoized(GetSyllabus.new);
     final focusNode = useMemoized(FocusNode.new);
-
-    void onSubmit(
-      // エンターが押されたときに実行される 検索処理
-      String word,
-    ) {
-      ref
-          .read(selectSyllabusFilterNotifierProvider.notifier)
-          .changeWord(word: word);
-    }
-
-    void onClear() {
-      // 検索ワード削除
-      controller.text = '';
-      ref
-          .read(selectSyllabusFilterNotifierProvider.notifier)
-          .changeWord(word: '');
-    }
-
-    Future<void> getFilters() async {
-      //フィルター取得
-      try {
-        await getSyllabus.create();
-        await ref
-            .read(syllabusFiltersNotifierProvider.notifier)
-            .create(getSyllabus);
-      } on SocketException {
-        await Fluttertoast.showToast(msg: 'インターネットに接続できません');
-      } on Exception catch (err) {
-        await Fluttertoast.showToast(msg: err.toString());
-      }
-    }
-
-    void setFilters({
-      required SelectSyllabusFilters selectFilters,
-    }) {
-      //フィルターが変化
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        ref
-            .read(selectSyllabusFilterNotifierProvider.notifier)
-            .change(filter: selectFilters);
-      });
-    }
+    final useCase = useMemoized(
+      () => SyllabusSearchUseCase(
+        getSyllabus: getSyllabus,
+        controller: controller,
+        ref: ref,
+      ),
+    );
+    final content = ref.watch(syllabusSearchNotifierProvider);
 
     useEffect(
       () {
@@ -74,8 +38,6 @@ class SyllabusSearchScreen extends HookConsumerWidget {
                 ref.watch(selectSyllabusFilterNotifierProvider)?.word ?? '';
           }
         });
-
-        getFilters();
         return focusNode.dispose;
       },
       [],
@@ -84,7 +46,7 @@ class SyllabusSearchScreen extends HookConsumerWidget {
     return Scaffold(
       key: _scaffoldKey,
       endDrawer: FilterDrawer(
-        setFilters: setFilters,
+        setFilters: useCase.setFilters,
         getSyllabus: getSyllabus,
       ),
       appBar: AppBar(
@@ -102,8 +64,8 @@ class SyllabusSearchScreen extends HookConsumerWidget {
             children: [
               Expanded(
                 child: SearchBarWidget(
-                  onSuffixIconPusshed: onClear,
-                  onSubmitted: onSubmit,
+                  onSuffixIconPusshed: useCase.onClear,
+                  onSubmitted: useCase.onSubmit,
                   focusNode: focusNode,
                   controller: controller,
                   hintText: '教授名、授業名で検索',
@@ -122,7 +84,31 @@ class SyllabusSearchScreen extends HookConsumerWidget {
               ),
             ],
           ),
-          SyllabusSearchList(getSyllabus: getSyllabus),
+          content.when(
+            error: (error, stackTrace) {
+              return Center(
+                child: Text(error.toString()),
+              );
+            },
+            loading: () => const Expanded(
+              child: LoadingWidget(),
+            ),
+            data: (data) {
+              if (data.isEmpty) {
+                return const SizedBox.shrink();
+              } else {
+                return Expanded(
+                  child: ListView.builder(
+                    itemCount: data.length,
+                    itemBuilder: (c, i) => SyllabusItem(
+                      syllabus: data[i],
+                      getSyllabus: getSyllabus,
+                    ),
+                  ),
+                );
+              }
+            },
+          ),
         ],
       ),
     );

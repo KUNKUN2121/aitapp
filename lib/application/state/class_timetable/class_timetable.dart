@@ -7,10 +7,11 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'class_timetable.g.dart';
 
-@riverpod
+@Riverpod(keepAlive: true)
 class ClassTimeTableNotifier extends _$ClassTimeTableNotifier {
   @override
   AsyncValue<Map<DayOfWeek, Map<int, Class>>> build() {
+    fetchData();
     return const AsyncValue.loading();
   }
 

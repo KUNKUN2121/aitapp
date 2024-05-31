@@ -16,14 +16,12 @@ class WebViewScreen extends ConsumerWidget {
     final cookieManager = WebViewCookieManager.fromPlatformCreationParams(
       const PlatformWebViewCookieManagerCreationParams(),
     ).platform;
+
     Future<void> getLoginCookie() async {
-      // getLcamDataを取得
-      final getLcamDataNotifier =
-          ref.read(getLcamDataNotifierProvider.notifier);
       final getLcamData = ref.read(getLcamDataNotifierProvider);
 
       // ログイン処理
-      await getLcamDataNotifier.create();
+      await ref.read(getLcamDataNotifierProvider.notifier).create();
 
       // 以前登録されたcookieを削除する
       await cookieManager.clearCookies();

@@ -4,6 +4,7 @@ import 'package:aitapp/domain/features/lcam_parse.dart';
 import 'package:aitapp/domain/types/class.dart';
 import 'package:aitapp/domain/types/cookies.dart';
 import 'package:aitapp/domain/types/day_of_week.dart';
+import 'package:aitapp/domain/types/exception.dart';
 import 'package:aitapp/domain/types/notice.dart';
 import 'package:aitapp/domain/types/notice_detail.dart';
 import 'package:aitapp/infrastructure/restaccess/access_lcan.dart';
@@ -95,7 +96,7 @@ class GetLcamData {
       await file.writeAsBytes(response.bodyBytes);
       return file;
     } else {
-      throw Exception('[shareFile]データの取得に失敗しました');
+      throw const GetDataException('[shareFile]データの取得に失敗しました');
     }
   }
 
