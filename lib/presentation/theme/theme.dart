@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 ColorScheme kColorScheme = ColorScheme.fromSeed(
   seedColor: const Color.fromARGB(255, 35, 132, 223),
-  surface: const Color.fromARGB(255, 248, 248, 248),
+  surface: const Color.fromARGB(255, 255, 255, 255),
   secondary: const Color.fromARGB(255, 52, 76, 102),
   primaryContainer: const Color.fromARGB(255, 232, 232, 232),
   onPrimaryContainer: Colors.black,
