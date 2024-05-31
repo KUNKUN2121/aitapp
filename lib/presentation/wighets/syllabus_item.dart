@@ -37,7 +37,7 @@ class SyllabusItem extends StatelessWidget {
                 Text(
                   syllabus.subject,
                   style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                        color: Theme.of(context).colorScheme.onBackground,
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
                 ),
                 const SizedBox(
