@@ -1,5 +1,8 @@
 # Changelog
 
+## [v1.6.3](https://github.com/piman528/aitapp/compare/v1.6.2...v1.6.3) - 2024-06-26
+- いちいちロードされるバグ修正 by @piman528 in https://github.com/piman528/aitapp/pull/95
+
 ## [v1.6.2](https://github.com/piman528/aitapp/compare/v1.6.1...v1.6.2) - 2024-05-29
 - 画像の表示機能の追加 by @piman528 in https://github.com/piman528/aitapp/pull/81
 - コードを処理と表示で分割 by @piman528 in https://github.com/piman528/aitapp/pull/82
