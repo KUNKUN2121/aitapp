@@ -32,6 +32,9 @@ ThemeData buildThemeLight() {
     appBarTheme: AppBarTheme(
       backgroundColor: kColorScheme.surface,
     ),
+    bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+      backgroundColor: Color.fromARGB(255, 255, 255, 255),
+    ),
   );
 }
 
