@@ -88,7 +88,7 @@ class NoticeItem extends ConsumerWidget {
                       child: Text(
                         notice.title,
                         style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                              color: Theme.of(context).colorScheme.onBackground,
+                              color: Theme.of(context).colorScheme.onSurface,
                             ),
                       ),
                     ),

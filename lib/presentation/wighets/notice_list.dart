@@ -71,7 +71,7 @@ class NoticeListWidget extends HookConsumerWidget {
                 slivers: [
                   SliverAppBar(
                     scrolledUnderElevation: 0,
-                    backgroundColor: Theme.of(context).colorScheme.background,
+                    backgroundColor: Theme.of(context).colorScheme.surface,
                     automaticallyImplyLeading: false,
                     expandedHeight: 80,
                     snap: true,

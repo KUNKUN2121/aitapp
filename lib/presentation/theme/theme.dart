@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 ColorScheme kColorScheme = ColorScheme.fromSeed(
   seedColor: const Color.fromARGB(255, 35, 132, 223),
-  background: const Color.fromARGB(255, 248, 248, 248),
+  surface: const Color.fromARGB(255, 255, 255, 255),
   secondary: const Color.fromARGB(255, 52, 76, 102),
   primaryContainer: const Color.fromARGB(255, 232, 232, 232),
   onPrimaryContainer: Colors.black,
@@ -15,7 +15,7 @@ ColorScheme kDarkColorScheme = ColorScheme.fromSeed(
   brightness: Brightness.dark,
   seedColor: const Color.fromARGB(255, 35, 132, 223),
   secondary: const Color.fromARGB(255, 148, 181, 218),
-  background: const Color.fromARGB(255, 27, 27, 27),
+  surface: const Color.fromARGB(255, 27, 27, 27),
   primaryContainer: const Color.fromARGB(255, 43, 43, 43),
   onPrimaryContainer: const Color.fromARGB(255, 255, 255, 255),
   secondaryContainer: const Color.fromARGB(255, 46, 82, 114),
@@ -27,10 +27,13 @@ ThemeData buildThemeLight() {
   return ThemeData.light().copyWith(
     splashColor: Colors.transparent,
     colorScheme: kColorScheme,
-    scaffoldBackgroundColor: kColorScheme.background,
+    scaffoldBackgroundColor: kColorScheme.surface,
     dividerColor: const Color.fromARGB(255, 201, 201, 201),
     appBarTheme: AppBarTheme(
-      backgroundColor: kColorScheme.background,
+      backgroundColor: kColorScheme.surface,
+    ),
+    bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+      backgroundColor: Color.fromARGB(255, 255, 255, 255),
     ),
   );
 }
@@ -39,10 +42,10 @@ ThemeData buildThemeDark() {
   return ThemeData.dark().copyWith(
     splashColor: Colors.transparent,
     colorScheme: kDarkColorScheme,
-    scaffoldBackgroundColor: kDarkColorScheme.background,
+    scaffoldBackgroundColor: kDarkColorScheme.surface,
     dividerColor: const Color.fromARGB(255, 59, 59, 59),
     appBarTheme: AppBarTheme(
-      backgroundColor: kDarkColorScheme.background,
+      backgroundColor: kDarkColorScheme.surface,
     ),
     bottomNavigationBarTheme: const BottomNavigationBarThemeData(
       backgroundColor: Color.fromARGB(255, 34, 34, 34),

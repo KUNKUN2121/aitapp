@@ -2,6 +2,7 @@ import 'package:aitapp/domain/types/class.dart';
 import 'package:aitapp/domain/types/class_notice.dart';
 import 'package:aitapp/domain/types/class_notice_detail.dart';
 import 'package:aitapp/domain/types/day_of_week.dart';
+import 'package:aitapp/domain/types/exception.dart';
 import 'package:aitapp/domain/types/univ_notice.dart';
 import 'package:aitapp/domain/types/univ_notice_detail.dart';
 import 'package:universal_html/html.dart';
@@ -21,7 +22,7 @@ class LcamParse {
       '#smartPhoneClassContactList > form:nth-child(4) > div.listItem',
     );
     if (rows.isEmpty) {
-      throw Exception('[parseClassNotice]データの取得に失敗しました');
+      throw const GetDataException('[parseClassNotice]データの取得に失敗しました');
     }
 
     for (var i = 0; i < rows.length; i++) {
@@ -79,7 +80,7 @@ class LcamParse {
       'body > form > table > tbody > tr',
     );
     if (topStorytitle.isEmpty) {
-      throw Exception('[parseClassNoticeDetail]データの取得に失敗しました');
+      throw const GetDataException('[parseClassNoticeDetail]データの取得に失敗しました');
     }
     final texts = <String>[];
     var mainContent = 0;
@@ -162,7 +163,7 @@ class LcamParse {
       'body > form > table > tbody > tr',
     );
     if (topStorytitle.isEmpty) {
-      throw Exception('[parseClassTimeTable]データの取得に失敗しました');
+      throw const GetDataException('[parseClassTimeTable]データの取得に失敗しました');
     }
     for (var i = 0; i < topStorytitle.length; i++) {
       final day = i ~/ 7;
@@ -223,7 +224,7 @@ class LcamParse {
       selector,
     );
     if (topStorytitle.isEmpty) {
-      throw Exception('[parseStrutsToken]データの取得に失敗しました');
+      throw const GetDataException('[parseStrutsToken]データの取得に失敗しました');
     }
     final value = topStorytitle[0].attributes['value'];
     return value!;
@@ -235,7 +236,7 @@ class LcamParse {
       '#smartPhoneCommonContactList > form:nth-child(4) > div.listItem',
     ); //記事のリスト
     if (rows.isEmpty) {
-      throw Exception('[parseUnivNotice]データの取得に失敗しました');
+      throw const GetDataException('[parseUnivNotice]データの取得に失敗しました');
     }
 
     for (var i = 0; i < rows.length; i++) {
@@ -278,7 +279,7 @@ class LcamParse {
       'body > form > table > tbody > tr',
     );
     if (topStorytitle.isEmpty) {
-      throw Exception('[parseUnivNoticeDetail]データの取得に失敗しました');
+      throw const GetDataException('[parseUnivNoticeDetail]データの取得に失敗しました');
     }
     final texts = <String>[];
     var mainContent = 0;

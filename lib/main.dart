@@ -60,7 +60,7 @@ class InitHome extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final identity = ref.watch(identityProvider);
+    final content = useState<Widget>(const SizedBox.shrink());
     void loadIdPass() {
       final prefs = ref.read(sharedPreferencesProvider);
       final id = prefs.getString('id');
@@ -70,7 +70,10 @@ class InitHome extends HookConsumerWidget {
           ref.read(identityProvider.notifier).setIdPassword(
                 Identity(id: id, password: password),
               );
+          content.value = const TabScreen();
         });
+      } else {
+        content.value = const LoginScreen();
       }
     }
 
@@ -105,10 +108,6 @@ class InitHome extends HookConsumerWidget {
       [],
     );
 
-    if (identity != null) {
-      return const TabScreen();
-    } else {
-      return const LoginScreen();
-    }
+    return content.value;
   }
 }

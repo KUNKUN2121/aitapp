@@ -5,6 +5,7 @@ import 'package:aitapp/domain/types/identity.dart';
 import 'package:aitapp/domain/types/last_login.dart';
 import 'package:aitapp/infrastructure/restaccess/access_lcan.dart';
 import 'package:aitapp/presentation/screens/tabs.dart';
+import 'package:aitapp/presentation/wighets/loading.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -183,9 +184,7 @@ class LoginScreen extends HookConsumerWidget {
             ),
           ),
           if (isLoading.value) ...{
-            const Center(
-              child: CircularProgressIndicator(),
-            ),
+            const LoadingWidget(),
           },
         ],
       ),
