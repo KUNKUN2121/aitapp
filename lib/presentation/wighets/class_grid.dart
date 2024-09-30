@@ -1,6 +1,7 @@
 // 授業
 import 'package:aitapp/domain/types/class.dart';
 import 'package:aitapp/domain/types/day_of_week.dart';
+import 'package:aitapp/presentation/screens/class_info.dart';
 import 'package:aitapp/presentation/screens/syllabus_filter.dart';
 import 'package:aitapp/utils/extended_string.dart';
 import 'package:flutter/material.dart';
@@ -21,12 +22,23 @@ class ClassGridContainer extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
+        // Navigator.of(context).push(
+        //   MaterialPageRoute<void>(
+        // builder: (ctx) => SyllabusFilterScreen(
+        //       dayOfWeek: dayOfWeek,
+        //       classPeriod: classPeriod,
+        //       teacher: clas?.teacher,
+        //     ),
+        //   ),
+        // );
+
         Navigator.of(context).push(
           MaterialPageRoute<void>(
-            builder: (ctx) => SyllabusFilterScreen(
-              dayOfWeek: dayOfWeek,
-              classPeriod: classPeriod,
-              teacher: clas?.teacher,
+            builder: (ctx) => ClassInfo(
+              // dayOfWeek: dayOfWeek,
+              // classPeriod: classPeriod,
+              // teacher: clas?.teacher,
+              clas: clas!,
             ),
           ),
         );
