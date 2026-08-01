@@ -48,3 +48,7 @@ app.*.map.json
 # Auth
 .env
 env.g.dart
+
+
+sankou/
+plan/
