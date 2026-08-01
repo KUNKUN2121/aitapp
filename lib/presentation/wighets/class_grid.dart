@@ -27,6 +27,8 @@ class ClassGridContainer extends StatelessWidget {
               dayOfWeek: dayOfWeek,
               classPeriod: classPeriod,
               teacher: clas?.teacher,
+              subjectCode: clas?.subjectCode,
+              classCode: clas?.classCode,
             ),
           ),
         );
