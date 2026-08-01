@@ -215,6 +215,66 @@ Future<String> searchTimeTable({
   return res.body;
 }
 
+/// 授業アンケート一覧ページを取得する。
+///
+/// レスポンスHTMLに埋め込まれた Struts トークンを使って
+/// [selectSubjectInfoList] で年度・学期ごとの授業コード一覧を取得する。
+Future<String> getClassEnqueteBody({required Cookies cookies}) async {
+  debugPrint('getClassEnqueteBody');
+  final headers = {
+    'Cookie': cookies.toString(),
+    'Referer':
+        'https://$origin/portalv2/smartphone/smartPhoneHome/nextPage/contactNotice',
+  }
+    ..addAll(constHeader)
+    ..addAll(secFetchHeader);
+
+  final url = Uri.parse(
+    'https://$origin/portalv2/smartphone/smartPhoneContactNotice/nextPage/classEnquete',
+  );
+
+  final res = await httpAccess(url, headers: headers);
+  return res.body;
+}
+
+/// 指定年度・学期の授業アンケート対象科目(subjectDispCode)一覧を取得する。
+///
+/// レスポンスHTMLには `#subjectDispCode` の option 群と、次リクエスト用の
+/// 新しい Struts トークンが含まれる。
+Future<String> selectSubjectInfoList({
+  required Cookies cookies,
+  required String token,
+  required String year,
+  required String semester,
+}) async {
+  debugPrint('selectSubjectInfoList');
+  final headers = {
+    'Origin': 'https://$origin',
+    'Referer':
+        'https://$origin/portalv2/smartphone/smartPhoneContactNotice/nextPage/classEnquete',
+    'Cookie': cookies.toString(),
+  }
+    ..addAll(constHeader)
+    ..addAll(secFetchHeader)
+    ..addAll(contentTypeHeader);
+
+  final data = {
+    'org.apache.struts.taglib.html.TOKEN': token,
+    'schoolYear': year,
+    'semesterCode': semester,
+    'subjectDispCode': '',
+    'titleSearch': '',
+    'listPageNo': '1',
+  };
+
+  final url = Uri.parse(
+    'https://$origin/portalv2/smartphone/smartPhoneClassEnqList/selectSubjectInfoList/',
+  );
+
+  final res = await httpAccess(url, headers: headers, body: data);
+  return res.body;
+}
+
 Future<Cookies> pcGetCookie() async {
   debugPrint('pcgetcookie');
   final url = Uri.parse('https://$origin/portalv2/');
@@ -227,6 +287,20 @@ Future<Cookies> pcGetCookie() async {
   final setCookie = _getSetCookie(res.headers);
   final cookies = setCookie.split(RegExp(',(?=[^ ])'));
   return Cookies(jSessionId: cookies[0], liveAppsCookie: cookies[1]);
+}
+
+Future<String> getPortalTop({required Cookies cookies}) async {
+  debugPrint('getPortalTop');
+  final headers = {
+    'Cookie': cookies.toString(),
+  }
+    ..addAll(constHeader)
+    ..addAll(secFetchHeader);
+
+  final url = Uri.parse('https://$origin/portalv2/');
+
+  final res = await httpAccess(url, headers: headers);
+  return res.body;
 }
 
 Future<Cookies> getCookie() async {

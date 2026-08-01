@@ -4,6 +4,7 @@ import 'package:aitapp/domain/types/class_notice.dart';
 import 'package:aitapp/domain/types/class_notice_detail.dart';
 import 'package:aitapp/domain/types/class_period.dart';
 import 'package:aitapp/domain/types/day_of_week.dart';
+import 'package:aitapp/domain/types/disp_code.dart';
 import 'package:aitapp/domain/types/event.dart';
 import 'package:aitapp/domain/types/exception.dart';
 import 'package:aitapp/domain/types/univ_notice.dart';
@@ -229,6 +230,49 @@ class LcamParse {
     return classTimeTableMap;
   }
 
+  /// 授業アンケート一覧の subjectDispCode(`授業コード_クラスコード`) を
+  /// `正規化した授業名 -> DispCode` の Map にする。
+  ///
+  /// option text 例 `[八]卒業研究(X1)` は 正規化して `卒業研究` をキーにする。
+  /// 同名授業が別コードに割れる場合は曖昧なため値を null にして紐付けを避ける。
+  Map<String, DispCode?> subjectDispCodes(String body) {
+    final options = parseHtmlDocument(body).querySelectorAll(
+      '#subjectDispCode > option',
+    );
+    final result = <String, DispCode?>{};
+    for (final option in options) {
+      final value = option.attributes['value'];
+      if (value == null || value.isEmpty) {
+        continue; // 「▼選択してください」等
+      }
+      final dispCode = DispCode.tryParse(value);
+      if (dispCode == null) {
+        continue;
+      }
+      final name = normalizeSubjectName(option.text ?? '');
+      if (name.isEmpty) {
+        continue;
+      }
+      if (result.containsKey(name)) {
+        // 同名衝突: 曖昧なので紐付け対象から外す
+        result[name] = null;
+      } else {
+        result[name] = dispCode;
+      }
+    }
+    return result;
+  }
+
+  /// 授業名の名寄せ用正規化。
+  /// 先頭の校舎表記 `[八]` 等と末尾の `(クラスコード)`、空白を除去する。
+  static String normalizeSubjectName(String s) {
+    return s
+        .replaceAll(RegExp(r'^\[[^\]]*\]'), '')
+        .replaceAll(RegExp(r'[(（][^)）]*[)）]$'), '')
+        .replaceAll(RegExp(r'\s+'), '')
+        .trim();
+  }
+
   Map<DateTime, List<CalendarEvent>> schedule(String body) {
     final result = <DateTime, List<CalendarEvent>>{};
 
@@ -370,6 +414,21 @@ class LcamParse {
       }
     }
     return classTimeTableMap;
+  }
+
+  /// `/portalv2/` トップページからStrutsトークンを取り出す。
+  ///
+  /// SP版ログインのCookieを流用してPC版へ入る際、認証済みでも見た目はログイン
+  /// 画面のトップページに埋め込まれたトークンを使う (playwright_lcam.py 参照)。
+  String portalStrutsToken(String body) {
+    final input = parseHtmlDocument(body).querySelector(
+      'input[name="org.apache.struts.taglib.html.TOKEN"]',
+    );
+    final value = input?.attributes['value'];
+    if (value == null || value.isEmpty) {
+      throw const GetDataException('[portalStrutsToken]データの取得に失敗しました');
+    }
+    return value;
   }
 
   String lCamStrutsToken({required String body}) {

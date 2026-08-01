@@ -23,8 +23,9 @@ class TimetableDatabase {
 
     return openDatabase(
       path,
-      version: 1,
+      version: 2,
       onCreate: _createDB,
+      onUpgrade: _upgradeDB,
     );
   }
 
@@ -38,9 +39,19 @@ class TimetableDatabase {
         period INTEGER NOT NULL,
         title TEXT NOT NULL,
         classroom TEXT NOT NULL,
-        teacher TEXT NOT NULL
+        teacher TEXT NOT NULL,
+        subject_code TEXT,
+        class_code TEXT
       )
     ''');
+  }
+
+  Future<void> _upgradeDB(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 2) {
+      // v2: シラバスをコードで一意検索するための授業コード・クラスコード列を追加
+      await db.execute('ALTER TABLE timetable ADD COLUMN subject_code TEXT');
+      await db.execute('ALTER TABLE timetable ADD COLUMN class_code TEXT');
+    }
   }
 
   Future<void> saveTimetable(
@@ -70,6 +81,8 @@ class TimetableDatabase {
                 'title': classData.title,
                 'classroom': classData.classRoom,
                 'teacher': classData.teacher,
+                'subject_code': classData.subjectCode,
+                'class_code': classData.classCode,
               });
             }
           }
@@ -108,6 +121,8 @@ class TimetableDatabase {
         title: row['title'] as String,
         classRoom: row['classroom'] as String,
         teacher: row['teacher'] as String,
+        subjectCode: row['subject_code'] as String?,
+        classCode: row['class_code'] as String?,
       );
     }
 

@@ -6,6 +6,7 @@ import 'package:aitapp/domain/types/calendar_event.dart';
 import 'package:aitapp/domain/types/class.dart';
 import 'package:aitapp/domain/types/cookies.dart';
 import 'package:aitapp/domain/types/day_of_week.dart';
+import 'package:aitapp/domain/types/disp_code.dart';
 import 'package:aitapp/domain/types/exception.dart';
 import 'package:aitapp/domain/types/notice.dart';
 import 'package:aitapp/domain/types/notice_detail.dart';
@@ -113,20 +114,18 @@ class GetPCLcamData {
   final parse = LcamParse();
 
   // pc版にログインする
+  //
+  // 仮パスワードではPC版ログイン(initLogin)ができないため、SP版ログインの
+  // セッションCookieを流用してPC版ポータルにアクセスする。
+  // /portalv2/ は認証済みでも見た目はログイン画面だが、そこに埋め込まれた
+  // Strutsトークンを使えば generalPurpose 経由でPC版の各機能へ遷移できる
+  // (playwright_lcam.py の go_home_via_cookie と同じ方式)。
   Future<bool> create(String id, String password) async {
     token = null;
-    cookies = await pcGetCookie();
-    final jsessionid = await preAccess(cookie: cookies);
-    cookies = Cookies(
-      jSessionId: jsessionid,
-      liveAppsCookie: cookies.liveAppsCookie,
-    );
-    final loginResult = await initLogin(
-      id: id,
-      password: password,
-      cookies: cookies,
-    );
-    token = LcamParse().lCamStrutsToken(body: loginResult);
+    cookies = await getCookie();
+    await loginLcam(id: id, password: password, cookies: cookies);
+    final portalTop = await getPortalTop(cookies: cookies);
+    token = parse.portalStrutsToken(portalTop);
     return true;
   }
 
@@ -136,42 +135,133 @@ class GetPCLcamData {
         await generalPurpose(cookies: cookies, token: token!);
     final result = <int, Map<Semester, Map<DayOfWeek, Map<int, Class>>>>{};
     token = LcamParse().lCamStrutsToken(body: generalPurposeResult);
-    var year = AcademicYear.getCurrent();
-    var semester = Semester.getCurrent();
-    // 結果用のMapを初期化
-    result[year] = {
+
+    // 現在年度から過去にさかのぼって各学期を走査する。
+    // 現在年度が履修0でも止まらず、データのある過去年度まで取得する。
+    // (Strutsトークンは1リクエストごとに更新が必要なため毎回抽出する)
+    const maxLookbackYears = 5;
+    final currentYear = AcademicYear.getCurrent();
+    // 現在年度は履修が無くても必ず表示する(最新=空の時間割として出す)
+    result[currentYear] = {
       Semester.early: {},
       Semester.late: {},
     };
-    while (true) {
-      debugPrint('year: $year, semester: $semester');
-      final body = await searchTimeTable(
-        cookies: cookies,
-        token: token!,
-        year: '$year',
-        semester: semester == Semester.early ? '1' : '2',
-      );
-      final timetable = LcamParse().pcClassTimeTable(
-        body,
-      );
-      if (timetable.entries.isEmpty) {
-        break;
+    var foundAny = false;
+    var emptyYearStreak = 0;
+
+    // 授業アンケート一覧の初期トークンを取得しておく。
+    // 取得できなければコード紐付けはスキップし、従来の時間割のみ返す。
+    var enqueteToken = await _getEnqueteToken();
+
+    for (var year = currentYear;
+        year >= currentYear - maxLookbackYears;
+        year--) {
+      var yearHasData = false;
+      for (final semester in [Semester.early, Semester.late]) {
+        final semesterCode = semester == Semester.early ? '1' : '2';
+        final body = await searchTimeTable(
+          cookies: cookies,
+          token: token!,
+          year: '$year',
+          semester: semesterCode,
+        );
+        var timetable = <DayOfWeek, Map<int, Class>>{};
+        try {
+          timetable = LcamParse().pcClassTimeTable(body);
+        } on Exception {
+          timetable = {};
+        }
+        // 次リクエスト用にトークンを更新する
+        token = LcamParse().lCamStrutsToken(body: body);
+        if (timetable.isNotEmpty) {
+          // 授業コード・クラスコードを紐付ける (トークンは繰り上げる)
+          if (enqueteToken != null) {
+            final enriched = await _enrichWithCodes(
+              timetable: timetable,
+              token: enqueteToken,
+              year: '$year',
+              semester: semesterCode,
+            );
+            timetable = enriched.timetable;
+            enqueteToken = enriched.token;
+          }
+          result[year] ??= {Semester.early: {}, Semester.late: {}};
+          result[year]![semester] = timetable;
+          yearHasData = true;
+          foundAny = true;
+        }
       }
-      token = LcamParse().lCamStrutsToken(body: body);
-      // 年度のMapが未初期化の場合は初期化
-      result[year] ??= {};
-      // 学期のMapが未初期化の場合は初期化
-      result[year]?[semester] ??= {};
-      // 時間割データを保存
-      result[year]![semester] = timetable;
-      if (semester == Semester.early) {
-        year--;
-        semester = Semester.late;
+      if (yearHasData) {
+        emptyYearStreak = 0;
       } else {
-        semester = Semester.early;
+        emptyYearStreak++;
+        // データが見つかった後に2年連続で空なら、それ以上さかのぼらない
+        if (foundAny && emptyYearStreak >= 2) {
+          break;
+        }
       }
     }
 
+    return result;
+  }
+
+  /// 授業アンケート一覧ページから初期 Struts トークンを取得する。
+  /// アクセスできない場合は null を返し、コード紐付けをスキップする。
+  Future<String?> _getEnqueteToken() async {
+    try {
+      final body = await getClassEnqueteBody(cookies: cookies);
+      return parse.portalStrutsToken(body);
+    } on Exception {
+      return null;
+    }
+  }
+
+  /// 指定年度・学期の授業コード一覧を取得し、時間割の各授業に付与する。
+  /// 返り値には次リクエスト用に繰り上げたトークンを含める。
+  Future<({Map<DayOfWeek, Map<int, Class>> timetable, String? token})>
+      _enrichWithCodes({
+    required Map<DayOfWeek, Map<int, Class>> timetable,
+    required String token,
+    required String year,
+    required String semester,
+  }) async {
+    try {
+      final body = await selectSubjectInfoList(
+        cookies: cookies,
+        token: token,
+        year: year,
+        semester: semester,
+      );
+      final codes = LcamParse().subjectDispCodes(body);
+      final nextToken = LcamParse().portalStrutsToken(body);
+      return (timetable: _applyCodes(timetable, codes), token: nextToken);
+    } on Exception {
+      // 取得失敗時はコード無しのまま、トークンも維持する
+      return (timetable: timetable, token: token);
+    }
+  }
+
+  /// 授業名の名寄せでコードを付与した時間割を返す。
+  /// 一致しない/曖昧な授業はコード無しのまま(従来検索へフォールバック)。
+  Map<DayOfWeek, Map<int, Class>> _applyCodes(
+    Map<DayOfWeek, Map<int, Class>> timetable,
+    Map<String, DispCode?> codes,
+  ) {
+    final result = <DayOfWeek, Map<int, Class>>{};
+    for (final dayEntry in timetable.entries) {
+      result[dayEntry.key] = <int, Class>{};
+      for (final periodEntry in dayEntry.value.entries) {
+        final clas = periodEntry.value;
+        final dispCode =
+            codes[LcamParse.normalizeSubjectName(clas.title)];
+        result[dayEntry.key]![periodEntry.key] = dispCode == null
+            ? clas
+            : clas.copyWith(
+                subjectCode: dispCode.subjectCode,
+                classCode: dispCode.classCode,
+              );
+      }
+    }
     return result;
   }
 

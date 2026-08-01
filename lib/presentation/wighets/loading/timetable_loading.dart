@@ -11,8 +11,28 @@ class TimetableLoadingWidget extends ConsumerWidget {
     final settingRow = ref.watch(settingIntProvider)!['classTimeTableRow']!;
     return Column(
       children: [
-        const SizedBox(
-          height: 60,
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const SizedBox(
+                width: 16,
+                height: 16,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+              const SizedBox(width: 8),
+              Flexible(
+                child: Text(
+                  '時間割を取得中。完了まで時間がかかります。しばらくお待ちください。',
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    fontSize: 13,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
         Expanded(
           child: Shimmer.fromColors(

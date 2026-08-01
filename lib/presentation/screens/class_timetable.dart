@@ -147,6 +147,15 @@ class ClassTimeTableScreen extends ConsumerWidget {
                         ),
                       ),
                     ),
+                    IconButton(
+                      visualDensity: VisualDensity.compact,
+                      tooltip: '再取得',
+                      icon: Icon(
+                        Icons.refresh,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                      onPressed: notifier.fetchData,
+                    ),
                   ],
                 ),
               ),

@@ -1,6 +1,7 @@
 import 'package:aitapp/application/state/identity_provider.dart';
 import 'package:aitapp/application/state/last_login/last_login.dart';
 import 'package:aitapp/domain/features/get_lcam_data.dart';
+import 'package:aitapp/domain/types/academic_year.dart';
 import 'package:aitapp/domain/types/class.dart';
 import 'package:aitapp/domain/types/class_timetable_state.dart';
 import 'package:aitapp/domain/types/day_of_week.dart';
@@ -45,17 +46,32 @@ class ClassTimeTableNotifier extends _$ClassTimeTableNotifier {
     );
   }
 
+  /// 時間割Mapから表示用の状態を作る。
+  ///
+  /// 現在年度は履修が無くても必ず含め(空の時間割として表示)、年度は降順に並べる。
+  /// 初期表示は最新(現在年度)・現在の学期にする。
+  ClassTimeTableState _buildState(
+    Map<int, Map<Semester, Map<DayOfWeek, Map<int, Class>>>> timetable,
+  ) {
+    final currentYear = AcademicYear.getCurrent();
+    timetable.putIfAbsent(
+      currentYear,
+      () => {Semester.early: {}, Semester.late: {}},
+    );
+    final years = timetable.keys.toList()..sort((a, b) => b.compareTo(a));
+    final sorted = {for (final year in years) year: timetable[year]!};
+    return ClassTimeTableState(
+      timetable: sorted,
+      selectYear: currentYear,
+      selectSemester: Semester.getCurrent(),
+    );
+  }
+
   Future<void> _loadFromDatabase() async {
     try {
       final timetable = await TimetableDatabase.instance.getTimetable();
       if (timetable.isNotEmpty) {
-        state = AsyncValue.data(
-          ClassTimeTableState(
-            timetable: timetable,
-            selectYear: timetable.entries.first.key,
-            selectSemester: timetable.entries.first.value.keys.last,
-          ),
-        );
+        state = AsyncValue.data(_buildState(timetable));
       } else {
         await fetchData();
       }
@@ -66,6 +82,7 @@ class ClassTimeTableNotifier extends _$ClassTimeTableNotifier {
 
   Future<void> fetchData() async {
     state = const AsyncValue.loading();
+    // PC版ログイン(SP版Cookie流用)で過去の年度分も含めて時間割を取得する
     final getPCLcamData = GetPCLcamData();
     final identity = ref.read(identityProvider);
     await getPCLcamData.create(identity!.id, identity.password);
@@ -75,12 +92,6 @@ class ClassTimeTableNotifier extends _$ClassTimeTableNotifier {
     // データベースに保存
     await TimetableDatabase.instance.saveTimetable(result);
 
-    state = AsyncValue.data(
-      ClassTimeTableState(
-        timetable: result,
-        selectYear: result.entries.first.key,
-        selectSemester: result.entries.first.value.keys.last,
-      ),
-    );
+    state = AsyncValue.data(_buildState(result));
   }
 }
