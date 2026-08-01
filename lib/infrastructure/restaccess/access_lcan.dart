@@ -4,9 +4,19 @@ import 'dart:convert';
 
 import 'package:aitapp/application/config/const.dart';
 import 'package:aitapp/domain/types/cookies.dart';
+import 'package:aitapp/domain/types/identity.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/http.dart';
+
+/// SSOサインインに失敗したときにスローされる (認証失敗・混雑など)。
+class SsoException implements Exception {
+  SsoException(this.message);
+  final String message;
+
+  @override
+  String toString() => message;
+}
 
 const constHeader = {
   'Accept-Language': 'ja',
@@ -256,6 +266,41 @@ Future<bool> canLoginLcam({
     return true;
   }
   return false;
+}
+
+/// SSOで取得した `key` を spAppLogin にPOSTし、ID/仮パスワードを取得する。
+///
+/// アプリ内WebViewでSSOサインインを行い、`lamyapp://lcam?key=xxxx` への遷移を
+/// 横取りして得た `key` を渡す。認証失敗・混雑時は [SsoException] をスローする。
+Future<Identity> ssoExchangeKey({required String key}) async {
+  debugPrint('ssoExchangeKey');
+  final headers = <String, String>{}
+    ..addAll(constHeader)
+    ..addAll(secFetchHeader)
+    ..addAll(contentTypeHeader);
+
+  // keyをuserIdに、passwordは空文字で送る
+  final data = {
+    'userId': key,
+    'password': '',
+  };
+
+  final url = Uri.parse('https://$origin/portalv2/login/login/spAppLogin/');
+
+  final res = await httpAccess(url, headers: headers, body: data);
+  final json = jsonDecode(res.body) as Map<String, dynamic>;
+  if (json['status'] == 'success') {
+    return Identity(
+      id: json['userId'] as String,
+      password: json['password'] as String,
+    );
+  }
+  if (json['status'] == 'stop_login') {
+    throw SsoException('ただいま混み合っております。しばらくしてからもう一度お試しください。');
+  }
+  throw SsoException(
+    (json['errorMessage'] as String?) ?? '愛工大IDまたはパスワードが正しくありません。',
+  );
 }
 
 Future<String> loginLcam({

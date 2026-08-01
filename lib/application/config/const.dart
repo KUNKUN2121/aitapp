@@ -874,8 +874,16 @@ const Map<String, String> links = {
   'ハラスメントへの取り組み': 'https://www.ait.ac.jp/campuslife/disasters/',
   '緊急災害時の対応': 'https://www.ait.ac.jp/campuslife/disasters/',
 };
+// サーバードメイン
 const origin = 'lcam.aitech.ac.jp';
 const syllabusOrigin = 'syllabus.aitech.ac.jp';
+
+/// EntraID SSOのサインイン開始URL (アプリ内WebViewで開く)
+const ssoAuthUrl = 'https://$origin/portalv2/login/login/smartPhoneLogin/sso';
+
+/// SSO成功時のリダイレクト先スキーム (lamyapp://lcam?key=...)。
+/// このスキームへの遷移をWebViewで横取りしてkeyを取得する。
+const ssoCallbackScheme = 'lamyapp';
 
 const List<WebAccessLink> webAccessLinks = [
   WebAccessLink(

@@ -1,3 +1,4 @@
+import 'package:aitapp/application/config/const.dart';
 import 'package:aitapp/application/state/identity_provider.dart';
 import 'package:aitapp/application/state/last_login/last_login.dart';
 import 'package:aitapp/application/state/link_tap_provider.dart';
@@ -9,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:webview_cookie_manager/webview_cookie_manager.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 class MainDrawerUseCase {
@@ -37,6 +39,9 @@ class MainDrawerUseCase {
     await pref.remove('id');
     await pref.remove('password');
     ref.read(identityProvider.notifier).clear();
+    // ログアウト時のみWebViewのCookie(Entraセッション)を削除する。
+    // これにより次回ログイン時は再度Microsoftの認証が必要になる。
+    await WebviewCookieManager().clearCookies();
     await _replaceGo(widget);
   }
 
@@ -66,7 +71,7 @@ class MainDrawerUseCase {
             mode: LaunchMode.externalApplication,
             Uri(
               scheme: 'https',
-              host: 'lcam.aitech.ac.jp',
+              host: origin,
               path: 'portalv2/login/preLogin/preSpAppSso',
               queryParameters: {
                 'spAppSso': 'Y',
