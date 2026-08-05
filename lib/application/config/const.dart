@@ -885,6 +885,19 @@ const ssoAuthUrl = 'https://$origin/portalv2/login/login/smartPhoneLogin/sso';
 /// このスキームへの遷移をWebViewで横取りしてkeyを取得する。
 const ssoCallbackScheme = 'lamyapp';
 
+/// Moodle(PC版)のSAML SSOログインページ。
+/// 従来の自動ログイン(para方式)が使えなくなったため、外部ブラウザで
+/// このページを開き、ユーザー自身にサインインしてもらう。
+const moodleLoginUrl = 'https://cms.aitech.ac.jp/auth/mo_saml/index.php';
+
+/// Office 365 (Outlook on the web) のホスト。
+/// 外部ブラウザで開き、login_hint にログインID(学生:学籍番号 / 事務職員:空)を
+/// 付与することで、SSOセッションがあればアカウント選択を省略できる。
+const office365Host = 'outlook.office.com';
+
+/// 愛工大アカウントのメールドメイン。login_hint のローカル部に付与する。
+const aitechMailDomain = 'aitech.ac.jp';
+
 const List<WebAccessLink> webAccessLinks = [
   WebAccessLink(
     title: '履修登録',

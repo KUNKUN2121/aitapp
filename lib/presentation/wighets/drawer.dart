@@ -67,14 +67,21 @@ class MainDrawer extends ConsumerWidget {
                 icon: Icons.link,
                 title: 'L-Cam',
                 onTap: () async {
-                  await usecase.loginCampus(isMoodle: false);
+                  await usecase.loginCampus();
                 },
               ),
               DrawerTile(
                 icon: Icons.link,
                 title: 'Moodle',
                 onTap: () async {
-                  await usecase.loginCampus(isMoodle: true);
+                  await usecase.openMoodle();
+                },
+              ),
+              DrawerTile(
+                icon: Icons.mail_outline,
+                title: 'Office 365',
+                onTap: () async {
+                  await usecase.openOffice365();
                 },
               ),
               const Divider(),

@@ -46,6 +46,7 @@ class StaffLoginScreen extends HookConsumerWidget {
         context: context,
         ref: ref,
         identity: Identity(id: id.value, password: password.value),
+        isStaff: true,
       );
     }
 
