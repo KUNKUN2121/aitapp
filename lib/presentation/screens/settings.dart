@@ -1,6 +1,8 @@
 import 'package:aitapp/application/state/setting_int_provider.dart';
+import 'package:aitapp/application/usecases/main_drawer_usecase.dart';
 import 'package:aitapp/infrastructure/database/timetable_database.dart';
 import 'package:aitapp/presentation/screens/license.dart';
+import 'package:aitapp/presentation/screens/login.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -9,6 +11,7 @@ class Settings extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final usecase = MainDrawerUseCase(ref, context);
     return Scaffold(
       appBar: AppBar(
         scrolledUnderElevation: 0,
@@ -104,8 +107,49 @@ class Settings extends ConsumerWidget {
               );
             },
           ),
+          const Divider(),
+          ListTile(
+            leading: const Icon(Icons.refresh),
+            title: const Text('再ログイン'),
+            onTap: () {
+              usecase.reLogin(const LoginScreen());
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.logout),
+            title: const Text('ログアウト'),
+            onTap: () => _confirmLogout(context, usecase),
+          ),
         ],
       ),
+    );
+  }
+
+  /// 認証情報を削除する前に確認ダイアログを表示する。
+  void _confirmLogout(BuildContext context, MainDrawerUseCase usecase) {
+    showDialog<void>(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: const Text('ログアウト'),
+          content: const Text('保存された認証情報を削除します。よろしいですか？'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(dialogContext).pop();
+              },
+              child: const Text('キャンセル'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(dialogContext).pop();
+                usecase.removeIdentity(const LoginScreen());
+              },
+              child: const Text('ログアウト'),
+            ),
+          ],
+        );
+      },
     );
   }
 }

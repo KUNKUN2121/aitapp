@@ -5,6 +5,8 @@ import 'package:aitapp/application/state/link_tap_provider.dart';
 import 'package:aitapp/application/state/select_syllabus_filter/select_syllabus_filter.dart';
 import 'package:aitapp/application/state/shared_preference_provider.dart';
 import 'package:aitapp/domain/types/last_login.dart';
+import 'package:aitapp/domain/types/web_access.dart';
+import 'package:aitapp/presentation/screens/webview.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -94,6 +96,13 @@ class MainDrawerUseCase {
 
   Future<void> openWebView(Widget widget) async {
     await go(widget);
+    ref.read(lastLoginNotifierProvider.notifier).changeState(LastLogin.others);
+  }
+
+  /// 特定の学内Webページ([WebAccessLink])を直接WebViewで開く。
+  /// アンケートなど、一覧を経由せずホームから開く用途で使う。
+  Future<void> openWebLink(WebAccessLink link) async {
+    await go(WebViewScreen(title: link.title, url: link.url));
     ref.read(lastLoginNotifierProvider.notifier).changeState(LastLogin.others);
   }
 }

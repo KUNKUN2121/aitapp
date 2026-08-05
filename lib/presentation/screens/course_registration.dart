@@ -8,7 +8,7 @@ class CourseRegistration extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('履修/アンケート/成績')),
+      appBar: AppBar(title: const Text('履修/成績')),
       body: ListView(
         children: [
           for (final webAccessLink in webAccessLinks) ...{

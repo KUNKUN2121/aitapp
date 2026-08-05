@@ -905,6 +905,24 @@ const office365Host = 'outlook.office.com';
 /// 愛工大アカウントのメールドメイン。login_hint のローカル部に付与する。
 const aitechMailDomain = 'aitech.ac.jp';
 
+// 各アンケートへのリンク。ホームからも直接開けるよう名前付き定数にしている。
+const classEnqueteLink = WebAccessLink(
+  title: '授業アンケート',
+  icon: Icons.assignment,
+  url: '/portalv2/smartphone/smartPhoneContactNotice/nextPage/classEnquete/',
+);
+const courseEvaluationLink = WebAccessLink(
+  title: '授業評価アンケート',
+  icon: Icons.assignment,
+  url:
+      '/portalv2/smartphone/smartPhoneContactNotice/nextPage/courseEvaluation/',
+);
+const enqueteContactLink = WebAccessLink(
+  title: '学内アンケート',
+  icon: Icons.assignment,
+  url: '/portalv2/smartphone/smartPhoneContactNotice/nextPage/enqueteContact/',
+);
+
 const List<WebAccessLink> webAccessLinks = [
   WebAccessLink(
     title: '履修登録',
@@ -925,23 +943,6 @@ const List<WebAccessLink> webAccessLinks = [
     title: '抽選履修登録結果',
     icon: Icons.event,
     url: '/portalv2/smartphone/smartPhoneHome/nextPage/lotteryRegistResult/',
-  ),
-  WebAccessLink(
-    title: '授業アンケート',
-    icon: Icons.assignment,
-    url: '/portalv2/smartphone/smartPhoneContactNotice/nextPage/classEnquete/',
-  ),
-  WebAccessLink(
-    title: '授業評価アンケート',
-    icon: Icons.assignment,
-    url:
-        '/portalv2/smartphone/smartPhoneContactNotice/nextPage/courseEvaluation/',
-  ),
-  WebAccessLink(
-    title: '学内アンケート',
-    icon: Icons.assignment,
-    url:
-        '/portalv2/smartphone/smartPhoneContactNotice/nextPage/enqueteContact/',
   ),
   WebAccessLink(
     title: '成績照会',

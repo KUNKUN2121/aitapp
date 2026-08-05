@@ -5,7 +5,6 @@ import 'package:aitapp/presentation/screens/campus_map.dart';
 import 'package:aitapp/presentation/screens/contacts.dart';
 import 'package:aitapp/presentation/screens/course_registration.dart';
 import 'package:aitapp/presentation/screens/links.dart';
-import 'package:aitapp/presentation/screens/login.dart';
 import 'package:aitapp/presentation/screens/open_asset_pdf.dart';
 import 'package:aitapp/presentation/screens/settings.dart';
 import 'package:aitapp/presentation/screens/syllabus_search.dart';
@@ -87,7 +86,7 @@ class MainDrawer extends ConsumerWidget {
               const Divider(),
               DrawerTile(
                 icon: Icons.event,
-                title: '履修/アンケート/成績',
+                title: '履修/成績',
                 onTap: () {
                   usecase.openWebView(const CourseRegistration());
                 },
@@ -112,43 +111,6 @@ class MainDrawer extends ConsumerWidget {
                 title: '設定',
                 onTap: () {
                   usecase.go(const Settings());
-                },
-              ),
-              DrawerTile(
-                icon: Icons.refresh,
-                title: '再ログイン',
-                onTap: () {
-                  usecase.reLogin(const LoginScreen());
-                },
-              ),
-              DrawerTile(
-                icon: Icons.logout,
-                title: 'ログアウト',
-                onTap: () {
-                  showDialog<void>(
-                    context: context,
-                    builder: (dialogContext) {
-                      return AlertDialog(
-                        title: const Text('ログアウト'),
-                        content: const Text('保存された認証情報を削除します。よろしいですか？'),
-                        actions: [
-                          TextButton(
-                            onPressed: () {
-                              Navigator.of(dialogContext).pop();
-                            },
-                            child: const Text('キャンセル'),
-                          ),
-                          TextButton(
-                            onPressed: () {
-                              Navigator.of(dialogContext).pop();
-                              usecase.removeIdentity(const LoginScreen());
-                            },
-                            child: const Text('ログアウト'),
-                          ),
-                        ],
-                      );
-                    },
-                  );
                 },
               ),
             ],

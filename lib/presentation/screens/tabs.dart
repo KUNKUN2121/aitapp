@@ -1,5 +1,6 @@
 import 'package:aitapp/application/state/tab_button_provider.dart';
 import 'package:aitapp/presentation/screens/class_timetable.dart';
+import 'package:aitapp/presentation/screens/home.dart';
 import 'package:aitapp/presentation/screens/notices.dart';
 import 'package:aitapp/presentation/screens/timetable_screen.dart';
 import 'package:aitapp/presentation/wighets/drawer.dart';
@@ -9,15 +10,16 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 class TabScreen extends HookConsumerWidget {
   const TabScreen({super.key});
-  static const currentPages = [
-    NoticeScreen(),
-    ClassTimeTableScreen(),
-    TimeTableScreen(),
-  ];
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final currentPageIndex = useState(0);
+    final currentPages = [
+      HomeScreen(onSelectTab: (index) => currentPageIndex.value = index),
+      const NoticeScreen(),
+      const ClassTimeTableScreen(),
+      const TimeTableScreen(),
+    ];
     return Scaffold(
       drawer: const MainDrawer(),
       body: SafeArea(child: currentPages[currentPageIndex.value]),
@@ -26,6 +28,10 @@ class TabScreen extends HookConsumerWidget {
         selectedItemColor: Theme.of(context).colorScheme.primary,
         unselectedItemColor: Colors.grey,
         items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'ホーム',
+          ),
           BottomNavigationBarItem(
             icon: Icon(Icons.article),
             label: 'お知らせ',
