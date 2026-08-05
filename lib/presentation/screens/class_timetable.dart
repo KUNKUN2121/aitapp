@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:aitapp/application/state/class_timetable/class_timetable.dart';
+import 'package:aitapp/application/state/class_timetable/timetable_fetched_provider.dart';
 import 'package:aitapp/domain/types/semester.dart';
 import 'package:aitapp/presentation/wighets/appbar.dart';
 import 'package:aitapp/presentation/wighets/class_timetable_item.dart';
@@ -15,6 +16,11 @@ class ClassTimeTableScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final asyncValue = ref.watch(classTimeTableNotifierProvider);
     final notifier = ref.read(classTimeTableNotifierProvider.notifier);
+    final fetched = ref.watch(timetableFetchedProvider);
+    // 一度も取得していない場合は自動取得せず、情報取得ボタンを表示する。
+    if (!fetched) {
+      return _InitialFetchPrompt(onFetch: notifier.fetchData);
+    }
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 100),
       child: asyncValue.when(
@@ -154,7 +160,8 @@ class ClassTimeTableScreen extends ConsumerWidget {
                         Icons.refresh,
                         color: Theme.of(context).colorScheme.primary,
                       ),
-                      onPressed: notifier.fetchData,
+                      onPressed: () =>
+                          _confirmRefetch(context, notifier.fetchData),
                     ),
                   ],
                 ),
@@ -167,6 +174,83 @@ class ClassTimeTableScreen extends ConsumerWidget {
               child: TimeTable(
                 classData: notifier.selectClassData,
               ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// 再取得の前に確認ダイアログを表示する。時間がかかる旨を伝える。
+void _confirmRefetch(BuildContext context, Future<void> Function() onRefetch) {
+  showDialog<void>(
+    context: context,
+    builder: (dialogContext) {
+      return AlertDialog(
+        title: const Text('時間割を再取得'),
+        content: const Text(
+          '過去の年度分も含めて取得し直すため、完了まで時間がかかります。'
+          '取得中はアプリを閉じたりスリープさせないでください。よろしいですか？',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: const Text('キャンセル'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(dialogContext).pop();
+              onRefetch();
+            },
+            child: const Text('再取得'),
+          ),
+        ],
+      );
+    },
+  );
+}
+
+/// 初回の時間割取得を促す画面。ボタンを押すと取得が始まる。
+class _InitialFetchPrompt extends StatelessWidget {
+  const _InitialFetchPrompt({required this.onFetch});
+
+  final Future<void> Function() onFetch;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.school_outlined,
+              size: 64,
+              color: theme.colorScheme.primary,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              '時間割を取得しましょう',
+              style: theme.textTheme.titleMedium
+                  ?.copyWith(fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '過去の年度分も含めて取得するため、完了まで少し時間がかかります。'
+              '取得中はアプリを閉じたりスリープさせないでください。',
+              textAlign: TextAlign.center,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 24),
+            FilledButton.icon(
+              onPressed: onFetch,
+              icon: const Icon(Icons.download),
+              label: const Text('情報取得'),
             ),
           ],
         ),

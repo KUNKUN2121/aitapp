@@ -1,10 +1,8 @@
 import 'package:aitapp/application/state/identity_provider.dart';
-import 'package:aitapp/application/state/last_login/last_login.dart';
-import 'package:aitapp/domain/features/get_lcam_data.dart';
+import 'package:aitapp/application/usecases/session_reauth.dart';
 import 'package:aitapp/domain/features/get_moodle_data.dart';
 import 'package:aitapp/domain/types/calendar_state.dart';
 import 'package:aitapp/domain/types/event.dart';
-import 'package:aitapp/domain/types/last_login.dart';
 import 'package:aitapp/infrastructure/database/event_database.dart';
 import 'package:aitapp/presentation/dialogs/select_calendar_dialog.dart'; // Add this import
 import 'package:device_calendar/device_calendar.dart';
@@ -40,22 +38,21 @@ class ScheduleNotifier extends _$ScheduleNotifier {
   // 既存データは削除せず、新しい予定のみ追加する
   Future<void> fetchData() async {
     try {
-      final id = ref.read(identityProvider);
-      if (id == null) {
+      if (ref.read(identityProvider) == null) {
         throw Exception('ログインIDが取得できません');
       }
 
       final db = EventDatabase.instance;
+      final reauth = ref.read(sessionReauthenticatorProvider);
 
-      // LCAMからのデータ取得
-      final lcamData = GetPCLcamData();
-      await lcamData.create(id.id, id.password);
-      ref
-          .read(lastLoginNotifierProvider.notifier)
-          .changeState(LastLogin.others);
-      final lcamEvents = await lcamData.getShedule();
+      // LCAMからのデータ取得(仮パスワード失効時は一度だけ再認証してリトライ)
+      final lcamEvents = await runWithReauth(reauth, () async {
+        final lcamData = await loginPcLcam(ref);
+        return lcamData.getShedule();
+      });
 
-      // Moodleからのデータ取得
+      // Moodleからのデータ取得(再認証後の最新パスワードを使う)
+      final id = ref.read(identityProvider)!;
       final moodleData = GetMoodleData();
       await moodleData.create(id.id, id.password);
       final moodleEvents = await moodleData.getAssignments();

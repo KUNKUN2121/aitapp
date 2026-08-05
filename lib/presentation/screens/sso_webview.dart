@@ -1,6 +1,7 @@
 import 'package:aitapp/application/config/const.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:webview_cookie_manager/webview_cookie_manager.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 /// EntraID SSOのサインイン画面をアプリ内WebViewで表示する。
@@ -12,9 +13,13 @@ import 'package:webview_flutter/webview_flutter.dart';
 /// - サインイン成功: `key` (String) を返して pop
 /// - ユーザーが戻る/閉じた: null を返して pop
 ///
-/// Cookieは意図的にクリアしない。Entraのセッションを保持することで、仮パスワード
+/// Cookieは基本的にクリアしない。Entraのセッションを保持することで、仮パスワード
 /// が期限切れ(12時間)になった際もMicrosoftの認証プロンプトなしで自動的に
-/// 再ログインできる。Cookieの削除はログアウト時のみ行う。
+/// 再ログインできる。
+///
+/// 例外として、蓄積したSSO Cookieでサイレント認証が壊れ、SAML受け口(mellon)が
+/// 400を返した場合のみ、その場でCookie/キャッシュを消して対話ログインへ
+/// フォールバックする(自己修復。onHttpError を参照)。
 class SsoWebViewScreen extends HookWidget {
   const SsoWebViewScreen({super.key});
 
@@ -22,14 +27,19 @@ class SsoWebViewScreen extends HookWidget {
   Widget build(BuildContext context) {
     final isLoading = useState(true);
 
+    // mellonの400を検知した際の自己修復(Cookieクリア→再試行)は一度だけ行う。
+    // 無限ループを防ぐためのガード。
+    final hasRecovered = useRef(false);
+
     final controller = useMemoized(() {
-      return WebViewController()
+      final webController = WebViewController()
         ..setJavaScriptMode(JavaScriptMode.unrestricted)
         // 埋め込みWebViewでのMicrosoftログイン制限を避けるため通常ブラウザのUAを指定
         ..setUserAgent(
           'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 '
           '(KHTML, like Gecko) Chrome/125.0.0.0 Mobile Safari/537.36',
-        )
+        );
+      webController
         ..setNavigationDelegate(
           NavigationDelegate(
             onNavigationRequest: (request) {
@@ -46,9 +56,26 @@ class SsoWebViewScreen extends HookWidget {
             },
             onPageStarted: (_) => isLoading.value = true,
             onPageFinished: (_) => isLoading.value = false,
+            // SAML受け口(mod_auth_mellon)で400になるのは、蓄積したMicrosoftの
+            // SSO Cookieでサイレント認証が壊れた状態(Apacheが不正リクエストとして
+            // 弾く)。この場合はCookie/キャッシュを消して対話ログインからやり直す。
+            onHttpError: (error) async {
+              final uri = error.response?.uri ?? error.request?.uri;
+              if (error.response?.statusCode == 400 &&
+                  (uri?.path.contains('/mellon/postResponse') ?? false) &&
+                  !hasRecovered.value) {
+                hasRecovered.value = true;
+                debugPrint('[SSO] mellon 400検知 → Cookie/キャッシュ削除して再試行');
+                await WebviewCookieManager().clearCookies();
+                await webController.clearCache();
+                await webController.clearLocalStorage();
+                await webController.loadRequest(Uri.parse(ssoAuthUrl));
+              }
+            },
           ),
         )
         ..loadRequest(Uri.parse(ssoAuthUrl));
+      return webController;
     });
 
     return Scaffold(

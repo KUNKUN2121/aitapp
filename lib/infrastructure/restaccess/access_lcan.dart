@@ -1,9 +1,11 @@
 // ignore_for_file: lines_longer_than_80_chars
 
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:aitapp/application/config/const.dart';
 import 'package:aitapp/domain/types/cookies.dart';
+import 'package:aitapp/domain/types/exception.dart';
 import 'package:aitapp/domain/types/identity.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -33,16 +35,25 @@ const contentTypeHeader = {
   'Content-Type': 'application/x-www-form-urlencoded',
 };
 
+/// 1リクエストあたりのタイムアウト。無応答で「ずっとロード」になるのを防ぐ。
+const _httpTimeout = Duration(seconds: 30);
+
 Future<Response> httpAccess(
   Uri uri, {
   required Map<String, String> headers,
   Map<String, String>? body,
 }) async {
   late final Response res;
-  if (body != null) {
-    res = await http.post(uri, headers: headers, body: body);
-  } else {
-    res = await http.get(uri, headers: headers);
+  try {
+    if (body != null) {
+      res = await http
+          .post(uri, headers: headers, body: body)
+          .timeout(_httpTimeout);
+    } else {
+      res = await http.get(uri, headers: headers).timeout(_httpTimeout);
+    }
+  } on TimeoutException {
+    throw const GetDataException('通信がタイムアウトしました。電波状況を確認してください');
   }
   if (res.statusCode != 200) {
     throw Exception('http.get error: statusCode= ${res.statusCode}');

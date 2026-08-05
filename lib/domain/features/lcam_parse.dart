@@ -9,8 +9,55 @@ import 'package:aitapp/domain/types/event.dart';
 import 'package:aitapp/domain/types/exception.dart';
 import 'package:aitapp/domain/types/univ_notice.dart';
 import 'package:aitapp/domain/types/univ_notice_detail.dart';
+import 'package:flutter/foundation.dart';
 import 'package:universal_html/html.dart';
 import 'package:universal_html/parsing.dart';
+
+/// レスポンス本文がLCAMの「未ログイン」ページかどうかを判定する。
+///
+/// 仮パスワードが失効すると、サーバは認証済みページの代わりに
+/// `<body id="login">` を持つ「ログインされていないため…」の小さなページを返す。
+bool isNotLoggedInPage(String body) {
+  if (body.contains('ログインされていないため')) {
+    return true;
+  }
+  return parseHtmlDocument(body).querySelector('body')?.id == 'login';
+}
+
+/// トークン抽出などに失敗したとき、レスポンス本文の手がかりをログに出す。
+///
+/// 認証切れ(ログイン画面が返ってきている)なのか、HTML構造が変わったのかを
+/// 切り分けるための調査用。リリースビルドでは出力されない(debugPrint)。
+void debugDumpBody(String tag, String body) {
+  final doc = parseHtmlDocument(body);
+  final title = doc.querySelector('title')?.text?.trim() ?? '(no title)';
+  // ログイン/認証切れの手がかりになりそうな要素を軽く判定する。
+  final hasErrorInfo = doc.querySelectorAll('#_errorInformation').isNotEmpty;
+  final hasPasswordField =
+      doc.querySelectorAll('input[type="password"]').isNotEmpty;
+  final looksLikeLogin = hasPasswordField ||
+      body.contains('login') ||
+      body.contains('ログイン') ||
+      body.contains('SSO') ||
+      body.contains('shibboleth');
+  // 連続する空白・改行を1つに潰し、意味のあるタグだけ見えるようにする。
+  final collapsed = body.replaceAll(RegExp(r'\s+'), ' ').trim();
+  // meta refresh / JS リダイレクト先の手がかりを拾う。
+  final metaRefresh =
+      doc.querySelector('meta[http-equiv="refresh"]')?.attributes['content'];
+  debugPrint(
+    '[$tag] token抽出失敗: title="$title" '
+    'len=${body.length} errorInfo=$hasErrorInfo '
+    'passwordField=$hasPasswordField looksLikeLogin=$looksLikeLogin '
+    'metaRefresh=$metaRefresh',
+  );
+  // debugPrint は長い行を切るため、800字ずつに分割して全文出す。
+  const chunk = 800;
+  for (var i = 0; i < collapsed.length; i += chunk) {
+    final end = (i + chunk < collapsed.length) ? i + chunk : collapsed.length;
+    debugPrint('[$tag] body[$i-$end]: ${collapsed.substring(i, end)}');
+  }
+}
 
 class LcamParse {
   bool isLogin(String body) {
@@ -426,6 +473,10 @@ class LcamParse {
     );
     final value = input?.attributes['value'];
     if (value == null || value.isEmpty) {
+      if (isNotLoggedInPage(body)) {
+        throw const SessionExpiredException();
+      }
+      debugDumpBody('portalStrutsToken', body);
       throw const GetDataException('[portalStrutsToken]データの取得に失敗しました');
     }
     return value;
@@ -449,6 +500,10 @@ class LcamParse {
         }
       }
     }
+    if (isNotLoggedInPage(body)) {
+      throw const SessionExpiredException();
+    }
+    debugDumpBody('parseLcamStrutsToken', body);
     throw const GetDataException('[parseLcamStrutsToken]データの取得に失敗しました');
   }
 

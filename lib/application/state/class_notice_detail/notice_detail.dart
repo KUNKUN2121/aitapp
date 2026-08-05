@@ -1,6 +1,8 @@
 import 'dart:io';
 
 import 'package:aitapp/application/state/get_lcam_data/get_lcam_data.dart';
+import 'package:aitapp/application/usecases/session_reauth.dart';
+import 'package:aitapp/domain/types/exception.dart';
 import 'package:aitapp/domain/types/notice_detail.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -28,7 +30,11 @@ class NoticeDetailNotifier extends _$NoticeDetailNotifier {
       state = AsyncValue.data(result);
     } on SocketException catch (err, stack) {
       state = AsyncValue.error(err, stack);
-    } on Exception {
+    } on Exception catch (err) {
+      // 仮パスワード失効なら、以降の再ログインで新パスワードを使えるよう先に再認証。
+      if (err is SessionExpiredException) {
+        await ref.read(sessionReauthenticatorProvider).reauthenticate();
+      }
       try {
         await ref.read(getLcamDataNotifierProvider.notifier).create();
         final noticelist = await getLcamData.getNoticelist(

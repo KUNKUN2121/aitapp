@@ -24,7 +24,13 @@ class WebViewScreen extends ConsumerWidget {
       // ログイン処理
       await ref.read(getLcamDataNotifierProvider.notifier).create();
 
-      // 以前登録されたcookieを削除する
+      // 以前登録されたcookieを削除する。
+      // SSO/mellonフロー由来の古いJSESSIONID(ホスト限定Cookie)が残っていると、
+      // 注入する認証済みセッションと二重になり、サーバが未ログイン扱いに
+      // なってしまう(履修/アンケート/成績が開けなくなる)。ここで全消しして
+      // クリーンな状態に注入する。
+      // 副作用でEntra(SSO)のCookieも消えるが、その場合の再ログインは
+      // SessionExpired検知→SSO再認証(対話ログイン)とmellon400の自己修復で担保する。
       await cookieManager.clearCookies();
 
       await cookieManager.setCookies([

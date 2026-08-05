@@ -4,12 +4,14 @@ import 'dart:io';
 import 'package:aitapp/application/state/identity_provider.dart';
 import 'package:aitapp/application/state/setting_int_provider.dart';
 import 'package:aitapp/application/state/shared_preference_provider.dart';
+import 'package:aitapp/application/usecases/session_reauth.dart';
 import 'package:aitapp/domain/types/identity.dart';
 import 'package:aitapp/infrastructure/restaccess/access_latest_version.dart';
 import 'package:aitapp/presentation/dialogs/update_dialog.dart';
 import 'package:aitapp/presentation/screens/login.dart';
 import 'package:aitapp/presentation/screens/tabs.dart';
 import 'package:aitapp/presentation/theme/theme.dart';
+import 'package:aitapp/presentation/wighets/timetable_fetch_overlay.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -50,6 +52,7 @@ class App extends ConsumerWidget {
     final themeMode = ref.watch(settingIntProvider)!['colorTheme']!;
 
     return MaterialApp(
+      navigatorKey: navigatorKey,
       theme: buildThemeLight(),
       darkTheme: buildThemeDark(),
       themeMode: switch (themeMode) {
@@ -59,6 +62,17 @@ class App extends ConsumerWidget {
         _ => ThemeMode.system,
       },
       home: const InitHome(),
+      // 時間割取得中は全画面オーバーレイでアプリ全体の操作をブロックする。
+      // builder は Navigator の外側に重なるため、タブ・ドロワー・ダイアログを
+      // 含む全操作を確実に無効化できる。
+      builder: (context, child) {
+        return Stack(
+          children: [
+            if (child != null) child,
+            const TimetableFetchOverlay(),
+          ],
+        );
+      },
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,

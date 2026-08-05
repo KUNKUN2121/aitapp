@@ -130,7 +130,10 @@ class GetPCLcamData {
   }
 
   Future<Map<int, Map<Semester, Map<DayOfWeek, Map<int, Class>>>>>
-      getClassTimeTable() async {
+      getClassTimeTable({
+    void Function(int current, int total, String message)? onProgress,
+    bool Function()? isCancelled,
+  }) async {
     final generalPurposeResult =
         await generalPurpose(cookies: cookies, token: token!);
     final result = <int, Map<Semester, Map<DayOfWeek, Map<int, Class>>>>{};
@@ -141,6 +144,9 @@ class GetPCLcamData {
     // (Strutsトークンは1リクエストごとに更新が必要なため毎回抽出する)
     const maxLookbackYears = 5;
     final currentYear = AcademicYear.getCurrent();
+    // 進捗バーの分母。全年度×前期/後期を走査した場合の最大ステップ数。
+    const totalSteps = (maxLookbackYears + 1) * 2;
+    var step = 0;
     // 現在年度は履修が無くても必ず表示する(最新=空の時間割として出す)
     result[currentYear] = {
       Semester.early: {},
@@ -158,6 +164,16 @@ class GetPCLcamData {
         year--) {
       var yearHasData = false;
       for (final semester in [Semester.early, Semester.late]) {
+        // リクエストの境目でキャンセルをチェックし、要求されていれば中断する。
+        if (isCancelled?.call() ?? false) {
+          throw const TimetableFetchCancelledException();
+        }
+        onProgress?.call(
+          step,
+          totalSteps,
+          '$year年度 ${semester.displayName}を取得中…',
+        );
+        step++;
         final semesterCode = semester == Semester.early ? '1' : '2';
         final body = await searchTimeTable(
           cookies: cookies,
@@ -252,8 +268,7 @@ class GetPCLcamData {
       result[dayEntry.key] = <int, Class>{};
       for (final periodEntry in dayEntry.value.entries) {
         final clas = periodEntry.value;
-        final dispCode =
-            codes[LcamParse.normalizeSubjectName(clas.title)];
+        final dispCode = codes[LcamParse.normalizeSubjectName(clas.title)];
         result[dayEntry.key]![periodEntry.key] = dispCode == null
             ? clas
             : clas.copyWith(

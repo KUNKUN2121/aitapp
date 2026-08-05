@@ -4,7 +4,9 @@ import 'package:aitapp/application/state/get_lcam_data/get_lcam_data.dart';
 import 'package:aitapp/application/state/last_login/last_login.dart';
 import 'package:aitapp/application/state/notice_load/notice_load.dart';
 import 'package:aitapp/application/state/univ_notice/univ_notice.dart';
+import 'package:aitapp/application/usecases/session_reauth.dart';
 import 'package:aitapp/domain/types/class_notice.dart';
+import 'package:aitapp/domain/types/exception.dart';
 import 'package:aitapp/domain/types/last_login.dart';
 import 'package:aitapp/domain/types/notice.dart';
 import 'package:aitapp/domain/types/notice_catche.dart';
@@ -91,6 +93,10 @@ class LoadNoticeListUseCase {
       }
     } on Exception catch (err) {
       if (!isRetry) {
+        // 仮パスワード失効なら、再ログイン前に再認証して新パスワードへ更新する。
+        if (err is SessionExpiredException) {
+          await ref.read(sessionReauthenticatorProvider).reauthenticate();
+        }
         await load(
           withLogin: true,
           isRetry: true,
