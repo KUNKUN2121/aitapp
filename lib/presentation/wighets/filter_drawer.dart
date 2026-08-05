@@ -10,6 +10,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
+/// ドロップダウンで「指定なし(フィルタ解除)」を表すセンチネル値。
+const _noneFilterValue = '__none__';
+
 class FilterDrawer extends HookConsumerWidget {
   const FilterDrawer({
     super.key,
@@ -27,26 +30,45 @@ class FilterDrawer extends HookConsumerWidget {
     final selectSyllabusFilters =
         useState(ref.read(selectSyllabusFilterNotifierProvider));
     List<DropdownMenuItem<String>> getDropdownMenuItem(
-      Map<String, String> filters,
-    ) {
-      return filters.entries
-          .map(
-            (entry) => DropdownMenuItem(
-              value: entry.value,
-              child: Text(entry.key),
-            ),
-          )
-          .toList();
+      Map<String, String> filters, {
+      bool withNone = false,
+    }) {
+      return [
+        if (withNone)
+          const DropdownMenuItem(
+            value: _noneFilterValue,
+            child: Text('指定なし'),
+          ),
+        ...filters.entries.map(
+          (entry) => DropdownMenuItem(
+            value: entry.value,
+            child: Text(entry.key),
+          ),
+        ),
+      ];
     }
 
     void clear() {
-      selectSyllabusFilters.value = selectSyllabusFilters.value?.copyWith(
+      if (filtersProvider == null) {
+        return;
+      }
+      final latestYear = filtersProvider.year.values.first;
+      final current = selectSyllabusFilters.value;
+      selectSyllabusFilters.value = current?.copyWith(
+        year: latestYear,
         campus: null,
         folder: null,
         hour: null,
         semester: null,
         week: null,
       );
+      // 年度が変わる場合は年度別のフィルタ候補も更新する。
+      if (current?.year != latestYear) {
+        ref.read(syllabusFiltersNotifierProvider.notifier).changeYear(
+              year: latestYear,
+              getSyllabus: getSyllabus,
+            );
+      }
     }
 
     useEffect(
@@ -102,12 +124,17 @@ class FilterDrawer extends HookConsumerWidget {
                     ListTile(
                       title: const Text('学部'),
                       trailing: DropdownButton(
-                        value: selectSyllabusFilters.value?.folder,
-                        items: getDropdownMenuItem(filtersProvider.folder),
+                        value: selectSyllabusFilters.value?.folder ??
+                            _noneFilterValue,
+                        items: getDropdownMenuItem(
+                          filtersProvider.folder,
+                          withNone: true,
+                        ),
                         onChanged: (item) {
-                          selectSyllabusFilters.value = selectSyllabusFilters
-                              .value
-                              ?.copyWith(folder: item);
+                          selectSyllabusFilters.value =
+                              selectSyllabusFilters.value?.copyWith(
+                            folder: item == _noneFilterValue ? null : item,
+                          );
                         },
                       ),
                     ),
@@ -115,14 +142,20 @@ class FilterDrawer extends HookConsumerWidget {
                       title: const Text('キャンパス'),
                       trailing: DropdownButton(
                         value: selectSyllabusFilters.value?.campus?.num
-                            .toStringOrNull(),
-                        items: getDropdownMenuItem(filtersProvider.campus),
+                                .toStringOrNull() ??
+                            _noneFilterValue,
+                        items: getDropdownMenuItem(
+                          filtersProvider.campus,
+                          withNone: true,
+                        ),
                         onChanged: (item) {
                           selectSyllabusFilters.value =
                               selectSyllabusFilters.value?.copyWith(
-                            campus: Campus.values.firstWhere(
-                              (element) => element.num.toString() == item,
-                            ),
+                            campus: item == _noneFilterValue
+                                ? null
+                                : Campus.values.firstWhere(
+                                    (element) => element.num.toString() == item,
+                                  ),
                           );
                         },
                       ),
@@ -131,14 +164,20 @@ class FilterDrawer extends HookConsumerWidget {
                       title: const Text('開講学期'),
                       trailing: DropdownButton(
                         value: selectSyllabusFilters.value?.semester?.num
-                            .toStringOrNull(),
-                        items: getDropdownMenuItem(filtersProvider.semester),
+                                .toStringOrNull() ??
+                            _noneFilterValue,
+                        items: getDropdownMenuItem(
+                          filtersProvider.semester,
+                          withNone: true,
+                        ),
                         onChanged: (item) {
                           selectSyllabusFilters.value =
                               selectSyllabusFilters.value?.copyWith(
-                            semester: Semester.values.firstWhere(
-                              (element) => element.num.toString() == item,
-                            ),
+                            semester: item == _noneFilterValue
+                                ? null
+                                : Semester.values.firstWhere(
+                                    (element) => element.num.toString() == item,
+                                  ),
                           );
                         },
                       ),
@@ -147,14 +186,20 @@ class FilterDrawer extends HookConsumerWidget {
                       title: const Text('曜日'),
                       trailing: DropdownButton(
                         value: selectSyllabusFilters.value?.week?.num
-                            .toStringOrNull(),
-                        items: getDropdownMenuItem(filtersProvider.week),
+                                .toStringOrNull() ??
+                            _noneFilterValue,
+                        items: getDropdownMenuItem(
+                          filtersProvider.week,
+                          withNone: true,
+                        ),
                         onChanged: (item) {
                           selectSyllabusFilters.value =
                               selectSyllabusFilters.value?.copyWith(
-                            week: DayOfWeek.values.firstWhere(
-                              (element) => element.num.toString() == item,
-                            ),
+                            week: item == _noneFilterValue
+                                ? null
+                                : DayOfWeek.values.firstWhere(
+                                    (element) => element.num.toString() == item,
+                                  ),
                           );
                         },
                       ),
@@ -162,13 +207,19 @@ class FilterDrawer extends HookConsumerWidget {
                     ListTile(
                       title: const Text('時限'),
                       trailing: DropdownButton(
-                        value:
-                            selectSyllabusFilters.value?.hour.toStringOrNull(),
-                        items: getDropdownMenuItem(filtersProvider.hour),
+                        value: selectSyllabusFilters.value?.hour
+                                .toStringOrNull() ??
+                            _noneFilterValue,
+                        items: getDropdownMenuItem(
+                          filtersProvider.hour,
+                          withNone: true,
+                        ),
                         onChanged: (item) {
                           selectSyllabusFilters.value =
                               selectSyllabusFilters.value?.copyWith(
-                            hour: int.tryParse(item!),
+                            hour: item == _noneFilterValue
+                                ? null
+                                : int.tryParse(item!),
                           );
                         },
                       ),

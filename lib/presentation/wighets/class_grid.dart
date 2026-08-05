@@ -1,11 +1,13 @@
 // 授業
+import 'package:aitapp/application/state/class_timetable/class_timetable.dart';
 import 'package:aitapp/domain/types/class.dart';
 import 'package:aitapp/domain/types/day_of_week.dart';
-import 'package:aitapp/presentation/screens/syllabus_filter.dart';
+import 'package:aitapp/presentation/screens/syllabus_search.dart';
 import 'package:aitapp/utils/extended_string.dart';
 import 'package:flutter/material.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-class ClassGridContainer extends StatelessWidget {
+class ClassGridContainer extends ConsumerWidget {
   const ClassGridContainer({
     required this.dayOfWeek,
     required this.classPeriod,
@@ -18,17 +20,25 @@ class ClassGridContainer extends StatelessWidget {
   final Class? clas;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return GestureDetector(
       onTap: () {
+        final subjectCode = clas?.subjectCode;
+        final classCode = clas?.classCode;
+        final hasCode = subjectCode != null && classCode != null;
+        // 授業コードがあれば一意に特定できるためコードのみで検索する
+        // (集中講義・通年で曜日/時限が一致せず0件になるのを防ぐ)。
+        // 空きコマのときは曜日+時限でその枠の授業一覧を表示する。
+        final word = hasCode ? '$subjectCode $classCode' : null;
+        final selectYear =
+            ref.read(classTimeTableNotifierProvider.notifier).selectYear;
         Navigator.of(context).push(
           MaterialPageRoute<void>(
-            builder: (ctx) => SyllabusFilterScreen(
-              dayOfWeek: dayOfWeek,
-              classPeriod: classPeriod,
-              teacher: clas?.teacher,
-              subjectCode: clas?.subjectCode,
-              classCode: clas?.classCode,
+            builder: (ctx) => SyllabusSearchScreen(
+              initialWord: word,
+              initialWeek: hasCode ? null : dayOfWeek,
+              initialHour: hasCode ? null : classPeriod,
+              initialYear: selectYear,
             ),
           ),
         );

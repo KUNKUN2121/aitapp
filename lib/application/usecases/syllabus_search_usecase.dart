@@ -5,8 +5,10 @@ import 'package:aitapp/application/state/syllabus_filter/syllabus_filters.dart';
 import 'package:aitapp/application/state/syllabus_search/syllabus_search.dart';
 import 'package:aitapp/domain/features/get_syllabus.dart';
 import 'package:aitapp/domain/types/class_syllabus.dart';
+import 'package:aitapp/domain/types/day_of_week.dart';
 import 'package:aitapp/domain/types/select_syllabus_filters.dart';
 import 'package:async/async.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -16,12 +18,21 @@ class SyllabusSearchUseCase {
     required this.getSyllabus,
     required this.controller,
     required this.ref,
+    this.presetWord,
+    this.presetWeek,
+    this.presetHour,
+    this.presetYear,
   }) {
     getFilters();
   }
   final GetSyllabus getSyllabus;
   final TextEditingController controller;
   final WidgetRef ref;
+  // 時間割などからプリセットで開かれたときの初期条件。
+  final String? presetWord;
+  final DayOfWeek? presetWeek;
+  final int? presetHour;
+  final int? presetYear;
   CancelableOperation<List<ClassSyllabus>>? loadOperation;
 
   void refresh() {
@@ -52,11 +63,44 @@ class SyllabusSearchUseCase {
       await ref
           .read(syllabusFiltersNotifierProvider.notifier)
           .create(getSyllabus);
+      // セッション確立後にプリセット条件を反映して検索する。
+      _applyPresetIfNeeded();
     } on SocketException {
       await Fluttertoast.showToast(msg: 'インターネットに接続できません');
     } on Exception catch (err) {
       await Fluttertoast.showToast(msg: err.toString());
     }
+  }
+
+  void _applyPresetIfNeeded() {
+    final hasPreset =
+        presetWord != null || presetWeek != null || presetHour != null;
+    if (!hasPreset) {
+      return;
+    }
+    final filters = ref.read(syllabusFiltersNotifierProvider);
+    if (filters == null) {
+      return;
+    }
+    var yearValue = ref.read(selectSyllabusFilterNotifierProvider)?.year ??
+        filters.year.values.first;
+    if (presetYear != null) {
+      final yearKey = filters.year.keys
+          .firstWhereOrNull((k) => k.startsWith('$presetYear'));
+      if (yearKey != null) {
+        yearValue = filters.year[yearKey]!;
+      }
+    }
+    controller.text = presetWord ?? '';
+    ref.read(selectSyllabusFilterNotifierProvider.notifier).change(
+          filter: SelectSyllabusFilters(
+            year: yearValue,
+            week: presetWeek,
+            hour: presetHour,
+            word: presetWord ?? '',
+          ),
+        );
+    refresh();
   }
 
   void onSubmit(

@@ -13,6 +13,8 @@ class SyllabusFiltersNotifier extends _$SyllabusFiltersNotifier {
 
   Future<void> create(GetSyllabus getSyllabus) async {
     state = getSyllabus.filters;
+    // 通常オープン時は最新年度・条件なしの状態にする。
+    // 時間割などからのプリセットはこの後 getFilters 内で上書きされる。
     ref
         .read(selectSyllabusFilterNotifierProvider.notifier)
         .setYear(year: getSyllabus.filters.year.values.first);

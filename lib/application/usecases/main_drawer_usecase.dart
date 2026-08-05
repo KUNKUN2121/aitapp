@@ -34,6 +34,13 @@ class MainDrawerUseCase {
     );
   }
 
+  Future<void> reLogin(Widget widget) async {
+    // 再ログイン: Cookie(Entraセッション)やid/passwordは削除せず、ログイン画面を
+    // 表示するだけ。Cookieを保持しているためMicrosoftの認証プロンプトは表示されず、
+    // SSO経由で新しいToken(仮パスワード)が再発行され、completeLoginで上書きされる。
+    await _replaceGo(widget);
+  }
+
   Future<void> removeIdentity(Widget widget) async {
     final pref = ref.read(sharedPreferencesProvider);
     await pref.remove('id');

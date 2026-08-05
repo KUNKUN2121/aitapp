@@ -108,6 +108,13 @@ class MainDrawer extends ConsumerWidget {
                 },
               ),
               DrawerTile(
+                icon: Icons.refresh,
+                title: '再ログイン',
+                onTap: () {
+                  usecase.reLogin(const LoginScreen());
+                },
+              ),
+              DrawerTile(
                 icon: Icons.logout,
                 title: 'ログアウト',
                 onTap: () {
