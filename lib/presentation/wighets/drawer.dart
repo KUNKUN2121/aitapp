@@ -118,7 +118,30 @@ class MainDrawer extends ConsumerWidget {
                 icon: Icons.logout,
                 title: 'ログアウト',
                 onTap: () {
-                  usecase.removeIdentity(const LoginScreen());
+                  showDialog<void>(
+                    context: context,
+                    builder: (dialogContext) {
+                      return AlertDialog(
+                        title: const Text('ログアウト'),
+                        content: const Text('保存された認証情報を削除します。よろしいですか？'),
+                        actions: [
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(dialogContext).pop();
+                            },
+                            child: const Text('キャンセル'),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(dialogContext).pop();
+                              usecase.removeIdentity(const LoginScreen());
+                            },
+                            child: const Text('ログアウト'),
+                          ),
+                        ],
+                      );
+                    },
+                  );
                 },
               ),
             ],
