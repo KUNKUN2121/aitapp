@@ -1,5 +1,7 @@
 # Changelog
 
+## [v0.0.1](https://github.com/KUNKUN2121/aitapp/commits/v0.0.1) - 2026-08-05
+
 ## [v2.0.4](https://github.com/piman528/aitapp/compare/v2.0.3...v2.0.4) - 2026-04-22
 - シラバスサイトのHTMLから取得した年度フィルタを取得するように by @piman528 in https://github.com/piman528/aitapp/pull/119
 - ダイヤを2026年度版に更新 by @piman528 in https://github.com/piman528/aitapp/pull/121
