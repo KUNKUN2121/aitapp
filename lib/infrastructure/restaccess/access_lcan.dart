@@ -61,30 +61,6 @@ Future<Response> httpAccess(
   return res;
 }
 
-Future<String> getSchedule({required Cookies cookie}) async {
-  debugPrint('getSchedule');
-  final headers = {
-    'Origin': 'https://$origin',
-    'Cookie': cookie.toString(),
-  }
-    ..addAll(constHeader)
-    ..addAll(secFetchHeader)
-    ..addAll(contentTypeHeader);
-
-  final data = {
-    '_mode': '5',
-    'EXCLUDE_SET': '',
-  };
-
-  final url = Uri.parse(
-    'https://$origin/portalv2/schedule/scheduleForHome/getSchedule',
-  );
-
-  final res = await httpAccess(url, headers: headers, body: data);
-
-  return res.body;
-}
-
 Future<String> reload({
   required Cookies cookie,
   required String token,

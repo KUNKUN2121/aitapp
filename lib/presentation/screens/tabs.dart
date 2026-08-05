@@ -1,7 +1,6 @@
 import 'package:aitapp/application/state/tab_button_provider.dart';
 import 'package:aitapp/presentation/screens/class_timetable.dart';
 import 'package:aitapp/presentation/screens/notices.dart';
-import 'package:aitapp/presentation/screens/schedule.dart';
 import 'package:aitapp/presentation/screens/timetable_screen.dart';
 import 'package:aitapp/presentation/wighets/drawer.dart';
 import 'package:flutter/material.dart';
@@ -12,7 +11,6 @@ class TabScreen extends HookConsumerWidget {
   const TabScreen({super.key});
   static const currentPages = [
     NoticeScreen(),
-    ScheduleScreen(),
     ClassTimeTableScreen(),
     TimeTableScreen(),
   ];
@@ -31,10 +29,6 @@ class TabScreen extends HookConsumerWidget {
           BottomNavigationBarItem(
             icon: Icon(Icons.article),
             label: 'お知らせ',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.calendar_today),
-            label: '予定',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.school),
