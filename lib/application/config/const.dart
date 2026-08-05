@@ -885,6 +885,13 @@ const ssoAuthUrl = 'https://$origin/portalv2/login/login/smartPhoneLogin/sso';
 /// このスキームへの遷移をWebViewで横取りしてkeyを取得する。
 const ssoCallbackScheme = 'lamyapp';
 
+/// 再認証(SSO)のサイレントログインに必要なEntra/MicrosoftのCookieが載るホスト。
+/// 学内ページ表示時にポータルの古いJSESSIONIDを消すためCookieを全消しするが、
+/// その前後でこれらのホストのCookieだけは退避・復元し、Entraセッションを保つ。
+const ssoCookieHosts = <String>[
+  'login.microsoftonline.com',
+];
+
 /// Moodle(PC版)のSAML SSOログインページ。
 /// 従来の自動ログイン(para方式)が使えなくなったため、外部ブラウザで
 /// このページを開き、ユーザー自身にサインインしてもらう。
