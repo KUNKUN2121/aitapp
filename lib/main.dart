@@ -110,6 +110,13 @@ class InitHome extends HookConsumerWidget {
     }
 
     Future<bool> checkVersion() async {
+      // 「後で(5日間通知しない)」を押した期間中はチェック自体をスキップする。
+      final snoozeUntil =
+          ref.read(sharedPreferencesProvider).getInt(updateSnoozeUntilKey);
+      if (snoozeUntil != null &&
+          DateTime.now().millisecondsSinceEpoch < snoozeUntil) {
+        return false;
+      }
       final currentVersion = (await PackageInfo.fromPlatform()).version;
       try {
         final latestVersion = await getLatestVersion();

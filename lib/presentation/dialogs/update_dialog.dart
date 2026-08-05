@@ -1,11 +1,19 @@
+import 'package:aitapp/application/state/shared_preference_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class UpdateDialog extends StatelessWidget {
+/// 「後で」を押したときにアップデート通知を抑制する日数。
+const updateSnoozeDays = 5;
+
+/// アップデート通知を再表示しない期限(millisecondsSinceEpoch)を保存するキー。
+const updateSnoozeUntilKey = 'updateSnoozeUntil';
+
+class UpdateDialog extends ConsumerWidget {
   const UpdateDialog({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return AlertDialog(
       title: const Text(
         'アプリのアップデートがあります',
@@ -15,9 +23,16 @@ class UpdateDialog extends StatelessWidget {
       actions: <Widget>[
         // ボタン領域
         ElevatedButton(
-          child: const Text('後で'),
-          onPressed: () {
-            Navigator.pop(context);
+          child: const Text('$updateSnoozeDays日間通知しない'),
+          onPressed: () async {
+            final prefs = ref.read(sharedPreferencesProvider);
+            final snoozeUntil = DateTime.now()
+                .add(const Duration(days: updateSnoozeDays))
+                .millisecondsSinceEpoch;
+            await prefs.setInt(updateSnoozeUntilKey, snoozeUntil);
+            if (context.mounted) {
+              Navigator.pop(context);
+            }
           },
         ),
         ElevatedButton(
