@@ -1,5 +1,7 @@
 // ignore_for_file: lines_longer_than_80_chars
 
+import 'package:aitapp/application/state/identity_provider.dart';
+import 'package:aitapp/application/state/shared_preference_provider.dart';
 import 'package:aitapp/application/usecases/main_drawer_usecase.dart';
 import 'package:aitapp/presentation/screens/campus_map.dart';
 import 'package:aitapp/presentation/screens/contacts.dart';
@@ -18,12 +20,25 @@ class MainDrawer extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final usecase = MainDrawerUseCase(ref, context);
+    // ログイン中のユーザーID。状態が未設定の起動直後は保存済みの値をフォールバック。
+    final userId = ref.watch(identityProvider)?.id ??
+        ref.watch(sharedPreferencesProvider).getString('id');
     return Drawer(
       child: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(8),
           child: ListView(
             children: [
+              if (userId != null && userId.isNotEmpty)
+                ListTile(
+                  leading: const Icon(Icons.account_circle),
+                  title: Text(
+                    userId,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  subtitle: const Text('ログイン中'),
+                ),
+              if (userId != null && userId.isNotEmpty) const Divider(),
               DrawerTile(
                 icon: Icons.calendar_today,
                 title: '行事予定',

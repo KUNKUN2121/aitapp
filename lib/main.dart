@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:aitapp/application/services/push_notification.dart';
 import 'package:aitapp/application/state/identity_provider.dart';
 import 'package:aitapp/application/state/setting_int_provider.dart';
 import 'package:aitapp/application/state/shared_preference_provider.dart';
@@ -13,6 +14,7 @@ import 'package:aitapp/presentation/screens/tabs.dart';
 import 'package:aitapp/presentation/theme/theme.dart';
 import 'package:aitapp/presentation/wighets/timetable_fetch_overlay.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -25,16 +27,28 @@ import 'package:timezone/timezone.dart' as tz; // Add timezone import
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // 端末の短辺で縦固定するか判定する。スマホ(600dp未満)は縦固定、
+  // タブレット(600dp以上)は横向きも許可する。
+  final view = WidgetsBinding.instance.platformDispatcher.views.first;
+  final shortestSide = (view.physicalSize / view.devicePixelRatio).shortestSide;
+  if (shortestSide < 600) {
+    await SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+    ]);
+  }
   tz.initializeTimeZones();
   tz.setLocalLocation(
     tz.getLocation('Asia/Tokyo'),
   ); // Set local timezone to Tokyo
+  final prefs = await SharedPreferences.getInstance();
+  // FCM初期化(ログイン済みならuserIdトピックを購読)。起動を待たせないよう非同期で実行。
+  unawaited(initPushNotification(userId: prefs.getString('id')));
   runApp(
     ProviderScope(
       overrides: [
         sharedPreferencesProvider.overrideWithValue(
           // ここでインスタンス化し、Providerの値を上書きします
-          await SharedPreferences.getInstance(),
+          prefs,
         ),
       ],
       child: const App(),

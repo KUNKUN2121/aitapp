@@ -544,6 +544,27 @@ Future<String> getNoticeDetailBody({
   return res.body;
 }
 
+/// 通知の targetUrl(例:
+/// `portalv2/smartphone/smartPhoneCommonContactDetail/detail/330848`)が指す
+/// 学内連絡詳細ページを、認証済みCookieで直接取得する。
+///
+/// 一覧経由の [getNoticeDetailBody]（index/token 依存の POST）とは別エンドポイント
+/// だが、返るHTMLは同じ詳細テンプレートのため既存パーサでそのまま整形できる。
+Future<String> getNoticeDetailBodyByPath({
+  required String path,
+  required Cookies cookies,
+}) async {
+  debugPrint('getNoticeDetailBodyByPath: $path');
+  final headers = {
+    'Referer': 'https://$origin/portalv2/',
+    'Cookie': cookies.toString(),
+  }..addAll(constHeader);
+  final normalized = path.startsWith('/') ? path : '/$path';
+  final url = Uri.parse('https://$origin$normalized');
+  final res = await httpAccess(url, headers: headers);
+  return res.body;
+}
+
 Future<Response> getFile({
   required Cookies cookies,
   required String fileUrl,

@@ -49,6 +49,10 @@ app.*.map.json
 .env
 env.g.dart
 
+# Firebase (APIキー等を含むため公開リポジトリには置かない)
+android/app/google-services.json
+
 
 sankou/
 plan/
+TODO/

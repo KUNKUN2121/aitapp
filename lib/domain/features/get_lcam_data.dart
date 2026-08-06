@@ -101,6 +101,26 @@ class GetLcamData {
     }
   }
 
+  /// 通知の `targetUrl`(パス)が指す学内連絡詳細を取得し、整形済みの
+  /// [NoticeDetail] を返す。一覧を経由せず、通知から直接ネイティブ詳細を開く用途。
+  ///
+  /// [isCommon] が true なら全学連絡(UnivNoticeDetail)、false なら授業連絡
+  /// (ClassNoticeDetail)としてパースする。
+  Future<NoticeDetail> getNoticeDetailByPath({
+    required String path,
+    required bool isCommon,
+  }) async {
+    if (cookies.jSessionId.isEmpty) {
+      throw Exception('ログインできません');
+    }
+    final body = await getNoticeDetailBodyByPath(path: path, cookies: cookies);
+    if (isCommon) {
+      return parse.univNoticeDetail(body);
+    } else {
+      return parse.classNoticeDetail(body);
+    }
+  }
+
   Future<Map<DayOfWeek, Map<int, Class>>> getClassTimeTable() async {
     final body = await getClassTimeTableBody(cookies: cookies);
     return parse.classTimeTable(body);

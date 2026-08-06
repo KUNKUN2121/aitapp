@@ -1,3 +1,4 @@
+import 'package:aitapp/application/services/push_notification.dart';
 import 'package:aitapp/application/state/identity_provider.dart';
 import 'package:aitapp/application/state/last_login/last_login.dart';
 import 'package:aitapp/application/state/shared_preference_provider.dart';
@@ -25,6 +26,8 @@ Future<void> completeLogin({
   await pref.setString('id', identity.id);
   await pref.setString('password', identity.password);
   await pref.setBool('isStaff', isStaff);
+  // 旧アプリと同じく userId(=identity.id)トピックを購読して通知を受け取る。
+  await subscribePushTopic(identity.id);
   ref.read(identityProvider.notifier).setIdPassword(identity);
   ref.read(lastLoginNotifierProvider.notifier).changeState(LastLogin.others);
   if (!context.mounted) {

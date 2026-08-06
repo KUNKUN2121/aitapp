@@ -1,9 +1,11 @@
 import 'package:aitapp/application/config/const.dart';
+import 'package:aitapp/application/services/push_notification.dart';
 import 'package:aitapp/application/state/identity_provider.dart';
 import 'package:aitapp/application/state/last_login/last_login.dart';
 import 'package:aitapp/application/state/link_tap_provider.dart';
 import 'package:aitapp/application/state/select_syllabus_filter/select_syllabus_filter.dart';
 import 'package:aitapp/application/state/shared_preference_provider.dart';
+import 'package:aitapp/application/usecases/session_reauth.dart';
 import 'package:aitapp/domain/types/last_login.dart';
 import 'package:aitapp/domain/types/web_access.dart';
 import 'package:aitapp/presentation/screens/webview.dart';
@@ -33,15 +35,25 @@ class MainDrawerUseCase {
     );
   }
 
-  Future<void> reLogin(Widget widget) async {
-    // 再ログイン: Cookie(Entraセッション)やid/passwordは削除せず、ログイン画面を
-    // 表示するだけ。Cookieを保持しているためMicrosoftの認証プロンプトは表示されず、
-    // SSO経由で新しいToken(仮パスワード)が再発行され、completeLoginで上書きされる。
-    await _replaceGo(widget);
+  Future<void> reLogin(Widget fallback) async {
+    // 再ログイン: Cookie(Entraセッション)やid/passwordは削除しない。
+    //
+    // 学生はEntraセッションが残っていれば、セッション失効時と同じSSO再認証フローに
+    // 直接入ることで、Microsoftの認証プロンプトなしに新しい仮パスワードを再発行できる。
+    // 事務職員(ID/パスワード方式)はSSOできないため、従来どおりログイン画面へ。
+    final isStaff =
+        ref.read(sharedPreferencesProvider).getBool('isStaff') ?? false;
+    if (isStaff) {
+      await _replaceGo(fallback);
+      return;
+    }
+    await ref.read(sessionReauthenticatorProvider).reauthenticate();
   }
 
   Future<void> removeIdentity(Widget widget) async {
     final pref = ref.read(sharedPreferencesProvider);
+    // ログアウト時は通知トピックの購読を解除する。
+    await unsubscribePushTopic(pref.getString('id'));
     await pref.remove('id');
     await pref.remove('password');
     await pref.remove('isStaff');
