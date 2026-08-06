@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:aitapp/application/state/get_lcam_data/get_lcam_data.dart';
 import 'package:aitapp/domain/types/notice_detail.dart';
+import 'package:aitapp/domain/types/univ_notice_detail.dart';
 import 'package:aitapp/presentation/screens/open_file_pdf.dart';
 import 'package:aitapp/presentation/screens/open_image.dart';
 import 'package:aitapp/presentation/wighets/attachment.dart';
@@ -24,6 +25,7 @@ class NoticeDetailWidget extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isDonwloading = useState(false);
+    final univ = notice is UnivNoticeDetail ? notice as UnivNoticeDetail : null;
 
     return ListView(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 24),
@@ -39,39 +41,64 @@ class NoticeDetailWidget extends HookConsumerWidget {
           ),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Icon(
-                      Icons.person_outline,
-                      size: 16,
-                      color: Theme.of(context).colorScheme.primary,
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.person_outline,
+                          size: 16,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          univ != null && univ.noticeFrom.isNotEmpty
+                              ? univ.noticeFrom
+                              : notice.sender,
+                          style:
+                              Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(width: 4),
-                    Text(
-                      notice.sender,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.w500,
-                          ),
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.schedule,
+                          size: 16,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          notice.sendAt,
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                      ],
                     ),
                   ],
                 ),
-                Row(
-                  children: [
-                    Icon(
-                      Icons.schedule,
-                      size: 16,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      notice.sendAt,
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                  ],
-                ),
+                if (univ != null && univ.sender.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.apartment_outlined,
+                        size: 16,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        univ.sender,
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                    ],
+                  ),
+                ],
               ],
             ),
           ),
@@ -81,6 +108,68 @@ class NoticeDetailWidget extends HookConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              if (univ != null &&
+                  (univ.isImportant || univ.category.isNotEmpty)) ...[
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: Wrap(
+                    spacing: 8,
+                    runSpacing: 4,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      if (univ.isImportant)
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 2,
+                            horizontal: 6,
+                          ),
+                          decoration: BoxDecoration(
+                            borderRadius:
+                                const BorderRadius.all(Radius.circular(4)),
+                            color:
+                                Theme.of(context).colorScheme.tertiaryContainer,
+                          ),
+                          child: Text(
+                            '重要',
+                            style:
+                                Theme.of(context).textTheme.bodySmall!.copyWith(
+                                      color: const Color.fromARGB(
+                                        255,
+                                        240,
+                                        247,
+                                        255,
+                                      ),
+                                    ),
+                          ),
+                        ),
+                      if (univ.category.isNotEmpty)
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 2,
+                            horizontal: 6,
+                          ),
+                          decoration: BoxDecoration(
+                            borderRadius:
+                                const BorderRadius.all(Radius.circular(4)),
+                            color: Theme.of(context)
+                                .colorScheme
+                                .secondaryContainer,
+                          ),
+                          child: Text(
+                            univ.category,
+                            style:
+                                Theme.of(context).textTheme.bodySmall!.copyWith(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onSecondaryContainer,
+                                    ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 8),
+              ],
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8),
                 child: Text(

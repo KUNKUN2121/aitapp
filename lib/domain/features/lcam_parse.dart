@@ -544,10 +544,14 @@ class LcamParse {
     }
     final sender = texts[texts.indexOf('管理所属') + 1];
     final titleindex = texts.indexOf('タイトル') + 1;
-    final title =
-        texts[titleindex] != '重要' ? texts[titleindex] : texts[titleindex + 1];
+    final isImportant = texts[titleindex] == '重要';
+    final title = !isImportant ? texts[titleindex] : texts[titleindex + 1];
     final content = texts[texts.indexOf('連絡内容') + 1];
     final sendAt = texts[texts.indexOf('連絡日時') + 1];
+    final categoryIndex = texts.indexOf('カテゴリ');
+    final category = categoryIndex != -1 ? texts[categoryIndex + 1] : '';
+    final noticeFromIndex = texts.indexOf('連絡元');
+    final noticeFrom = noticeFromIndex != -1 ? texts[noticeFromIndex + 1] : '';
     final url = <String>[];
     for (var i = texts.indexOf('参考URL') + 1; i < texts.indexOf('連絡日時'); i++) {
       url.add(texts[i]);
@@ -559,6 +563,9 @@ class LcamParse {
       sendAt: sendAt,
       url: url,
       files: fileMap,
+      category: category,
+      noticeFrom: noticeFrom,
+      isImportant: isImportant,
     );
   }
 }

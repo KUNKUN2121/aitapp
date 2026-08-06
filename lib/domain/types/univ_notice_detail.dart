@@ -9,10 +9,19 @@ class UnivNoticeDetail implements NoticeDetail {
     required this.content,
     required this.url,
     required this.files,
+    required this.category,
+    required this.noticeFrom,
+    required this.isImportant,
   });
-  // 発信者
+  // 発信者(管理所属)
   @override
   final String sender;
+  // カテゴリ
+  final String category;
+  // 連絡元
+  final String noticeFrom;
+  // 重要度(重要かどうか)
+  final bool isImportant;
   // タイトル
   @override
   final String title;
