@@ -36,7 +36,8 @@ const contentTypeHeader = {
 };
 
 /// 1リクエストあたりのタイムアウト。無応答で「ずっとロード」になるのを防ぐ。
-const _httpTimeout = Duration(seconds: 30);
+/// 再認証(SSO)のユーザー操作待ちには掛からない(HTTPリクエスト単位のため)。
+const _httpTimeout = Duration(seconds: 15);
 
 Future<Response> httpAccess(
   Uri uri, {
@@ -349,6 +350,7 @@ Future<Identity> ssoExchangeKey({required String key}) async {
   final url = Uri.parse('https://$origin/portalv2/login/login/spAppLogin/');
 
   final res = await httpAccess(url, headers: headers, body: data);
+  debugPrint('[ssoExchangeKey] status=${res.statusCode} body=${res.body}');
   final json = jsonDecode(res.body) as Map<String, dynamic>;
   if (json['status'] == 'success') {
     return Identity(

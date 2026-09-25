@@ -5,7 +5,7 @@ import 'package:aitapp/domain/features/get_lcam_data.dart';
 import 'package:aitapp/domain/types/exception.dart';
 import 'package:aitapp/domain/types/last_login.dart';
 import 'package:aitapp/infrastructure/restaccess/access_lcan.dart';
-import 'package:aitapp/presentation/screens/sso_webview.dart';
+import 'package:aitapp/infrastructure/sso/sso_signin.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -43,19 +43,12 @@ class SessionReauthenticator {
     if (pref.getBool('isStaff') ?? false) {
       return false;
     }
-    final navigator = navigatorKey.currentState;
-    if (navigator == null) {
-      return false;
-    }
 
     ref.read(reauthInProgressProvider.notifier).state = true;
     try {
-      // Entraのセッションが生きていれば、この push は自動で key を返して pop する。
-      final key = await navigator.push<String>(
-        MaterialPageRoute<String>(
-          builder: (_) => const SsoWebViewScreen(),
-        ),
-      );
+      // [方式B] Entraのセッションが生きていれば、ASWebAuthenticationSession は
+      // ユーザー操作なし(初回のみ同意ダイアログ)で自動的に key を返す。
+      final key = await signInWithSso();
       if (key == null || key.isEmpty) {
         return false;
       }

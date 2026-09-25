@@ -26,15 +26,13 @@ class ClassTimeTableScreen extends ConsumerWidget {
       child: asyncValue.when(
         loading: () => const TimetableLoadingWidget(),
         error: (error, __) {
-          if (error is SocketException) {
-            return const Center(
-              child: Text('インターネットに接続できません'),
-            );
-          } else {
-            return Center(
-              child: Text(error.toString()),
-            );
-          }
+          final message = error is SocketException
+              ? 'インターネットに接続できません'
+              : error.toString();
+          return _FetchErrorView(
+            message: message,
+            onRetry: notifier.fetchData,
+          );
         },
         data: (data) => Column(
           children: [
@@ -209,6 +207,59 @@ void _confirmRefetch(BuildContext context, Future<void> Function() onRefetch) {
       );
     },
   );
+}
+
+/// 時間割の取得に失敗したときの表示。再取得ボタンで [onRetry] を呼び直せる。
+///
+/// 学生(SSO)の場合、[onRetry] は内部の再認証(runWithReauth)を通るため、
+/// ボタンを押すだけで再ログインまで自動で試みる。再起動は不要。
+class _FetchErrorView extends StatelessWidget {
+  const _FetchErrorView({required this.message, required this.onRetry});
+
+  final String message;
+  final Future<void> Function() onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.error_outline,
+              size: 64,
+              color: theme.colorScheme.error,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: theme.textTheme.titleMedium
+                  ?.copyWith(fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '時間をおいて再取得してください。'
+              'ログインの有効期限が切れている場合は、再取得時に自動で再ログインを試みます。',
+              textAlign: TextAlign.center,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 24),
+            FilledButton.icon(
+              onPressed: onRetry,
+              icon: const Icon(Icons.refresh),
+              label: const Text('再取得'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 /// 初回の時間割取得を促す画面。ボタンを押すと取得が始まる。

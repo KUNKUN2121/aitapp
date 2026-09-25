@@ -1,6 +1,6 @@
 import 'package:aitapp/application/usecases/login_usecase.dart';
 import 'package:aitapp/infrastructure/restaccess/access_lcan.dart';
-import 'package:aitapp/presentation/screens/sso_webview.dart';
+import 'package:aitapp/infrastructure/sso/sso_signin.dart';
 import 'package:aitapp/presentation/screens/staff_login.dart';
 import 'package:aitapp/presentation/wighets/loading/circular_loading.dart';
 import 'package:flutter/material.dart';
@@ -17,12 +17,9 @@ class LoginScreen extends HookConsumerWidget {
 
     Future<void> login() async {
       errorMessage.value = null;
-      // アプリ内WebViewでSSOサインインを行い、リダイレクトから key を取得する
-      final key = await Navigator.of(context).push<String>(
-        MaterialPageRoute<String>(
-          builder: (ctx) => const SsoWebViewScreen(),
-        ),
-      );
+      // [方式B] ASWebAuthenticationSession でSSOサインインし、コールバックの
+      // lamyapp://lcam?key=... から key を取得する。
+      final key = await signInWithSso();
       // ユーザーがサインインをキャンセルした場合は何もしない
       if (key == null || key.isEmpty) {
         return;
@@ -35,9 +32,12 @@ class LoginScreen extends HookConsumerWidget {
         }
         await completeLogin(context: context, ref: ref, identity: identity);
       } on SsoException catch (e) {
+        debugPrint('[login] SsoException: ${e.message}');
         errorMessage.value = e.message;
         isLoading.value = false;
-      } on Exception {
+      } on Exception catch (e, st) {
+        debugPrint('[login] 失敗: $e');
+        debugPrint('[login] stack: $st');
         errorMessage.value = '接続に失敗しました。時間をおいて再度お試しください。';
         isLoading.value = false;
       }

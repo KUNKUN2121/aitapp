@@ -22,6 +22,9 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   flutter_riverpod: ^2.5.1
+  # [テスト] EntraID SSO を ASWebAuthenticationSession(iOS)/Custom Tabs(Android)で
+  # 行う方式Bの検証用。従来の埋め込みWebView(webview_flutter)からの置き換え候補。
+  flutter_web_auth_2: ^4.1.0
   flutter_widget_from_html: ^0.15.0
   fluttertoast: 8.2.12
   freezed: ^2.5.2

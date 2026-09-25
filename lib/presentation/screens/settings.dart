@@ -1,8 +1,12 @@
+import 'package:aitapp/application/state/identity_provider.dart';
 import 'package:aitapp/application/state/setting_int_provider.dart';
+import 'package:aitapp/application/state/shared_preference_provider.dart';
 import 'package:aitapp/application/usecases/main_drawer_usecase.dart';
+import 'package:aitapp/domain/types/identity.dart';
 import 'package:aitapp/infrastructure/database/timetable_database.dart';
 import 'package:aitapp/presentation/screens/license.dart';
 import 'package:aitapp/presentation/screens/login.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -120,6 +124,39 @@ class Settings extends ConsumerWidget {
             title: const Text('ログアウト'),
             onTap: () => _confirmLogout(context, usecase),
           ),
+          // [デバッグ限定] 仮パスワード失効を再現するテスト用ボタン。
+          // release ビルドには含まれない(kDebugMode ガード)。
+          if (kDebugMode) ...[
+            const Divider(),
+            ListTile(
+              leading: const Icon(Icons.bug_report, color: Colors.orange),
+              title: const Text('[Debug] 仮パスワードを壊す'),
+              subtitle: const Text('保存PWとメモリ上のPWを無効化。直後に時間割を開くと再認証が走る'),
+              onTap: () async {
+                final messenger = ScaffoldMessenger.of(context);
+                final current = ref.read(identityProvider);
+                if (current == null) {
+                  messenger.showSnackBar(
+                    const SnackBar(content: Text('ログイン情報がありません')),
+                  );
+                  return;
+                }
+                // prefs と identityProvider の両方を壊さないと、起動中のアプリは
+                // メモリ上の有効PWを使い続けて失効しない。
+                final broken =
+                    Identity(id: current.id, password: 'BROKEN_FOR_TEST');
+                await ref
+                    .read(sharedPreferencesProvider)
+                    .setString('password', broken.password);
+                ref.read(identityProvider.notifier).setIdPassword(broken);
+                messenger.showSnackBar(
+                  const SnackBar(
+                    content: Text('仮パスワードを無効化しました。時間割を開いて再認証を確認してください'),
+                  ),
+                );
+              },
+            ),
+          ],
         ],
       ),
     );

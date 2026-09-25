@@ -92,18 +92,27 @@ class LoadNoticeListUseCase {
         error.value = 'インターネットに接続できません';
       }
     } on Exception catch (err) {
-      if (!isRetry) {
-        // 仮パスワード失効なら、再ログイン前に再認証して新パスワードへ更新する。
-        if (err is SessionExpiredException) {
-          await ref.read(sessionReauthenticatorProvider).reauthenticate();
+      // 2回目(リトライ)でも失敗したら、無限ロードせずエラーを表示して終わる。
+      if (isRetry) {
+        if (context.mounted) {
+          error.value = err.toString();
         }
-        await load(
-          withLogin: true,
-          isRetry: true,
-        );
-      } else if (context.mounted) {
-        error.value = err.toString();
+        return;
       }
+      // 仮パスワード失効なら、再取得の前にSSO再認証で新パスワードへ更新する。
+      // 再認証がキャンセル/失敗したら、盲目的にリトライせずエラーを表示して終わる。
+      if (err is SessionExpiredException) {
+        final reauthed =
+            await ref.read(sessionReauthenticatorProvider).reauthenticate();
+        if (!reauthed) {
+          if (context.mounted) {
+            error.value = 'サインインがキャンセルされました。もう一度お試しください。';
+          }
+          return;
+        }
+      }
+      // 再認証済み、または一時的なエラー。ログインし直して一度だけ再取得する。
+      await load(withLogin: true, isRetry: true);
     }
   }
 
@@ -125,29 +134,33 @@ class LoadNoticeListUseCase {
       noticeLoadNotifier.changeState(isload: true);
     });
 
-    if (withLogin) {
-      await getLcamDataNotifier.create();
+    try {
+      if (withLogin) {
+        await getLcamDataNotifier.create();
 
-      lastLoginNotifier.changeState(loginType);
-    }
+        lastLoginNotifier.changeState(loginType);
+      }
 
-    final nextPage = noticeCatche == null ? 10 : noticeCatche.page + 10;
-    final result = await getLcamData.getNoticelist(
-      page: nextPage,
-      isCommon: isCommon,
-      withLogin: withLogin,
-    );
+      final nextPage = noticeCatche == null ? 10 : noticeCatche.page + 10;
+      final result = await getLcamData.getNoticelist(
+        page: nextPage,
+        isCommon: isCommon,
+        withLogin: withLogin,
+      );
 
-    final isLast =
-        noticeCatche != null && noticeCatche.notices.length == result.length;
+      final isLast =
+          noticeCatche != null && noticeCatche.notices.length == result.length;
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
       final newCache =
           NoticeCatche(notices: result, page: nextPage, isLast: isLast);
       isCommon
           ? univNoticesNotifier.change(newCache)
           : classNoticesNotifier.change(newCache);
-      noticeLoadNotifier.changeState(isload: false);
-    });
+    } finally {
+      // 成功・失敗にかかわらずローディングを必ず解除する(無限ロード防止)。
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        noticeLoadNotifier.changeState(isload: false);
+      });
+    }
   }
 }
