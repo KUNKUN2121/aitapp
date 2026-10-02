@@ -1,10 +1,10 @@
 import 'dart:io';
+import 'package:aitapp/application/auth/lcam_session.dart';
 import 'package:aitapp/application/state/class_notice/class_notice.dart';
 import 'package:aitapp/application/state/get_lcam_data/get_lcam_data.dart';
 import 'package:aitapp/application/state/last_login/last_login.dart';
 import 'package:aitapp/application/state/notice_load/notice_load.dart';
 import 'package:aitapp/application/state/univ_notice/univ_notice.dart';
-import 'package:aitapp/application/usecases/session_reauth.dart';
 import 'package:aitapp/domain/types/class_notice.dart';
 import 'package:aitapp/domain/types/exception.dart';
 import 'package:aitapp/domain/types/last_login.dart';
@@ -91,6 +91,26 @@ class LoadNoticeListUseCase {
       if (context.mounted) {
         error.value = 'インターネットに接続できません';
       }
+    } on SessionExpiredException {
+      // 2回目(リトライ)でも失効したら、無限ロードせずエラーを表示して終わる。
+      if (isRetry) {
+        if (context.mounted) {
+          error.value = 'ログインの有効期限が切れました';
+        }
+        return;
+      }
+      // 再取得の前に復帰階段(再ログイン→SSO再認証)を通す。
+      // 復帰できなければ盲目的にリトライせずエラーを表示して終わる。
+      try {
+        await ref.read(lcamSessionProvider.notifier).recover();
+      } on AuthenticationRequiredException {
+        if (context.mounted) {
+          error.value = 'サインインがキャンセルされました。もう一度お試しください。';
+        }
+        return;
+      }
+      // 復帰済み。トークンを取り直して(withLogin)一度だけ再取得する。
+      await load(withLogin: true, isRetry: true);
     } on Exception catch (err) {
       // 2回目(リトライ)でも失敗したら、無限ロードせずエラーを表示して終わる。
       if (isRetry) {
@@ -99,19 +119,7 @@ class LoadNoticeListUseCase {
         }
         return;
       }
-      // 仮パスワード失効なら、再取得の前にSSO再認証で新パスワードへ更新する。
-      // 再認証がキャンセル/失敗したら、盲目的にリトライせずエラーを表示して終わる。
-      if (err is SessionExpiredException) {
-        final reauthed =
-            await ref.read(sessionReauthenticatorProvider).reauthenticate();
-        if (!reauthed) {
-          if (context.mounted) {
-            error.value = 'サインインがキャンセルされました。もう一度お試しください。';
-          }
-          return;
-        }
-      }
-      // 再認証済み、または一時的なエラー。ログインし直して一度だけ再取得する。
+      // 一時的なエラー。ログインし直して一度だけ再取得する。
       await load(withLogin: true, isRetry: true);
     }
   }
@@ -146,13 +154,18 @@ class LoadNoticeListUseCase {
         page: nextPage,
         isCommon: isCommon,
         withLogin: withLogin,
+        token: noticeCatche?.token,
       );
 
-      final isLast =
-          noticeCatche != null && noticeCatche.notices.length == result.length;
+      final isLast = noticeCatche != null &&
+          noticeCatche.notices.length == result.notices.length;
 
-      final newCache =
-          NoticeCatche(notices: result, page: nextPage, isLast: isLast);
+      final newCache = NoticeCatche(
+        notices: result.notices,
+        page: nextPage,
+        isLast: isLast,
+        token: result.token,
+      );
       isCommon
           ? univNoticesNotifier.change(newCache)
           : classNoticesNotifier.change(newCache);

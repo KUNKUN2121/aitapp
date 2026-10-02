@@ -15,6 +15,10 @@ import 'package:flutter/services.dart';
 /// サーバー無しで検証できるようにする。詳細は [_setupDebugTestChannel]。
 const _testChannel = MethodChannel('aitapp/push_test');
 
+/// アプリ内の通知ON/OFF設定を保存するSharedPreferencesのキー。
+/// OFFのときはトピックを購読しない(= 通知を受け取らない)。
+const notificationEnabledKey = 'notificationEnabled';
+
 /// FCM(プッシュ通知)の初期化。
 ///
 /// 旧アプリ(Cordova/firebasex)と同じ仕組みで、ログイン中ユーザーの `userId` を
@@ -74,6 +78,24 @@ Future<void> unsubscribePushTopic(String? userId) async {
     await FirebaseMessaging.instance.unsubscribeFromTopic(userId);
   } on Exception catch (e) {
     debugPrint('unsubscribePushTopic failed: $e');
+  }
+}
+
+/// 端末(OS)側の通知許可が有効かを返す。
+///
+/// アプリ内トグルがONでも、端末設定で通知が拒否されていると通知は届かない。
+/// その状態を検知して「端末の通知設定を開く」導線を出すために使う。
+/// 判定できない場合(例外時)は導線を無駄に出さないよう true を返す。
+Future<bool> isSystemNotificationAuthorized() async {
+  if (!Platform.isAndroid) {
+    return false;
+  }
+  try {
+    final settings = await FirebaseMessaging.instance.getNotificationSettings();
+    return settings.authorizationStatus == AuthorizationStatus.authorized;
+  } on Exception catch (e) {
+    debugPrint('getNotificationSettings failed: $e');
+    return true;
   }
 }
 

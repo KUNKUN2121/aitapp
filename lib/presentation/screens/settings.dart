@@ -1,9 +1,12 @@
+import 'package:aitapp/application/services/push_notification.dart';
 import 'package:aitapp/application/state/identity_provider.dart';
+import 'package:aitapp/application/state/notification_setting/notification_setting.dart';
 import 'package:aitapp/application/state/setting_int_provider.dart';
 import 'package:aitapp/application/state/shared_preference_provider.dart';
 import 'package:aitapp/application/usecases/main_drawer_usecase.dart';
 import 'package:aitapp/domain/types/identity.dart';
 import 'package:aitapp/infrastructure/database/timetable_database.dart';
+import 'package:aitapp/presentation/screens/auth_log_screen.dart';
 import 'package:aitapp/presentation/screens/license.dart';
 import 'package:aitapp/presentation/screens/login.dart';
 import 'package:flutter/foundation.dart';
@@ -37,6 +40,21 @@ class Settings extends ConsumerWidget {
                   builder: (ctx) => const LicenseScreen(),
                 ),
               );
+            },
+          ),
+          SwitchListTile(
+            secondary: const Icon(Icons.notifications_outlined),
+            title: const Text('通知'),
+            subtitle: _NotificationSubtitle(
+              enabled: ref.watch(notificationSettingNotifierProvider),
+            ),
+            value: ref.watch(notificationSettingNotifierProvider),
+            onChanged: (enabled) {
+              final userId = ref.read(identityProvider)?.id;
+              ref.read(notificationSettingNotifierProvider.notifier).setEnabled(
+                    userId: userId,
+                    enabled: enabled,
+                  );
             },
           ),
           ListTile(
@@ -129,6 +147,18 @@ class Settings extends ConsumerWidget {
           if (kDebugMode) ...[
             const Divider(),
             ListTile(
+              leading: const Icon(Icons.receipt_long, color: Colors.blueGrey),
+              title: const Text('[Debug] 認証ログ'),
+              subtitle: const Text('セッション確立/再利用/失効/再認証の時刻履歴'),
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (ctx) => const AuthLogScreen(),
+                  ),
+                );
+              },
+            ),
+            ListTile(
               leading: const Icon(Icons.bug_report, color: Colors.orange),
               title: const Text('[Debug] 仮パスワードを壊す'),
               subtitle: const Text('保存PWとメモリ上のPWを無効化。直後に時間割を開くと再認証が走る'),
@@ -186,6 +216,32 @@ class Settings extends ConsumerWidget {
             ),
           ],
         );
+      },
+    );
+  }
+}
+
+/// 通知スイッチの補足文言。ONなのに端末側の通知許可がオフの場合は警告を出す。
+class _NotificationSubtitle extends StatelessWidget {
+  const _NotificationSubtitle({required this.enabled});
+
+  final bool enabled;
+
+  @override
+  Widget build(BuildContext context) {
+    if (!enabled) {
+      return const Text('学内連絡のプッシュ通知を受け取りません');
+    }
+    return FutureBuilder<bool>(
+      future: isSystemNotificationAuthorized(),
+      builder: (context, snapshot) {
+        if (snapshot.data == false) {
+          return Text(
+            '端末の設定でこのアプリの通知が許可されていません',
+            style: TextStyle(color: Theme.of(context).colorScheme.error),
+          );
+        }
+        return const Text('学内連絡をプッシュ通知で受け取ります');
       },
     );
   }

@@ -1,3 +1,4 @@
+import 'package:aitapp/application/auth/lcam_session.dart';
 import 'package:aitapp/application/state/class_timetable/timetable_fetch_provider.dart';
 import 'package:aitapp/application/state/class_timetable/timetable_fetched_provider.dart';
 import 'package:aitapp/application/usecases/session_reauth.dart';
@@ -86,12 +87,12 @@ class ClassTimeTableNotifier extends _$ClassTimeTableNotifier {
   Future<void> fetchData() async {
     // 進捗の分母は「(最大遡及年数 + 現在年度) × 前期/後期」の概算ステップ数。
     final fetch = ref.read(timetableFetchProvider.notifier)..start(12);
-    final reauth = ref.read(sessionReauthenticatorProvider);
+    final session = ref.read(lcamSessionProvider.notifier);
     state = const AsyncValue.loading();
     try {
       // PC版ログイン(SP版Cookie流用)で過去の年度分も含めて時間割を取得する。
-      // 仮パスワード失効時は runWithReauth が一度だけ再認証してリトライする。
-      final result = await runWithReauth(reauth, () async {
+      // セッション無効時は guard が一度だけ復帰(再ログイン→SSO)してリトライする。
+      final result = await session.guard(() async {
         final getPCLcamData = await loginPcLcam(ref);
         return getPCLcamData.getClassTimeTable(
           onProgress: fetch.report,

@@ -8,7 +8,13 @@ part of 'last_login.dart';
 
 String _$lastLoginNotifierHash() => r'71edfdc725bdff086c8a2f9614218d314f96a0fa';
 
-/// See also [LastLoginNotifier].
+/// お知らせ一覧の再取得トリガ([LastLogin])を保持する。
+///
+/// これはセッション制御ではなく「最後に表示したお知らせ種別」の記録で、
+/// 画面が別種別に変わったときやアプリ復帰時に一覧を取り直すために使う。
+/// セッションの確立・再利用・復帰は `LcamSession` が担う。
+///
+/// Copied from [LastLoginNotifier].
 @ProviderFor(LastLoginNotifier)
 final lastLoginNotifierProvider =
     NotifierProvider<LastLoginNotifier, LastLogin>.internal(

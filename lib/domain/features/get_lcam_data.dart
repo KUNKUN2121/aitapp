@@ -16,21 +16,29 @@ import 'package:path_provider/path_provider.dart';
 
 class GetLcamData {
   late Cookies cookies;
-  late String? token;
   final parse = LcamParse();
 
-  Future<bool> create(String id, String password) async {
-    token = null;
-    cookies = await getCookie();
-    return parse
-        .isLogin(await loginLcam(id: id, password: password, cookies: cookies));
+  /// `LcamSession` が確立した共有セッションを受け取る。
+  ///
+  /// ログイン(getCookie/smartPhoneLogin)は `LcamSession` が一元管理するため、
+  /// ここではCookieを受け取るだけにする。Strutsトークンは可変フィールドで共有せず、
+  /// 一覧フローごとに引数・戻り値で受け渡す(種別間でトークンが混ざらない)。
+  // ignore: use_setters_to_change_properties
+  void useSession(Cookies session) {
+    cookies = session;
   }
 
-  Future<List<Notice>> getNoticelist({
+  /// お知らせ一覧を取得し、次リクエスト用の新しいトークンと合わせて返す。
+  ///
+  /// [withLogin] が true のときはフロー先頭(getStrutsToken)からトークンを取り直す。
+  /// false のときは前ページ取得時の [token] を渡すこと(ページング継続)。
+  Future<({List<Notice> notices, String token})> getNoticelist({
     required int page,
     required bool isCommon,
     required bool withLogin,
+    String? token,
   }) async {
+    var currentToken = token;
     if (withLogin) {
       final tempToken = parse.lCamStrutsToken(
         body: await getStrutsToken(
@@ -38,7 +46,7 @@ class GetLcamData {
           isCommon: isCommon,
         ),
       );
-      token = parse.lCamStrutsToken(
+      currentToken = parse.lCamStrutsToken(
         body: await getNoticeBody(
           cookies: cookies,
           token: tempToken,
@@ -49,30 +57,27 @@ class GetLcamData {
 
     final body = await getNoticeBodyNext(
       cookies: cookies,
-      token: token!,
+      token: currentToken!,
       pageNumber: page,
       isCommon: isCommon,
     );
-    token = parse.lCamStrutsToken(body: body);
-
-    if (isCommon) {
-      return parse.univNotice(body);
-    } else {
-      return parse.classNotice(body);
-    }
+    final nextToken = parse.lCamStrutsToken(body: body);
+    final notices = isCommon ? parse.univNotice(body) : parse.classNotice(body);
+    return (notices: notices, token: nextToken);
   }
 
   Future<NoticeDetail> getNoticeDetail({
     required int pageNumber,
     required bool isCommon,
+    required String token,
   }) async {
-    if (cookies.jSessionId.isEmpty) {
+    if (cookies.jsessionid.isEmpty) {
       throw Exception('ログインできません');
     }
     final body = await getNoticeDetailBody(
       index: pageNumber,
       cookies: cookies,
-      token: token!,
+      token: token,
       isCommon: isCommon,
     );
     if (isCommon) {
@@ -110,7 +115,7 @@ class GetLcamData {
     required String path,
     required bool isCommon,
   }) async {
-    if (cookies.jSessionId.isEmpty) {
+    if (cookies.jsessionid.isEmpty) {
       throw Exception('ログインできません');
     }
     final body = await getNoticeDetailBodyByPath(path: path, cookies: cookies);
@@ -134,18 +139,15 @@ class GetPCLcamData {
 
   // pc版にログインする
   //
-  // 仮パスワードではPC版ログイン(initLogin)ができないため、SP版ログインの
-  // セッションCookieを流用してPC版ポータルにアクセスする。
+  // 仮パスワードではPC版の通常ログインができないため、`LcamSession` が確立した
+  // SP版セッションのCookieを流用してPC版ポータルにアクセスする。
   // /portalv2/ は認証済みでも見た目はログイン画面だが、そこに埋め込まれた
   // Strutsトークンを使えば generalPurpose 経由でPC版の各機能へ遷移できる
   // (playwright_lcam.py の go_home_via_cookie と同じ方式)。
-  Future<bool> create(String id, String password) async {
-    token = null;
-    cookies = await getCookie();
-    await loginLcam(id: id, password: password, cookies: cookies);
+  Future<void> useSession(Cookies session) async {
+    cookies = session;
     final portalTop = await getPortalTop(cookies: cookies);
     token = parse.portalStrutsToken(portalTop);
-    return true;
   }
 
   Future<Map<int, Map<Semester, Map<DayOfWeek, Map<int, Class>>>>>

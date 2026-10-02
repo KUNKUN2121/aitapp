@@ -1,8 +1,8 @@
+import 'package:aitapp/application/auth/lcam_session.dart';
 import 'package:aitapp/application/state/identity_provider.dart';
 import 'package:aitapp/application/state/last_login/last_login.dart';
 import 'package:aitapp/application/state/shared_preference_provider.dart';
 import 'package:aitapp/domain/features/get_lcam_data.dart';
-import 'package:aitapp/domain/types/exception.dart';
 import 'package:aitapp/domain/types/last_login.dart';
 import 'package:aitapp/infrastructure/restaccess/access_lcan.dart';
 import 'package:aitapp/infrastructure/sso/sso_signin.dart';
@@ -55,7 +55,15 @@ class SessionReauthenticator {
       final identity = await ssoExchangeKey(key: key);
       await pref.setString('id', identity.id);
       await pref.setString('password', identity.password);
+      // 新しい仮パスワードの発行時刻を記録し、次回の先回り更新の基準にする。
+      await pref.setInt(
+        passwordIssuedAtKey,
+        DateTime.now().millisecondsSinceEpoch,
+      );
       ref.read(identityProvider.notifier).setIdPassword(identity);
+      // 仮パスワードを更新したので、古いセッションは必ず無効化する。
+      // 次の ensure() が新しい仮パスワードでセッションを確立し直す。
+      ref.read(lcamSessionProvider.notifier).invalidate();
       return true;
     } on Exception {
       return false;
@@ -69,34 +77,17 @@ final sessionReauthenticatorProvider = Provider<SessionReauthenticator>(
   SessionReauthenticator.new,
 );
 
-/// [action] を実行し、セッション失効([SessionExpiredException])を検知したら
-/// 一度だけ再認証してからリトライする。
-///
-/// [action] は内部で最新の identity(更新後の仮パスワード)を読み直すように
-/// 書くこと。再認証できなかった場合は [SessionExpiredException] を再スローする。
-Future<T> runWithReauth<T>(
-  SessionReauthenticator reauth,
-  Future<T> Function() action,
-) async {
-  try {
-    return await action();
-  } on SessionExpiredException {
-    final reauthed = await reauth.reauthenticate();
-    if (!reauthed) {
-      rethrow;
-    }
-    return action();
-  }
-}
-
 /// PC版LCAMにログイン済みの [GetPCLcamData] を返す。
 ///
-/// [runWithReauth] のリトライ時に再認証で更新された仮パスワードを使う必要が
-/// あるため、識別情報は呼び出しのたびに読み直す。ログイン方式の記録も併せて行う。
+/// `LcamSession.guard` のリトライ時に再認証で更新された仮パスワードを使う必要が
+/// あるため、Cookieは呼び出しのたびに `ensure()` で読み直す。ログイン方式の記録も
+/// 併せて行う。
 Future<GetPCLcamData> loginPcLcam(Ref ref) async {
-  final identity = ref.read(identityProvider)!;
+  final cookies = await ref.read(lcamSessionProvider.notifier).ensure();
   final lcamData = GetPCLcamData();
-  await lcamData.create(identity.id, identity.password);
+  await lcamData.useSession(cookies);
+  // PC版(時間割)取得後もお知らせキャッシュは無効化しておく。お知らせのStruts
+  // トークンは別フローのため、次回お知らせを開いたら取り直す。
   ref.read(lastLoginNotifierProvider.notifier).changeState(LastLogin.others);
   return lcamData;
 }

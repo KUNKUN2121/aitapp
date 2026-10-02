@@ -26,9 +26,8 @@ class ClassTimeTableScreen extends ConsumerWidget {
       child: asyncValue.when(
         loading: () => const TimetableLoadingWidget(),
         error: (error, __) {
-          final message = error is SocketException
-              ? 'インターネットに接続できません'
-              : error.toString();
+          final message =
+              error is SocketException ? 'インターネットに接続できません' : error.toString();
           return _FetchErrorView(
             message: message,
             onRetry: notifier.fetchData,
@@ -211,7 +210,7 @@ void _confirmRefetch(BuildContext context, Future<void> Function() onRefetch) {
 
 /// 時間割の取得に失敗したときの表示。再取得ボタンで [onRetry] を呼び直せる。
 ///
-/// 学生(SSO)の場合、[onRetry] は内部の再認証(runWithReauth)を通るため、
+/// 学生(SSO)の場合、[onRetry] は内部の復帰階段(LcamSession.guard)を通るため、
 /// ボタンを押すだけで再ログインまで自動で試みる。再起動は不要。
 class _FetchErrorView extends StatelessWidget {
   const _FetchErrorView({required this.message, required this.onRetry});

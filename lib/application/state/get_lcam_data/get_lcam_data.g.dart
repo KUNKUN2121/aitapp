@@ -7,7 +7,7 @@ part of 'get_lcam_data.dart';
 // **************************************************************************
 
 String _$getLcamDataNotifierHash() =>
-    r'8be4880dc29b59402254255fc5cdc11cdc1b2c6b';
+    r'ddf2acbd9755c648104ac11a02217d41beb1c75f';
 
 /// See also [GetLcamDataNotifier].
 @ProviderFor(GetLcamDataNotifier)
